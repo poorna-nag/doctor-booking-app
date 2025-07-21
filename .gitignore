@@ -97,5 +97,5 @@ android/app/build/
 **/build/
 
 # Large asset files (optional, comment out if needed)
-# assets/videos/
-# *.mp4
+assets/videos/
+*.mp4

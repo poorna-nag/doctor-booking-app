@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/model/RegisterModel.dart';
-import 'package:aladdinmart/grocery/model/UserUpdateModel.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/model/UserUpdateModel.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -188,16 +186,100 @@ class _HomePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: GroceryAppColors.lightBlueBg, // Light orange background
       appBar: AppBar(
-          elevation: 0.0,
-          iconTheme: IconThemeData(
-            color: Colors.white, //change your color here
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                const Color.fromARGB(255, 53, 130, 255), // Primary orange
+                const Color.fromARGB(255, 53, 130, 255), // Light orange
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color.fromARGB(255, 53, 130, 255).withOpacity(0.4),
+                blurRadius: 20,
+                offset: Offset(0, 8),
+              ),
+            ],
           ),
-          backgroundColor: GroceryAppColors.tela,
-          title: Text(
-            "Profile Details",
-            style: TextStyle(color: Colors.white),
-          )),
+        ),
+        elevation: 0,
+        leading: Container(
+          margin: EdgeInsets.only(left: 8),
+          child: IconButton(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            onPressed: () {
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
+              } else {
+                SystemNavigator.pop();
+              }
+            },
+          ),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.medical_services_outlined,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Doctor Profile",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                Text(
+                  "Manage your healthcare profile",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.95),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
       key: profilescaffoldkey,
       body: Container(
         child: new ListView(
@@ -205,17 +287,27 @@ class _HomePageState extends State<EditProfilePage> {
             Column(
               children: <Widget>[
                 new Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color.fromARGB(255, 63, 150, 244)
+                            .withOpacity(0.08),
+                        GroceryAppColors.lightBlueBg,
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
                   child: new Column(
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.only(top: 20.0, bottom: 20),
+                        padding: EdgeInsets.only(top: 30.0, bottom: 30),
                         child:
                             new Stack(fit: StackFit.loose, children: <Widget>[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               Align(
-//                              alignment: Alignment.center,
                                 child: InkWell(
                                   onTap: () {
                                     setState(() {
@@ -226,67 +318,79 @@ class _HomePageState extends State<EditProfilePage> {
                                       }
                                     });
                                   },
-                                  child: CircleAvatar(
-                                    radius: 70,
-                                    backgroundColor: Colors.orange,
-                                    child: ClipOval(
-                                      child: new SizedBox(
-                                        width: 150.0,
-                                        height: 150.0,
-                                        child: _image != null
-                                            ? Image.file(
-                                                _image!,
-                                                fit: BoxFit.fill,
-                                              )
-                                            : Image.network(
-                                                GroceryAppConstant.image,
-                                                fit: BoxFit.fill,
-                                              ),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          const Color.fromARGB(
+                                              255, 53, 130, 255),
+                                          const Color.fromARGB(
+                                              255, 53, 130, 255),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color.fromARGB(
+                                                  255, 73, 159, 217)
+                                              .withOpacity(0.5),
+                                          blurRadius: 25,
+                                          offset: Offset(0, 12),
+                                        ),
+                                      ],
+                                    ),
+                                    padding: EdgeInsets.all(5),
+                                    child: CircleAvatar(
+                                      radius: 70,
+                                      backgroundColor: Colors.white,
+                                      child: ClipOval(
+                                        child: new SizedBox(
+                                          width: 140.0,
+                                          height: 140.0,
+                                          child: _image != null
+                                              ? Image.file(
+                                                  _image!,
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : Image.network(
+                                                  GroceryAppConstant.image,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
+                                                    return Container(
+                                                      decoration: BoxDecoration(
+                                                        gradient:
+                                                            LinearGradient(
+                                                          colors: [
+                                                            GroceryAppColors
+                                                                .lightBlueBg,
+                                                            GroceryAppColors
+                                                                .lightBlueBg,
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      child: Icon(
+                                                        Icons
+                                                            .local_hospital_outlined,
+                                                        size: 60,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 81, 165, 226),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
                               camera ? showIcone(context) : Container(),
-//                              camera?Container():submitImage(),
-
-//                              Padding(
-//                                padding: EdgeInsets.only(top: 85.0),
-//                                child: Card(
-//                                  color:AppColors.pink,
-//                                  shape: RoundedRectangleBorder(
-//                                    borderRadius: BorderRadius.circular(20.0),
-//                                  ),
-//                                  child: IconButton(
-//                                    color: Colors.white,
-//                                    icon: Icon(
-//                                      Icons.edit,
-//                                      size: 15.0,
-//                                    ),
-//                                    onPressed: () {
-////                                      _sowchoiceDiloge();
-//                                    },
-//                                  ),
-//                                ),
-//                              ),
                             ],
                           ),
-                          /* Padding(
-                            padding: EdgeInsets.only(top: 90.0, right: 100.0),
-                            child: new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                _status ? _getEditIcon1() : new Container(),
-//                                new CircleAvatar(
-//                                  backgroundColor: Colors.red,
-//                                  radius: 25.0,
-//                                  child: new Icon(
-//                                    Icons.camera_alt,
-//                                    color: Colors.white,
-//                                  ),
-//                                )
-                              ],
-                            )),*/
                         ]),
                       )
                     ],
@@ -294,11 +398,7 @@ class _HomePageState extends State<EditProfilePage> {
                 ),
                 new Container(
                   decoration: BoxDecoration(
-                    gradient:
-                        LinearGradient(begin: Alignment.bottomRight, colors: [
-                      GroceryAppColors.tela.withOpacity(.4),
-                      GroceryAppColors.tela.withOpacity(.1),
-                    ]),
+                    color: Color(0xffF8FBFF),
                   ),
                   child: Form(
                     key: _formKey,
@@ -323,7 +423,9 @@ class _HomePageState extends State<EditProfilePage> {
                                         'Name',
                                         style: TextStyle(
                                             fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color.fromARGB(
+                                                255, 71, 154, 232)),
                                       ),
                                     ],
                                   ),
@@ -336,18 +438,83 @@ class _HomePageState extends State<EditProfilePage> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                   new Flexible(
-                                    child: TextFormField(
-                                      controller: nameController,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the name";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                        hintText: "Enter Your Name",
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.white,
+                                            GroceryAppColors.lightBlueBg,
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: const Color.fromARGB(
+                                                  255, 80, 155, 241)
+                                              .withOpacity(0.3),
+                                          width: 1.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color.fromARGB(
+                                                    255, 78, 167, 226)
+                                                .withOpacity(0.15),
+                                            blurRadius: 15,
+                                            offset: Offset(0, 5),
+                                          ),
+                                        ],
                                       ),
-                                      enabled: !_status,
-                                      autofocus: !_status,
+                                      child: TextFormField(
+                                        controller: nameController,
+                                        validator: (String? value) {
+                                          if (value == null || value.isEmpty) {
+                                            return " Please enter the name";
+                                          }
+                                          return null;
+                                        },
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: const Color.fromARGB(
+                                              255, 53, 130, 255),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: "Enter Patient Name",
+                                          hintStyle: TextStyle(
+                                            color: Colors.grey[400],
+                                            fontSize: 15,
+                                          ),
+                                          prefixIcon: Container(
+                                            margin: EdgeInsets.all(10),
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  const Color.fromARGB(
+                                                      255, 53, 130, 255),
+                                                  const Color.fromARGB(
+                                                      255, 53, 130, 255),
+                                                ],
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Icon(
+                                              Icons.person_outline,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
+                                          border: InputBorder.none,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 15,
+                                          ),
+                                        ),
+                                        enabled: !_status,
+                                        autofocus: !_status,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -366,7 +533,9 @@ class _HomePageState extends State<EditProfilePage> {
                                         'Email Id',
                                         style: TextStyle(
                                             fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color.fromARGB(
+                                                255, 53, 130, 255)),
                                       ),
                                     ],
                                   ),
@@ -379,16 +548,82 @@ class _HomePageState extends State<EditProfilePage> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                   new Flexible(
-                                    child: TextFormField(
-                                      controller: emailController,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the email id";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                          hintText: "Enter Email ID"),
-                                      enabled: !_status,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Colors.white,
+                                            GroceryAppColors.lightBlueBg,
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: const Color.fromARGB(
+                                                  255, 53, 130, 255)
+                                              .withOpacity(0.3),
+                                          width: 1.5,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color.fromARGB(
+                                                    255, 53, 130, 255)
+                                                .withOpacity(0.15),
+                                            blurRadius: 15,
+                                            offset: Offset(0, 5),
+                                          ),
+                                        ],
+                                      ),
+                                      child: TextFormField(
+                                        controller: emailController,
+                                        validator: (String? value) {
+                                          if (value == null || value.isEmpty) {
+                                            return " Please enter the email id";
+                                          }
+                                          return null;
+                                        },
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: const Color.fromARGB(
+                                              255, 53, 130, 255),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: "Enter Contact Email",
+                                          hintStyle: TextStyle(
+                                            color: Colors.grey[400],
+                                            fontSize: 15,
+                                          ),
+                                          prefixIcon: Container(
+                                            margin: EdgeInsets.all(10),
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: [
+                                                  const Color.fromARGB(
+                                                      255, 53, 130, 255),
+                                                  const Color.fromARGB(
+                                                      255, 53, 130, 255),
+                                                ],
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Icon(
+                                              Icons.email_outlined,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
+                                          border: InputBorder.none,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 15,
+                                          ),
+                                        ),
+                                        enabled: !_status,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -420,17 +655,55 @@ class _HomePageState extends State<EditProfilePage> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                   new Flexible(
-                                    child: new TextFormField(
-                                      controller: mobileController,
-                                      keyboardType: TextInputType.number,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the mobile No";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                          hintText: "Enter Mobile Number"),
-                                      enabled: true,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color.fromARGB(
+                                                    255, 53, 130, 255)
+                                                .withOpacity(0.1),
+                                            blurRadius: 10,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: TextFormField(
+                                        controller: mobileController,
+                                        keyboardType: TextInputType.number,
+                                        validator: (String? value) {
+                                          if (value == null || value.isEmpty) {
+                                            return " Please enter the mobile No";
+                                          }
+                                          return null;
+                                        },
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: const Color.fromARGB(
+                                              255, 53, 130, 255),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: "Enter Mobile Number",
+                                          hintStyle: TextStyle(
+                                            color: Colors.grey[500],
+                                            fontSize: 16,
+                                          ),
+                                          prefixIcon: Icon(
+                                            Icons.phone_outlined,
+                                            color: const Color.fromARGB(
+                                                255, 53, 130, 255),
+                                            size: 20,
+                                          ),
+                                          border: InputBorder.none,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 15,
+                                          ),
+                                        ),
+                                        enabled: true,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -476,37 +749,116 @@ class _HomePageState extends State<EditProfilePage> {
                                   Flexible(
                                     child: Padding(
                                       padding: EdgeInsets.only(right: 10.0),
-                                      child: TextFormField(
-                                        controller: pincodeController,
-                                        keyboardType: TextInputType.number,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                          LengthLimitingTextInputFormatter(6)
-                                        ],
-                                        validator: (String? value) {
-                                          if (value == null || value.isEmpty) {
-                                            return " Please enter the pincode";
-                                          }
-                                        },
-                                        decoration: const InputDecoration(
-                                            hintText: "Enter Pin Code"),
-                                        enabled: !_status,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color.fromARGB(
+                                                      255, 82, 167, 210)
+                                                  .withOpacity(0.1),
+                                              blurRadius: 10,
+                                              offset: Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextFormField(
+                                          controller: pincodeController,
+                                          keyboardType: TextInputType.number,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly,
+                                            LengthLimitingTextInputFormatter(6)
+                                          ],
+                                          validator: (String? value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return " Please enter the pincode";
+                                            }
+                                            return null;
+                                          },
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: const Color.fromARGB(
+                                                255, 53, 130, 255),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          decoration: InputDecoration(
+                                            hintText: "Enter Pin Code",
+                                            hintStyle: TextStyle(
+                                              color: Colors.grey[500],
+                                              fontSize: 16,
+                                            ),
+                                            prefixIcon: Icon(
+                                              Icons.location_on_outlined,
+                                              color: const Color.fromARGB(
+                                                  255, 53, 130, 255),
+                                              size: 20,
+                                            ),
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                              horizontal: 20,
+                                              vertical: 15,
+                                            ),
+                                          ),
+                                          enabled: !_status,
+                                        ),
                                       ),
                                     ),
                                     flex: 2,
                                   ),
                                   Flexible(
-                                    child: TextFormField(
-                                      controller: stateController,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the state";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                          hintText: "Enter State"),
-                                      enabled: !_status,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color.fromARGB(
+                                                    255, 53, 130, 255)
+                                                .withOpacity(0.1),
+                                            blurRadius: 10,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: TextFormField(
+                                        controller: stateController,
+                                        validator: (String? value) {
+                                          if (value == null || value.isEmpty) {
+                                            return " Please enter the state";
+                                          }
+                                          return null;
+                                        },
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: const Color.fromARGB(
+                                              255, 53, 130, 255),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: "Enter State",
+                                          hintStyle: TextStyle(
+                                            color: Colors.grey[500],
+                                            fontSize: 16,
+                                          ),
+                                          prefixIcon: Icon(
+                                            Icons.map_outlined,
+                                            color: const Color.fromARGB(
+                                                255, 53, 130, 255),
+                                            size: 20,
+                                          ),
+                                          border: InputBorder.none,
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 15,
+                                          ),
+                                        ),
+                                        enabled: !_status,
+                                      ),
                                     ),
                                     flex: 2,
                                   ),
@@ -562,6 +914,7 @@ class _HomePageState extends State<EditProfilePage> {
                                         if (value == null || value.isEmpty) {
                                           return " Please enter the city";
                                         }
+                                        return null;
                                       },
                                       decoration: const InputDecoration(
                                           hintText: "Enter City"),
@@ -622,32 +975,60 @@ class _HomePageState extends State<EditProfilePage> {
                             padding: EdgeInsets.only(
                                 left: 25.0, right: 25.0, top: 15.0),
                             child: Container(
-                                child: new TextFormField(
-                                    maxLines: 8,
-                                    keyboardType: TextInputType
-                                        .text, // Use mobile input type for emails.
-                                    controller: resignofcause,
-                                    validator: (String? value) {
-                                      //print("Length${value.length}");
-                                      if (value == null ||
-                                          value.isEmpty && value.length > 10) {
-                                        return " Please enter the  address";
-                                      }
-                                    },
-                                    decoration: new InputDecoration(
-                                      hintText: 'Address',
-                                      labelText: 'Enter the address',
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.black54, width: 3.0),
-                                      ),
-
-//                                      icon: new Icon(Icons.queue_play_next),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.black54, width: 3.0),
-                                      ),
-                                    ))),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(15),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        const Color.fromARGB(255, 53, 130, 255),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextFormField(
+                                maxLines: 8,
+                                keyboardType: TextInputType.text,
+                                controller: resignofcause,
+                                validator: (String? value) {
+                                  if (value == null ||
+                                      value.isEmpty && value.length > 10) {
+                                    return " Please enter the  address";
+                                  }
+                                  return null;
+                                },
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color:
+                                      const Color.fromARGB(255, 73, 145, 222),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Address',
+                                  labelText: 'Enter the address',
+                                  labelStyle: TextStyle(
+                                    color:
+                                        const Color.fromARGB(255, 80, 146, 222),
+                                  ),
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: 16,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.home_outlined,
+                                    color:
+                                        const Color.fromARGB(255, 87, 159, 211),
+                                    size: 20,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 15,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
 
                           _getActionButtons(),
@@ -679,6 +1060,7 @@ class _HomePageState extends State<EditProfilePage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Expanded(
+            flex: 2,
             child: Padding(
               padding: EdgeInsets.only(right: 10.0),
               child: Container(
@@ -686,9 +1068,9 @@ class _HomePageState extends State<EditProfilePage> {
                 style: ElevatedButton.styleFrom(
                   shape: new RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(20.0)),
-                  backgroundColor: Colors.green,
+                  backgroundColor: const Color.fromARGB(255, 83, 160, 222),
                   textStyle: TextStyle(
-                    color: Colors.white,
+                    color: const Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),
                 child: new Text("Submit"),
@@ -706,7 +1088,6 @@ class _HomePageState extends State<EditProfilePage> {
                 },
               )),
             ),
-            flex: 2,
           ),
           // Expanded(
           //   child: Padding(
@@ -841,7 +1222,7 @@ class _HomePageState extends State<EditProfilePage> {
               },
               child: CircleAvatar(
                 radius: 70,
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 88, 181, 247),
                 child: ClipOval(
                   child: new SizedBox(
                     width: 150.0,
@@ -882,39 +1263,112 @@ class _HomePageState extends State<EditProfilePage> {
   }
 
   Widget showIcone(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        SizedBox(
-          height: 40,
-        ),
-        InkWell(
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          InkWell(
             onTap: () {
               getImageC(context);
-//              getImage12();
-
               setState(() {
                 camera = false;
               });
             },
-            child: Icon(
-              Icons.camera_alt,
-              size: 35,
-            )),
-        SizedBox(
-          height: 10,
-        ),
-        InkWell(
+            child: Container(
+              padding: EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color.fromARGB(255, 71, 163, 224),
+                    const Color.fromARGB(255, 65, 151, 203),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color.fromARGB(255, 51, 153, 197)
+                        .withOpacity(0.4),
+                    blurRadius: 15,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.camera_alt_outlined,
+                    size: 34,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Camera',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(width: 35),
+          InkWell(
             onTap: () {
               getImage(context);
               setState(() {
                 camera = false;
               });
             },
-            child: Icon(
-              Icons.storage,
-              size: 35,
-            )),
-      ],
+            child: Container(
+              padding: EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color.fromARGB(255, 72, 149, 185),
+                    Color.fromARGB(255, 76, 173, 215),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color.fromARGB(255, 83, 172, 235)
+                        .withOpacity(0.4),
+                    blurRadius: 15,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.photo_library_outlined,
+                    size: 34,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Gallery',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -923,41 +1377,36 @@ class _HomePageState extends State<EditProfilePage> {
     imageshow1 = File(data!.path);
 
     String imagevalue1 = (imageshow1).toString();
-    if (imagevalue1 != null) {
-      imagevalue = imagevalue1 != null
-          ? imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
-          : imagevalue1;
+    imagevalue =
+        imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim();
 
 //    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-      setState(() {
-        base64Image = base64Encode(imageshow1!.readAsBytesSync());
-        _image = new File('$imagevalue');
-        print('Image Path $_image');
-        _ImageUpdate();
-      });
-    }
+    setState(() {
+      base64Image = base64Encode(imageshow1!.readAsBytesSync());
+      _image = new File('$imagevalue');
+      print('Image Path $_image');
+      _ImageUpdate();
+    });
   }
 
   getImageC(BuildContext context) async {
     final data = await ImagePicker().pickImage(source: ImageSource.camera);
     imageshow1 = File(data!.path);
     String imagevalue1 = (imageshow1).toString();
-    if (imagevalue1 != null) {
-      imagevalue1.length > 7
-          ? imagevalue =
-              imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
-          : imagevalue1;
+    imagevalue1.length > 7
+        ? imagevalue =
+            imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
+        : imagevalue1;
 
 //    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-      setState(() {
-        base64Image = base64Encode(imageshow1!.readAsBytesSync());
-        _image = new File('$imagevalue');
-        print('Image Path $_image');
-        _ImageUpdate();
-      });
-    }
+    setState(() {
+      base64Image = base64Encode(imageshow1!.readAsBytesSync());
+      _image = new File('$imagevalue');
+      print('Image Path $_image');
+      _ImageUpdate();
+    });
   }
 
   final picker = ImagePicker();

@@ -1,17 +1,15 @@
-import 'dart:developer';
-import 'package:aladdinmart/constent/app_constent.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ecoshine24/constent/app_constent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:aladdinmart/grocery/Auth/signin.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/CategaryModal.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
-import 'package:aladdinmart/grocery/screen/SearchScreen.dart';
-import 'package:aladdinmart/grocery/screen/detailpage.dart';
+import 'package:ecoshine24/grocery/Auth/signin.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/CategaryModal.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/screen/SearchScreen.dart';
+import 'package:ecoshine24/grocery/screen/detailpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AllCategory extends StatefulWidget {
@@ -129,849 +127,1064 @@ class _AllCategory extends State<AllCategory> {
     getcartCount();
 
     return Scaffold(
+        backgroundColor: Color(0xFFF8FBFF), // Light medical background
         appBar: AppBar(
-          backgroundColor: GroceryAppColors.tela,
-          leading: Padding(
-              padding: EdgeInsets.only(left: 0.0),
-              child: InkWell(
-                onTap: () {
-                  if (Navigator.canPop(context)) {
-                    Navigator.pop(context);
-                  } else {
-                    SystemNavigator.pop();
-                  }
-                },
-                child: Icon(
-                  Icons.arrow_back,
-                  size: 30,
-                  color: Colors.white,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xff1E88E5), // Medical blue
+                  Color(0xff1E88E5), // Lighter medical blue
+                  Color(0xff1E88E5), // Lightest medical blue
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xff1E88E5).withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: Offset(0, 5),
                 ),
-              )),
+              ],
+            ),
+          ),
+          leading: Container(
+            margin: EdgeInsets.only(left: 8, top: 8, bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: InkWell(
+              onTap: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  SystemNavigator.pop();
+                }
+              },
+              borderRadius: BorderRadius.circular(14),
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                size: 20,
+                color: Colors.white,
+              ),
+            ),
+          ),
           title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: 20),
-                  child: Text(
-                    widget.title.isEmpty ? "Products" : widget.title,
-                    maxLines: 2,
-
-                    // overflow:TextOverflow.ellipsis ,
-                    style: TextStyle(color: GroceryAppColors.white),
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
                   ),
+                ),
+                child: Icon(
+                  Icons.medical_services_outlined,
+                  color: Colors.white,
+                  size: 20,
                 ),
               ),
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => UserFilterDemo()),
-                      );
-                    },
-                    child: Stack(
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 3),
-                          child: Icon(
-                            Icons.search,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                        ),
-//                    showCircle(),
-                      ],
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title.isEmpty ? "All Categories" : widget.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 12,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => WishList()),
-                      );
-                    },
-                    child: Stack(
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 13),
-                          child: Icon(
-                            Icons.add_shopping_cart,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.center,
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 15, bottom: 18),
-                            child: Container(
-                              padding: const EdgeInsets.all(5.0),
-                              decoration: new BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: GroceryAppColors.tela1,
-                                // color: Colors.orange,
-                              ),
-                              // child: Text('${cc}',
-                              //     style: TextStyle(
-                              //         color: Colors.white, fontSize: 15.0)),
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      "Medical Services",
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                  )
-                ],
+                  ],
+                ),
               ),
             ],
           ),
+          actions: [
+            Container(
+              margin: EdgeInsets.only(right: 8),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => UserFilterDemo()),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Icon(
+                          Icons.search,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => WishList()),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(14),
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Stack(
+                          children: <Widget>[
+                            Icon(
+                              Icons.shopping_cart_outlined,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            if (cc > 0)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Container(
+                                  padding: EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.red,
+                                        Colors.red[700]!,
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  constraints: BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '$cc',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-
-        // Navigator.push(context, MaterialPageRoute(builder: (context) => AllCategory(cat.pCats, i)),);
         body: Container(
           height: double.infinity,
           child: flag
               ? list1.length > 0
                   ? Container(
-
-                      // color: Colors.black,
+                      padding: EdgeInsets.all(16),
                       child: GridView.builder(
-                      physics: ClampingScrollPhysics(),
-                      controller: new ScrollController(keepScrollOffset: false),
-                      shrinkWrap: true,
-                      padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 5,
-                        crossAxisSpacing: 5,
-                        childAspectRatio: 16 / 6.5,
-                      ),
-                      itemBuilder: (context, index) {
-                        Categary item = list1[index];
-                        return InkWell(
-                          onTap: () {
-                            // Navigator.push(context, MaterialPageRoute(builder: (context) => Screen2(item.pcatId,item.pCats)),);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AllCategory(
-                                      item.pCats ?? "", item.pcatId ?? "")),
-                            );
-                          },
-                          child: Card(
-                            elevation: 10.0,
+                        physics: ClampingScrollPhysics(),
+                        controller:
+                            new ScrollController(keepScrollOffset: false),
+                        shrinkWrap: true,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 4.5,
+                        ),
+                        itemBuilder: (context, index) {
+                          Categary item = list1[index];
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AllCategory(
+                                        item.pCats ?? "", item.pcatId ?? "")),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(16),
                             child: Container(
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 40.0,
-                                    height: 40.0,
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                            color: GroceryAppColors.tela,
-                                            width: 1.5),
-                                        image: DecorationImage(
-                                          fit: BoxFit.fill,
-                                          image: item.img!.length > 0
-                                              ? NetworkImage(
-                                                  GroceryAppConstant.base_url +
-                                                      "manage/uploads/p_category/" +
-                                                      item.img.toString(),
-                                                ) as ImageProvider
-                                              : AssetImage(
-                                                  "assets/images/logo.png"),
-                                        )),
-                                    margin: EdgeInsets.only(left: 5, right: 10),
-                                    /*  child: CircleAvatar(
-                                    radius: 20,
-                                    backgroundColor: Colors.white,
-                                    child: ClipOval(
-                                      child: new SizedBox(
-                                        width: 40.0,
-                                        height: 40.0,
-                                        child:item.img.length>0?Image.network(Constant.base_url + "manage/uploads/p_category/" + item.img, fit: BoxFit.fill):Image.asset("assets/images/logo.png"),
-                                      ),
-                                    ),
-                                  ),*/
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 12,
+                                    offset: Offset(0, 4),
+                                    spreadRadius: 0,
                                   ),
-                                  Expanded(
-                                    child: Text(
-                                      item.pCats ?? "",
-                                      maxLines: 2,
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: GroceryAppColors.tela),
-                                    ),
-                                  )
                                 ],
                               ),
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        color:
+                                            Color(0xFF1B5E20).withOpacity(0.1),
+                                        border: Border.all(
+                                          color: Color.fromARGB(255, 27, 37, 94)
+                                              .withOpacity(0.2),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: item.img != null &&
+                                                item.img!.isNotEmpty
+                                            ? Image(
+                                                image:
+                                                    getGroceryCategoryImageProvider(
+                                                        item.img),
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return Container(
+                                                    color: Color.fromARGB(
+                                                            255, 74, 147, 199)
+                                                        .withOpacity(0.1),
+                                                    child: Icon(
+                                                      Icons.category_outlined,
+                                                      color: Color.fromARGB(
+                                                          255, 74, 147, 199),
+                                                      size: 24,
+                                                    ),
+                                                  );
+                                                },
+                                              )
+                                            : Container(
+                                                color: Color(0xFF1B5E20)
+                                                    .withOpacity(0.1),
+                                                child: Icon(
+                                                  Icons.category_outlined,
+                                                  color: Color.fromARGB(
+                                                      255, 74, 147, 19),
+                                                  size: 24,
+                                                ),
+                                              ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            item.pCats ?? "",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color.fromARGB(
+                                                  255, 47, 103, 143),
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            "Explore services",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: Color.fromARGB(255, 74, 147, 199),
+                                      size: 16,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      itemCount: list1.length == null ? 0 : list1.length,
-                    ))
-                  : Center(child: CircularProgressIndicator())
+                          );
+                        },
+                        itemCount: list1.length,
+                      ))
+                  : Center(
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF1E88E5)),
+                      ),
+                    )
               : !product
                   ? products1.length > 0
                       ? Column(
                           children: [
                             Expanded(
                               child: Container(
-                                  child:
-                                      /*GridView.count(
-                  controller: _scrollController,
-                  shrinkWrap: true,
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.7,
-                  padding: EdgeInsets.only(top: 8, left: 6, right: 6, bottom: 0),
-                  children: List.generate(products1.length, (index) {
-                    return Container(
-                      child: Card(
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => ProductDetails(products1[index])),
-                            );                                      },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(
-                                height: (MediaQuery.of(context).size.width / 2 - 14),
-                                width: double.infinity,
-                                child: products1[index].img!=null
-                                    ?Image.network(Constant.Base_Imageurl+products1[index].img,fit: BoxFit.fill,)
-                          */
-                                      /*      CachedNetworkImage
-                                  (
-                                  fit: BoxFit.cover,
-                                  imageUrl:Constant.Base_Imageurl+products1[index].img,
-                                  placeholder: (context, url) => Center(
-                                      child: CircularProgressIndicator()
-                                  ),
-                                  errorWidget: (context, url, error) => new Icon(Icons.error),
-                                )*/
-
-                                      /*
-                                    :Image.asset("assets/images/logo.png",fit:BoxFit.fill),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 0.0),
-                                child: ListTile(
-                                  title: Text(
-                                    products1[index].productName,
-                                    overflow:TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                    style: TextStyle(
-                                      fontSize: 13,color:AppColors.telamoredeep,   fontWeight: FontWeight.bold,
-
-                                    ),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Row(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.only(top: 2.0, bottom: 1),
-                                            child: Text('\u{20B9} ${calDiscount(products1[index].buyPrice,products1[index].discount)}', style: TextStyle(
-                                              color: AppColors.sellp,
-                                              fontWeight: FontWeight.w700,
-                                            )),
-                                          ),
-                                          Expanded(
-                                            child: Text('(\u{20B9} ${products1[index].buyPrice})',
-                                              overflow:TextOverflow.ellipsis,
-                                              maxLines: 2,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontStyle: FontStyle.italic,
-                                                  color: Theme.of(context).colorScheme.secondary,
-                                                  decoration: TextDecoration.lineThrough
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),*/
-                                      ListView.builder(
+                                  child: ListView.builder(
                                 controller: _scrollController,
                                 shrinkWrap: true,
                                 primary: false,
                                 scrollDirection: Axis.vertical,
                                 itemCount: products1.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  return Stack(
-                                    children: [
-                                      Container(
-                                        margin: EdgeInsets.only(
-                                            left: 10,
-                                            right: 10,
-                                            top: 6,
-                                            bottom: 6),
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(16))),
-                                        child: InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ProductDetails(
-                                                        products1[index],
-                                                      )),
-                                            );
-                                          },
-                                          child: Container(
-                                            child: Row(
-                                              children: <Widget>[
-                                                Container(
-                                                  margin: EdgeInsets.only(
-                                                      right: 8,
-                                                      left: 8,
-                                                      top: 8,
-                                                      bottom: 8),
-                                                  width: 110,
-                                                  height: 110,
-                                                  decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  14)),
-                                                      color:
-                                                          Colors.blue.shade200,
-                                                      image: DecorationImage(
-                                                        fit: BoxFit.cover,
-                                                        image: products1[index]
-                                                                    .img !=
-                                                                null
-                                                            ? NetworkImage(GroceryAppConstant
-                                                                        .Product_Imageurl +
-                                                                    products1[
-                                                                            index]
-                                                                        .img
-                                                                        .toString())
-                                                                as ImageProvider
-                                                            : AssetImage(
-                                                                "assets/images/logo.png"),
-                                                      )),
+                                  return Container(
+                                    margin: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.white,
+                                          Color(0xFFF8FBFF),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color:
+                                            Color(0xff1E88E5).withOpacity(0.2),
+                                        width: 1.5,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0xff1E88E5)
+                                              .withOpacity(0.12),
+                                          blurRadius: 15,
+                                          offset: Offset(0, 5),
+                                          spreadRadius: 0,
+                                        ),
+                                      ],
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProductDetails(
+                                                    products1[index],
+                                                  )),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(16),
+                                        child: Row(
+                                          children: <Widget>[
+                                            // Product Image
+                                            Container(
+                                              width: 100,
+                                              height: 100,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(18),
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    Color(0xff1E88E5)
+                                                        .withOpacity(0.1),
+                                                    Color(0xff42A5F5)
+                                                        .withOpacity(0.1),
+                                                  ],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
                                                 ),
-                                                Expanded(
-                                                  child: Container(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Column(
-                                                      mainAxisSize:
-                                                          MainAxisSize.max,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: <Widget>[
-                                                        Container(
-                                                          child: Text(
+                                                border: Border.all(
+                                                  color: Color(0xff1E88E5)
+                                                      .withOpacity(0.3),
+                                                  width: 2,
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Color(0xff1E88E5)
+                                                        .withOpacity(0.2),
+                                                    blurRadius: 8,
+                                                    offset: Offset(0, 3),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                                child: products1[index].img !=
+                                                        null
+                                                    ? Image.network(
+                                                        GroceryAppConstant
+                                                                .Product_Imageurl +
                                                             products1[index]
-                                                                        .productName ==
-                                                                    null
-                                                                ? 'name'
-                                                                : products1[index]
-                                                                        .productName ??
-                                                                    "",
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .fade,
-                                                            style: TextStyle(
-                                                                    fontSize:
-                                                                        15,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w400,
-                                                                    color: Colors
-                                                                        .black)
-                                                                .copyWith(
-                                                                    fontSize:
-                                                                        14),
+                                                                .img
+                                                                .toString(),
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context,
+                                                            error, stackTrace) {
+                                                          return Container(
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              gradient:
+                                                                  LinearGradient(
+                                                                colors: [
+                                                                  Color(0xff1E88E5)
+                                                                      .withOpacity(
+                                                                          0.15),
+                                                                  Color(0xff42A5F5)
+                                                                      .withOpacity(
+                                                                          0.15),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            child: Icon(
+                                                              Icons
+                                                                  .local_hospital_outlined,
+                                                              color: Color(
+                                                                  0xff1E88E5),
+                                                              size: 40,
+                                                            ),
+                                                          );
+                                                        },
+                                                      )
+                                                    : Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          gradient:
+                                                              LinearGradient(
+                                                            colors: [
+                                                              Color(0xff1E88E5)
+                                                                  .withOpacity(
+                                                                      0.15),
+                                                              Color(0xff42A5F5)
+                                                                  .withOpacity(
+                                                                      0.15),
+                                                            ],
                                                           ),
                                                         ),
-                                                        SizedBox(height: 6),
-                                                        Row(
-                                                          children: <Widget>[
-                                                            Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      top: 2.0,
-                                                                      bottom:
-                                                                          1),
-                                                              child: Text(
-                                                                  '\u{20B9} ${calDiscount(products1[index].buyPrice ?? "", products1[index].discount ?? "")} ${products1[index].unit_type != null ? products1[index].unit_type : ""}',
-                                                                  style:
-                                                                      TextStyle(
-                                                                    color: GroceryAppColors
-                                                                        .sellp,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w700,
-                                                                  )),
-                                                            ),
-                                                            SizedBox(
-                                                              width: 20,
-                                                            ),
-                                                            Expanded(
-                                                              child: Text(
-                                                                '(\u{20B9} ${products1[index].buyPrice})',
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                maxLines: 2,
-                                                                style: TextStyle(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w700,
-                                                                    fontStyle:
-                                                                        FontStyle
-                                                                            .italic,
-                                                                    color:
-                                                                        GroceryAppColors
-                                                                            .mrp,
-                                                                    decoration:
-                                                                        TextDecoration
-                                                                            .lineThrough),
-                                                              ),
-                                                            )
+                                                        child: Icon(
+                                                          Icons
+                                                              .local_hospital_outlined,
+                                                          color:
+                                                              Color(0xff1E88E5),
+                                                          size: 40,
+                                                        ),
+                                                      ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 16),
+
+                                            // Product Details
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: <Widget>[
+                                                  // Service Name
+                                                  Text(
+                                                    products1[index]
+                                                            .productName ??
+                                                        'Medical Service',
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color(0xff2C3E50),
+                                                      letterSpacing: 0.3,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  SizedBox(height: 8),
+
+                                                  // Price Section
+                                                  Row(
+                                                    children: <Widget>[
+                                                      Text(
+                                                        '₹${calDiscount(products1[index].buyPrice ?? "", products1[index].discount ?? "")}',
+                                                        style: TextStyle(
+                                                          color:
+                                                              Color(0xff1E88E5),
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 18,
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: 8),
+                                                      Text(
+                                                        '₹${products1[index].buyPrice}',
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          fontSize: 13,
+                                                          color:
+                                                              Colors.grey[500],
+                                                          decoration:
+                                                              TextDecoration
+                                                                  .lineThrough,
+                                                        ),
+                                                      ),
+                                                      if (products1[index]
+                                                                  .unit_type !=
+                                                              null &&
+                                                          products1[index]
+                                                              .unit_type!
+                                                              .isNotEmpty)
+                                                        Text(
+                                                          " /${products1[index].unit_type}",
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors
+                                                                .grey[600],
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 12),
+
+                                                  // Variant Selector
+                                                  if (products1[index].p_id !=
+                                                      null)
+                                                    Container(
+                                                      width: double.infinity,
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 10),
+                                                      decoration: BoxDecoration(
+                                                        gradient:
+                                                            LinearGradient(
+                                                          colors: [
+                                                            Color(0xff1E88E5)
+                                                                .withOpacity(
+                                                                    0.05),
+                                                            Color(0xff42A5F5)
+                                                                .withOpacity(
+                                                                    0.05),
                                                           ],
                                                         ),
-                                                        products1[index].p_id ==
-                                                                null
-                                                            ? Container()
-                                                            : Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .only(
-                                                                        left:
-                                                                            6.0,
-                                                                        top:
-                                                                            8.0),
-                                                                child: InkWell(
-                                                                  onTap: () {
-                                                                    _displayDialog(
-                                                                        context,
+                                                        border: Border.all(
+                                                            color: Color(
+                                                                    0xff1E88E5)
+                                                                .withOpacity(
+                                                                    0.3)),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                      ),
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          _displayDialog(
+                                                              context,
+                                                              products1[index]
+                                                                      .productIs ??
+                                                                  "",
+                                                              index);
+                                                        },
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Expanded(
+                                                              child: Text(
+                                                                products1[index]
+                                                                            .youtube!
+                                                                            .length >
+                                                                        1
+                                                                    ? products1[index].youtube!.length >
+                                                                            20
+                                                                        ? products1[index].youtube!.substring(0,
+                                                                                20) +
+                                                                            ".."
+                                                                        : products1[index].youtube ??
+                                                                            ""
+                                                                    : "Select variant",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 14,
+                                                                  color: Color(
+                                                                      0xff1E88E5),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Icon(
+                                                              Icons.expand_more,
+                                                              color: Color(
+                                                                  0xff1E88E5),
+                                                              size: 20,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  SizedBox(height: 12),
+
+                                                  // Action Buttons
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 4.0),
+                                                    child: Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: SizedBox(
+                                                            height: 42,
+                                                            child:
+                                                                ElevatedButton(
+                                                              onPressed: () {
+                                                                if (GroceryAppConstant
+                                                                    .isLogin) {
+                                                                  String mrp_price = calDiscount(
+                                                                      products1[index]
+                                                                              .buyPrice ??
+                                                                          "",
+                                                                      products1[index]
+                                                                              .discount ??
+                                                                          "");
+                                                                  totalmrp =
+                                                                      double.parse(
+                                                                          mrp_price);
+                                                                  double
+                                                                      dicountValue =
+                                                                      double.parse(products1[index].buyPrice ??
+                                                                              "") -
+                                                                          totalmrp!;
+                                                                  String gst_sgst = calGst(
+                                                                      mrp_price,
+                                                                      products1[index]
+                                                                              .sgst ??
+                                                                          "");
+                                                                  String gst_cgst = calGst(
+                                                                      mrp_price,
+                                                                      products1[index]
+                                                                              .cgst ??
+                                                                          "");
+                                                                  String adiscount = calDiscount(
+                                                                      products1[index]
+                                                                              .buyPrice ??
+                                                                          "",
+                                                                      products1[index].msrp !=
+                                                                              null
+                                                                          ? products1[index].msrp ??
+                                                                              ""
+                                                                          : "0");
+                                                                  admindiscountprice = (double.parse(
+                                                                          products1[index].buyPrice ??
+                                                                              "") -
+                                                                      double.parse(
+                                                                          adiscount));
+                                                                  String color =
+                                                                      "";
+                                                                  String size =
+                                                                      "";
+                                                                  _addToproducts(
+                                                                      products1[index].productIs ??
+                                                                          "",
+                                                                      products1[index].productName ??
+                                                                          "",
+                                                                      products1[index].img ??
+                                                                          "",
+                                                                      int.parse(
+                                                                          mrp_price),
+                                                                      int.parse(
+                                                                          products1[index].count ??
+                                                                              ""),
+                                                                      color,
+                                                                      size,
+                                                                      products1[index]
+                                                                              .productDescription ??
+                                                                          "",
+                                                                      gst_sgst,
+                                                                      gst_cgst,
+                                                                      products1[index]
+                                                                              .discount ??
+                                                                          "",
+                                                                      dicountValue
+                                                                          .toString(),
+                                                                      products1[index]
+                                                                              .APMC ??
+                                                                          "",
+                                                                      admindiscountprice
+                                                                          .toString(),
+                                                                      products1[index]
+                                                                              .buyPrice ??
+                                                                          "",
+                                                                      products1[index]
+                                                                              .shipping ??
+                                                                          "",
+                                                                      products1[index]
+                                                                              .quantityInStock ??
+                                                                          "",
+                                                                      products1[index]
+                                                                              .youtube ??
+                                                                          "",
+                                                                      products1[index]
+                                                                              .mv ??
+                                                                          "");
+                                                                } else {
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                SignInPage()),
+                                                                  );
+                                                                }
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                                foregroundColor:
+                                                                    Color(
+                                                                        0xFF1E88E5),
+                                                                elevation: 0,
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        horizontal:
+                                                                            8,
+                                                                        vertical:
+                                                                            10),
+                                                                side: BorderSide(
+                                                                    color: Color(
+                                                                        0xFF1E88E5),
+                                                                    width: 1.5),
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12),
+                                                                ),
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                children: [
+                                                                  Icon(
+                                                                      Icons
+                                                                          .shopping_cart_outlined,
+                                                                      size: 14),
+                                                                  SizedBox(
+                                                                      width: 4),
+                                                                  Flexible(
+                                                                    child: Text(
+                                                                      "Add to Cart",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            11,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                        letterSpacing:
+                                                                            0.3,
+                                                                      ),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: 10),
+                                                        Expanded(
+                                                          child: SizedBox(
+                                                            height: 42,
+                                                            child:
+                                                                ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                if (GroceryAppConstant
+                                                                    .isLogin) {
+                                                                  if (num.parse(
+                                                                          products1[index].quantityInStock ??
+                                                                              '0') >
+                                                                      0) {
+                                                                    String mrp_price = calDiscount(
+                                                                        products1[index].buyPrice ??
+                                                                            "",
+                                                                        products1[index].discount ??
+                                                                            "");
+                                                                    totalmrp =
+                                                                        double.parse(
+                                                                            mrp_price);
+                                                                    double
+                                                                        dicountValue =
+                                                                        double.parse(products1[index].buyPrice ??
+                                                                                "") -
+                                                                            totalmrp!;
+                                                                    String gst_sgst = calGst(
+                                                                        mrp_price,
+                                                                        products1[index].sgst ??
+                                                                            "");
+                                                                    String gst_cgst = calGst(
+                                                                        mrp_price,
+                                                                        products1[index].cgst ??
+                                                                            "");
+                                                                    String adiscount = calDiscount(
+                                                                        products1[index].buyPrice ??
+                                                                            "",
+                                                                        products1[index].msrp !=
+                                                                                null
+                                                                            ? products1[index].msrp ??
+                                                                                ""
+                                                                            : "0");
+                                                                    admindiscountprice = (double.parse(products1[index].buyPrice ??
+                                                                            "") -
+                                                                        double.parse(
+                                                                            adiscount));
+                                                                    String
+                                                                        color =
+                                                                        "";
+                                                                    String
+                                                                        size =
+                                                                        "";
+                                                                    _addToproducts(
                                                                         products1[index].productIs ??
                                                                             "",
-                                                                        index);
-                                                                    // _showSelectionDialog(context);
-                                                                  },
-                                                                  child:
-                                                                      Container(
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                            border:
-                                                                                Border.all(color: Colors.grey)),
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width /
-                                                                        2,
-                                                                    padding:
-                                                                        const EdgeInsets
-                                                                            .only(
-                                                                      left: 5.0,
-                                                                      top: 0.0,
-                                                                      right:
-                                                                          5.0,
-                                                                    ),
-                                                                    margin:
-                                                                        const EdgeInsets
-                                                                            .only(
-                                                                      top: 5.0,
-                                                                    ),
-                                                                    child: Center(
-                                                                        child: Row(
-                                                                      mainAxisAlignment:
-                                                                          MainAxisAlignment
-                                                                              .end,
-                                                                      children: [
-                                                                        Padding(
-                                                                          padding: EdgeInsets.only(
-                                                                              left: 10,
-                                                                              right: 0),
-                                                                          child:
-                                                                              Text(
-                                                                            // textval.length>15?textval.substring(0,15)+"..": textval,
-                                                                            products1[index].youtube!.length > 1
-                                                                                ? products1[index].youtube!.length > 15
-                                                                                    ? products1[index].youtube!.substring(0, 15) + ".."
-                                                                                    : products1[index].youtube ?? ""
-                                                                                : textval,
-                                                                            overflow:
-                                                                                TextOverflow.fade,
-                                                                            // maxLines: 2,
-                                                                            style:
-                                                                                TextStyle(
-                                                                              fontSize: 15,
-                                                                              color: GroceryAppColors.black,
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        Padding(
-                                                                            padding:
-                                                                                EdgeInsets.only(left: 0),
-                                                                            child: Icon(
-                                                                              Icons.expand_more,
-                                                                              color: Colors.black,
-                                                                              size: 30,
-                                                                            ))
-                                                                      ],
-                                                                    )),
-                                                                  ),
-                                                                )),
-                                                        Container(
-                                                          margin:
-                                                              EdgeInsets.only(
-                                                                  left: 0.0,
-                                                                  right: 8),
-                                                          child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: <Widget>[
-                                                                SizedBox(
-                                                                  width: 0.0,
-                                                                  height: 10.0,
+                                                                        products1[index].productName ??
+                                                                            "",
+                                                                        products1[index].img ??
+                                                                            "",
+                                                                        int.parse(
+                                                                            mrp_price),
+                                                                        int.parse(products1[index].count ??
+                                                                            ""),
+                                                                        color,
+                                                                        size,
+                                                                        products1[index].productDescription ??
+                                                                            "",
+                                                                        gst_sgst,
+                                                                        gst_cgst,
+                                                                        products1[index].discount ??
+                                                                            "",
+                                                                        dicountValue
+                                                                            .toString(),
+                                                                        products1[index].APMC ??
+                                                                            "",
+                                                                        admindiscountprice
+                                                                            .toString(),
+                                                                        products1[index].buyPrice ??
+                                                                            "",
+                                                                        products1[index].shipping ??
+                                                                            "",
+                                                                        products1[index].quantityInStock ??
+                                                                            "",
+                                                                        products1[index].youtube ??
+                                                                            "",
+                                                                        products1[index].mv ??
+                                                                            "");
+                                                                    await Navigator
+                                                                        .push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                          builder: (context) =>
+                                                                              WishList()),
+                                                                    );
+                                                                    setState(
+                                                                        () {});
+                                                                  } else {
+                                                                    showLongToast(
+                                                                        "Product is out of stock");
+                                                                  }
+                                                                } else {
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                SignInPage()),
+                                                                  );
+                                                                }
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                backgroundColor:
+                                                                    Color(
+                                                                        0xFF1E88E5),
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                                elevation: 2,
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        horizontal:
+                                                                            8,
+                                                                        vertical:
+                                                                            10),
+                                                                shadowColor: Color(
+                                                                        0xFF1E88E5)
+                                                                    .withOpacity(
+                                                                        0.3),
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12),
                                                                 ),
-
-                                                                // SizedBox(width: 25,),
-
-                                                                Container(
-                                                                    margin: EdgeInsets
-                                                                        .only(
-                                                                            left:
-                                                                                5.0),
-                                                                    height: 40,
-                                                                    // width: 60,
-                                                                    child: Card(
-                                                                      elevation:
-                                                                          0.0,
-                                                                      shape:
-                                                                          RoundedRectangleBorder(
-                                                                        side:
-                                                                            BorderSide(
-                                                                          color:
-                                                                              GroceryAppColors.tela,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              15),
-                                                                        ),
+                                                              ),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                children: [
+                                                                  Icon(
+                                                                      Icons
+                                                                          .event_available,
+                                                                      size: 14),
+                                                                  SizedBox(
+                                                                      width: 4),
+                                                                  Flexible(
+                                                                    child: Text(
+                                                                      "Book Now",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            11,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                        letterSpacing:
+                                                                            0.3,
                                                                       ),
-                                                                      clipBehavior:
-                                                                          Clip.antiAlias,
-                                                                      child:
-                                                                          InkWell(
-                                                                        onTap:
-                                                                            () {
-                                                                          if (GroceryAppConstant
-                                                                              .isLogin) {
-                                                                            String
-                                                                                mrp_price =
-                                                                                calDiscount(products1[index].buyPrice ?? "", products1[index].discount ?? "");
-                                                                            totalmrp =
-                                                                                double.parse(mrp_price);
-
-                                                                            double
-                                                                                dicountValue =
-                                                                                double.parse(products1[index].buyPrice ?? "") - totalmrp!;
-                                                                            String
-                                                                                gst_sgst =
-                                                                                calGst(mrp_price, products1[index].sgst ?? "");
-                                                                            String
-                                                                                gst_cgst =
-                                                                                calGst(mrp_price, products1[index].cgst ?? "");
-
-                                                                            String
-                                                                                adiscount =
-                                                                                calDiscount(products1[index].buyPrice ?? "", products1[index].msrp != null ? products1[index].msrp ?? "" : "0");
-
-                                                                            admindiscountprice =
-                                                                                (double.parse(products1[index].buyPrice ?? "") - double.parse(adiscount));
-
-                                                                            String
-                                                                                color =
-                                                                                "";
-                                                                            String
-                                                                                size =
-                                                                                "";
-                                                                            _addToproducts(
-                                                                                products1[index].productIs ?? "",
-                                                                                products1[index].productName ?? "",
-                                                                                products1[index].img ?? "",
-                                                                                int.parse(mrp_price),
-                                                                                int.parse(products1[index].count ?? ""),
-                                                                                color,
-                                                                                size,
-                                                                                products1[index].productDescription ?? "",
-                                                                                gst_sgst,
-                                                                                gst_cgst,
-                                                                                products1[index].discount ?? "",
-                                                                                dicountValue.toString(),
-                                                                                products1[index].APMC ?? "",
-                                                                                admindiscountprice.toString(),
-                                                                                products1[index].buyPrice ?? "",
-                                                                                products1[index].shipping ?? "",
-                                                                                products1[index].quantityInStock ?? "",
-                                                                                products1[index].youtube ?? "",
-                                                                                products1[index].mv ?? "");
-
-//                                                               zz
-//                                                                Navigator.push(context,
-//                                                                  MaterialPageRoute(builder: (context) => MyApp1()),);
-                                                                          } else {
-                                                                            Navigator.push(
-                                                                              context,
-                                                                              MaterialPageRoute(builder: (context) => SignInPage()),
-                                                                            );
-                                                                          }
-
-//
-                                                                        },
-                                                                        child: Padding(
-                                                                            padding: EdgeInsets.only(left: 5, top: 3.5, bottom: 3.5, right: 5),
-                                                                            child: Center(
-                                                                              child: Text(
-                                                                                "Add service",
-                                                                                style: TextStyle(color: GroceryAppColors.tela, fontSize: 12, fontWeight: FontWeight.bold),
-                                                                              ),
-                                                                              // Icon(Icons.add_shopping_cart,color: Colors.white,),
-                                                                            )),
-                                                                      ),
-                                                                    )),
-                                                              Container(
-                                                                    margin: EdgeInsets
-                                                                        .only(
-                                                                            left:
-                                                                                5.0),
-                                                                    height: 40,
-                                                                    // width: 60,
-                                                                    child: Card(
-                                                                      color: GroceryAppColors
-                                                                          .tela,
-                                                                      elevation:
-                                                                          0.0,
-                                                                      shape:
-                                                                          RoundedRectangleBorder(
-                                                                        side:
-                                                                            BorderSide(
-                                                                          color:
-                                                                              GroceryAppColors.tela,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              15),
-                                                                        ),
-                                                                      ),
-                                                                      clipBehavior:
-                                                                          Clip.antiAlias,
-                                                                      child:
-                                                                          InkWell(
-                                                                        onTap:
-                                                                            () async {
-                                                                          SharedPreferences pref = await SharedPreferences.getInstance();
-                                                                          if (GroceryAppConstant
-                                                                              .isLogin) {
-                                                                            if (num.parse(products1[index].quantityInStock ?? '0') >
-                                                                                0) {
-                                                                              String mrp_price = calDiscount(products1[index].buyPrice ?? "", products1[index].discount ?? "");
-                                                                              totalmrp = double.parse(mrp_price);
-                                                                              double dicountValue = double.parse(products1[index].buyPrice ?? "") - totalmrp!;
-                                                                              String gst_sgst = calGst(mrp_price, products1[index].sgst ?? "");
-                                                                              String gst_cgst = calGst(mrp_price, products1[index].cgst ?? "");
-                                                                              String adiscount = calDiscount(products1[index].buyPrice ?? "", products1[index].msrp != null ? products1[index].msrp ?? "" : "0");
-                                                                              admindiscountprice = (double.parse(products1[index].buyPrice ?? "") - double.parse(adiscount));
-                                                                              String color = "";
-                                                                              String size = "";
-                                                                              _addToproducts(products1[index].productIs ?? "", products1[index].productName ?? "", products1[index].img ?? "", int.parse(mrp_price), int.parse(products1[index].count ?? ""), color, size, products1[index].productDescription ?? "", gst_sgst, gst_cgst, products1[index].discount ?? "", dicountValue.toString(), products1[index].APMC ?? "", admindiscountprice.toString(), products1[index].buyPrice ?? "", products1[index].shipping ?? "", products1[index].quantityInStock ?? "", products1[index].youtube ?? "", products1[index].mv ?? "");
-                                                                              // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                                                              //   content: Text("Service added to cart"),
-                                                                              //   backgroundColor: Colors.green,
-                                                                              //   behavior: SnackBarBehavior.floating,
-                                                                              // ));
-                                                                            await Navigator.push(
-                                                                                context,
-                                                                                MaterialPageRoute(builder: (context) => WishList()),
-                                                                              );
-                                                                              setState(() {});
-                                                                              // Navigator.push(
-                                                                              //   context,
-                                                                              //   MaterialPageRoute(builder: (context) => ShowAddress("0")),
-                                                                              // );
-                                                                              // setState(() {
-                                                                              //                 AppConstant.cc++;
-                                                                              //   Constant.carditemCount++;
-                                                                              //   cartItemcount(Constant.carditemCount);
-                                                                              // });
-                                                                              // Navigator.push(
-                                                                              //   context,
-                                                                              //   MaterialPageRoute(builder: (context) => MyApp1()),
-                                                                              // );
-                                                                            } else {
-                                                                              showLongToast("Product is out of stock");
-                                                                            }
-                                                                          } else {
-                                                                            Navigator.push(
-                                                                              context,
-                                                                              MaterialPageRoute(builder: (context) => SignInPage()),
-                                                                            );
-                                                                          }
-                                                                        },
-                                                                        child: Padding(
-                                                                            padding: EdgeInsets.only(left: 5, top: 3.5, bottom: 3.5, right: 5),
-                                                                            child: Center(
-                                                                              child: Text(
-                                                                                "Book Now",
-                                                                                style: TextStyle(color: GroceryAppColors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                                                                              ),
-                                                                              // Icon(Icons.add_shopping_cart,color: Colors.white,),
-                                                                            )),
-                                                                      ),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
                                                                     ),
-                                                                    ),
-                                                              ]),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
                                                   ),
-                                                )
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
+                                          ],
                                         ),
                                       ),
-                                      // double.parse(products1[index].discount)>0?  showSticker(index,products1):Row()
-                                    ],
+                                    ),
                                   );
                                 },
                               )),
                             ),
-
-                            //GroceryAppConstant.groceryAppCartItemCount > 0
-                            //  ? InkWell(
-                            //    onTap: () {
-                            //    Navigator.push(
-                            //    context,
-                            //  MaterialPageRoute(
-                            //    builder: (context) => WishList()),
-                            //);
-                            //},
-                            //child: Container(
-                            //decoration: BoxDecoration(
-                            //  color: GroceryAppColors.green,
-                            //borderRadius: BorderRadius.only(
-                            //  topLeft: Radius.circular(8),
-                            //topRight: Radius.circular(8))),
-                            //margin:
-                            //  EdgeInsets.only(left: 5, right: 5),
-                            //height: 60,
-                            //width: MediaQuery.of(context).size.width,
-                            // child: Row(
-                            //children: [
-                            // Container(
-                            //   width: 60,
-                            // padding: EdgeInsets.only(
-                            //   left: 10, right: 20),
-                            //child: Icon(
-                            //Icons
-                            //  .add_shopping_cart_outlined,
-                            //size: 20,
-                            //color: GroceryAppColors.white,
-                            // )),
-                            //Container(
-                            //margin: EdgeInsets.only(
-                            //  right: 5, top: 3, bottom: 3),
-                            //width: 1,
-                            //height: 60,
-                            // color: GroceryAppColors.white,
-                            // ),
-                            // Container(
-                            // child: SizedBox(
-                            //   width: MediaQuery.of(context)
-                            //         .size
-                            //       .width /
-                            // 3,
-                            //  child: Text(
-                            //  '( ${cc} ) items count',
-                            //style: TextStyle(
-                            //  fontSize: 12,
-                            //    fontWeight:
-                            //      FontWeight.w600,
-                            // color: GroceryAppColors
-                            //   .white),
-                            // )),
-                            // ),
-                            //Row(
-                            //children: [
-                            //   SizedBox(
-                            //     width: MediaQuery.of(context)
-                            //           .size
-                            //         .width /
-                            //   3,
-                            // child: Text(
-                            // 'Proceed to cart',
-                            //style: TextStyle(
-                            //  fontSize: 12,
-                            //fontWeight:
-                            //  FontWeight.w600,
-                            //color: GroceryAppColors
-                            //  .white),
-                            // )),
-                            //  Padding(
-                            //  padding:
-                            //     EdgeInsets.only(left: 0),
-                            //   child: Icon(
-                            //  Icons.arrow_forward_ios,
-                            //  color: GroceryAppColors.white,
-                            //   size: 15,
-                            // ),
-                            //  )
-                            // ],
-                            //  )
-                            //  ],
-                            //  ),
-                            //  ),
-                            // )
-                            // : Row()
                           ],
                         )
-                      : Center(child: CircularProgressIndicator())
+                      : Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF1E88E5)),
+                          ),
+                        )
                   : Container(
+                      padding: EdgeInsets.all(16),
                       child: Center(
-                        child: Text("No Serviceis Found"),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.medical_services_outlined,
+                              size: 80,
+                              color: Color(0xFF1E88E5).withOpacity(0.3),
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              "No Services Found",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF2C3E50),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              "Try searching for different services or check back later",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF7F8C8D),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
         ));
@@ -998,8 +1211,18 @@ class _AllCategory extends State<AllCategory> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            scrollable: true,
-            title: Text('Select Varant'),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text(
+              'Select Variant',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1B5E20),
+              ),
+            ),
             content: Container(
               width: double.maxFinite,
               height: 200,
@@ -1009,14 +1232,18 @@ class _AllCategory extends State<AllCategory> {
                     if (snapshot.hasData) {
                       return ListView.builder(
                           scrollDirection: Axis.vertical,
-                          itemCount: snapshot.data!.length == null
-                              ? 0
-                              : snapshot.data!.length,
+                          itemCount: snapshot.data!.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Container(
-                              width: snapshot.data![index] != 0 ? 130.0 : 230.0,
-                              color: Colors.white,
-                              margin: EdgeInsets.only(right: 10),
+                              margin: EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFF8F9FA),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Color(0xFF1B5E20).withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
                               child: InkWell(
                                 onTap: () {
                                   setState(() {
@@ -1024,47 +1251,61 @@ class _AllCategory extends State<AllCategory> {
                                         snapshot.data![index].price;
                                     products1[index1].discount =
                                         snapshot.data![index].discount;
-
-                                    // total= int.parse(snapshot.data[index].price);
-                                    // String  mrp_price=calDiscount(snapshot.data[index].price,snapshot.data[index].discount);
-                                    // totalmrp= double.parse(mrp_price);
                                     products1[index1].youtube =
                                         snapshot.data![index].variant;
-
                                     Navigator.pop(context);
                                   });
                                 },
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding:
-                                          EdgeInsets.only(left: 10, right: 10),
-                                      child: Text(
-                                        snapshot.data![index].variant ?? "",
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          color: GroceryAppColors.black,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle_outline,
+                                        color: Color(0xFF1B5E20),
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          snapshot.data![index].variant ?? "",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Color(0xFF1B5E20),
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Divider(
-                                      color: GroceryAppColors.black,
-                                    ),
-                                  ],
+                                      Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Color(0xFF1B5E20),
+                                        size: 14,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
                           });
                     }
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF1E88E5)),
+                      ),
+                    );
                   }),
             ),
             actions: <Widget>[
-              new TextButton(
-                child: new Text('CANCEL'),
+              TextButton(
+                child: Text(
+                  'CANCEL',
+                  style: TextStyle(
+                    color: Color(0xFF1B5E20),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -1099,25 +1340,30 @@ class _AllCategory extends State<AllCategory> {
       String varient,
       String mv) {
     ProductsCart st = new ProductsCart(
-        pid: pID,
-        pname: p_name,
-        pimage: image,
-        pprice: (price * quantity).toString(),
-        pQuantity: quantity,
-        pcolor: c_val ?? "",
-        psize: p_size ?? "",
-        pdiscription: p_disc,
-        sgst: sgst,
-        cgst: cgst,
-        discount: discount,
-        discountValue: dis_val,
-        adminper: adminper,
-        adminpricevalue: adminper_val,
-        costPrice: cost_price,
-        shipping: shippingcharge,
-        totalQuantity: totalQun,
-        varient: varient,
-        mv: int.parse(mv));
+      id: 0, // Add missing required parameter
+      pid: pID,
+      pname: p_name,
+      pimage: image,
+      pprice: (price * quantity).toString(),
+      pQuantity: quantity,
+      pcolor: c_val,
+      psize: p_size,
+      pdiscription: p_disc,
+      sgst: sgst,
+      cgst: cgst,
+      discount: discount,
+      discountValue: dis_val,
+      adminper: adminper,
+      adminpricevalue: adminper_val,
+      costPrice: cost_price,
+      shipping: shippingcharge,
+      totalQuantity: totalQun,
+      varient: varient,
+      mv: int.tryParse(mv) ?? 0, // Convert string to int with null safety
+      moq: "", // Add missing required parameter
+      time1: "", // Add missing required parameter
+      date1: "", // Add missing required parameter
+    );
     dbmanager.getProductList1(pID).then((usersFromServe) {
       if (this.mounted) {
         setState(() {

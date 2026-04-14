@@ -1,8 +1,8 @@
 // import 'package:flutter/material.dart';
-// import 'package:aladdinmart/service_app/General/AppConstant.dart';
-// import 'package:aladdinmart/service_app/dbhelper/database_helper.dart';
-// import 'package:aladdinmart/service_app/model/CategaryModal.dart';
-// import 'package:aladdinmart/service_app/screen/vendors_by_cat.dart';
+// import 'package:ecoshine24/service_app/General/AppConstant.dart';
+// import 'package:ecoshine24/service_app/dbhelper/database_helper.dart';
+// import 'package:ecoshine24/service_app/model/CategaryModal.dart';
+// import 'package:ecoshine24/service_app/screen/vendors_by_cat.dart';
 
 // class SubCats extends StatefulWidget {
 //   final String catID;
@@ -92,7 +92,7 @@
 //                                                 subCatList[index].img,
 //                                             fit: BoxFit.contain,
 //                                           )
-//                                         : Image.asset("assets/images/logo.png"),
+//                                         : Image.asset("assets/images/eco-shine-logo.png"),
 //                                   ),
 //                                 ),
 //                                 SizedBox(

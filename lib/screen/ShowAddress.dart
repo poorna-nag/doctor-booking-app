@@ -1,16 +1,14 @@
 import 'dart:convert';
 
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/screen/AddAddress.dart';
-import 'package:aladdinmart/model/AddressModel.dart';
-import 'package:aladdinmart/model/RegisterModel.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/screen/AddAddress.dart';
+import 'package:ecoshine24/model/AddressModel.dart';
+import 'package:ecoshine24/model/RegisterModel.dart';
 import 'package:flutter/material.dart';
-
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 import 'UpdateAddress.dart';
 
@@ -259,8 +257,7 @@ class _ShowAddressState extends State<ShowAddress> {
                                                           .styleFrom(
                                                         elevation: 0,
                                                         backgroundColor:
-                                                            FoodAppColors
-                                                                .white,
+                                                            FoodAppColors.white,
                                                         shape:
                                                             RoundedRectangleBorder(
                                                           borderRadius:
@@ -487,8 +484,7 @@ class _ShowAddressState extends State<ShowAddress> {
     map['user_id'] = userid;
 
     final response = await http.post(
-        Uri.parse(
-            FoodAppConstant.base_url + 'manage/api/user_address/delete/'),
+        Uri.parse(FoodAppConstant.base_url + 'manage/api/user_address/delete/'),
         body: map);
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);

@@ -1,13 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
-import 'package:aladdinmart/grocery/Auth/signin.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/model/UserUpdateModel.dart';
-import 'package:http/http.dart' as http;
-import 'package:aladdinmart/grocery/screen/checkout.dart';
+import 'package:ecoshine24/grocery/Auth/signin.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,7 +10,7 @@ class DliveryInfo extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<DliveryInfo> {
+class _HomePageState extends State<DliveryInfo> with TickerProviderStateMixin {
   bool _status = false;
   final FocusNode myFocusNode = FocusNode();
   Future<File>? file;
@@ -41,12 +35,35 @@ class _HomePageState extends State<DliveryInfo> {
   final resignofcause = TextEditingController();
   String? _dropDownValue1;
   Future<File>? profileImg;
+  bool isLoading = false;
+
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _slideAnimation;
 
   @override
   void initState() {
     getUserInfo();
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+    _animationController.forward();
     super.initState();
 //    getImaformation();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    myFocusNode.dispose();
+    super.dispose();
   }
 
 /*  getImage(BuildContext context) async {
@@ -155,10 +172,7 @@ class _HomePageState extends State<DliveryInfo> {
     String? sex = pre.getString("sex");
     user_id = pre.getString("user_id");
     print(user_id);
-    if (GroceryAppConstant.image == null) {
-    } else {
-      url = GroceryAppConstant.image;
-    }
+    url = GroceryAppConstant.image;
 
     this.setState(() {
       nameController.text = name ?? "";
@@ -176,474 +190,716 @@ class _HomePageState extends State<DliveryInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: Colors.teal[50],
-          title: Text(
-            "Delivery Information",
-            style: TextStyle(color: Colors.teal[200]),
-          )),
-      key: profilescaffoldkey,
-      body: Container(
-        color: Colors.white,
-        child: new ListView(
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                new Container(
-                  color: Color(0xffFFFFFF),
-                  child: Form(
-                    key: _formKey,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: 25.0),
-                      child: new Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 0.0),
-                              child: new Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      new Text(
-                                        'Name',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Flexible(
-                                    child: TextFormField(
-                                      controller: nameController,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the name";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                        hintText: "Enter Your Name",
-                                      ),
-                                      enabled: !_status,
-                                      autofocus: !_status,
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      new Text(
-                                        'Email ID',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Flexible(
-                                    child: TextFormField(
-                                      controller: emailController,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the email id";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                          hintText: "Enter Email ID"),
-                                      enabled: !_status,
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      new Text(
-                                        'Mobile',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  new Flexible(
-                                    child: new TextFormField(
-                                      controller: mobileController,
-                                      keyboardType: TextInputType.number,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the mobile No";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                          hintText: "Enter Mobile Number"),
-                                      enabled: false,
-                                    ),
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'Pin Code',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'State',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 2.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Flexible(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 10.0),
-                                      child: TextFormField(
-                                        controller: pincodeController,
-                                        keyboardType: TextInputType.number,
-                                        validator: (String? value) {
-                                          if (value == null || value.isEmpty) {
-                                            return " Please enter the pincode";
-                                          }
-                                        },
-                                        decoration: const InputDecoration(
-                                            hintText: "Enter Pin Code"),
-                                        enabled: !_status,
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Flexible(
-                                    child: TextFormField(
-                                      controller: stateController,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the state";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                          hintText: "Enter State"),
-                                      enabled: !_status,
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          Padding(
-                              padding: EdgeInsets.only(
-                                  left: 25.0, right: 25.0, top: 25.0),
-                              child: new Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'City',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      child: new Text(
-                                        'Gender',
-                                        style: TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    flex: 2,
-                                  ),
-                                ],
-                              )),
-                          Container(
-                            height: 70,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            margin: EdgeInsets.only(left: 20, right: 20),
-                            padding: EdgeInsets.all(0.0),
-                            child: Row(children: <Widget>[
-                              Expanded(
-                                child: Padding(
-                                  padding: EdgeInsets.all(5),
-                                  child: Padding(
-                                    padding: EdgeInsets.only(right: 10.0),
-                                    child: TextFormField(
-                                      controller: cityController,
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return " Please enter the city";
-                                        }
-                                      },
-                                      decoration: const InputDecoration(
-                                          hintText: "Enter City"),
-                                      enabled: !_status,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 30,
-                              ),
-                              Expanded(
-                                child: DropdownButton(
-                                  hint: _dropDownValue1 == null
-                                      ? Text('Select gender')
-                                      : Text(
-                                          _dropDownValue1 ?? "",
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                  isExpanded: true,
-                                  iconSize: 30.0,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                  ),
-                                  items: [
-                                    'Male',
-                                    'Female',
-                                  ].map(
-                                    (val) {
-                                      return DropdownMenuItem<String>(
-                                        value: val,
-                                        child: Text(val),
-                                      );
-                                    },
-                                  ).toList(),
-                                  onChanged: (val) {
-                                    setState(
-                                      () {
-                                        _dropDownValue1 = val;
-                                      },
-                                    );
-                                  },
-                                ),
-                              )
-                            ]),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: 25.0, right: 25.0, top: 15.0),
-                            child: Container(
-                                child: new TextFormField(
-                                    maxLines: 4,
-                                    keyboardType: TextInputType
-                                        .number, // Use mobile input type for emails.
-                                    controller: resignofcause,
-                                    validator: (String? value) {
-                                      //print("Length${value.length}");
-                                      if (value == null ||
-                                          value.isEmpty && value.length > 10) {
-                                        return " Please enter the  address";
-                                      }
-                                    },
-                                    decoration: new InputDecoration(
-                                      hintText: 'Address',
-                                      labelText: 'Enter the address',
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.black54, width: 3.0),
-                                      ),
-
-//                                      icon: new Icon(Icons.queue_play_next),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.black54, width: 3.0),
-                                      ),
-                                    ))),
-                          ),
-                          _getActionButtons(),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF1B5E20), // Dark green
+            Color(0xFF2E7D32), // Medium green
+            Color(0xFF388E3C), // Light green
           ],
         ),
       ),
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            leading: Container(
+              margin: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Color(0xFF1B5E20),
+                  size: 20,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            title: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Text(
+                "Delivery Information",
+                style: TextStyle(
+                  color: Color(0xFF1B5E20),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            centerTitle: true,
+          ),
+          key: profilescaffoldkey,
+          body: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: AnimatedBuilder(
+                animation: _slideAnimation,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: Offset(0, _slideAnimation.value),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(20, 120, 20, 20),
+                      child: Column(
+                        children: [
+                          // Header Card
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFF1B5E20),
+                                        Color(0xFF2E7D32),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  child: Icon(
+                                    Icons.location_on,
+                                    color: Colors.white,
+                                    size: 32,
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  "Complete Your Profile",
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF1B5E20),
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  "Fill in your delivery details to complete your order",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 30),
+
+                          // Form Card
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                children: [
+                                  // Personal Information Section
+                                  _buildSectionHeader(
+                                      "Personal Information", Icons.person),
+                                  SizedBox(height: 20),
+
+                                  _buildModernTextField(
+                                    controller: nameController,
+                                    label: "Full Name",
+                                    hint: "Enter your full name",
+                                    icon: Icons.person_outline,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Please enter your name";
+                                      }
+                                      return null;
+                                    },
+                                    enabled: !_status,
+                                  ),
+
+                                  SizedBox(height: 16),
+
+                                  _buildModernTextField(
+                                    controller: emailController,
+                                    label: "Email Address",
+                                    hint: "Enter your email address",
+                                    icon: Icons.email_outlined,
+                                    keyboardType: TextInputType.emailAddress,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Please enter your email";
+                                      }
+                                      return null;
+                                    },
+                                    enabled: !_status,
+                                  ),
+
+                                  SizedBox(height: 16),
+
+                                  _buildModernTextField(
+                                    controller: mobileController,
+                                    label: "Mobile Number",
+                                    hint: "Enter your mobile number",
+                                    icon: Icons.phone_outlined,
+                                    keyboardType: TextInputType.phone,
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Please enter your mobile number";
+                                      }
+                                      return null;
+                                    },
+                                    enabled: false,
+                                  ),
+
+                                  SizedBox(height: 30),
+
+                                  // Location Information Section
+                                  _buildSectionHeader(
+                                      "Location Details", Icons.location_city),
+                                  SizedBox(height: 20),
+
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildModernTextField(
+                                          controller: pincodeController,
+                                          label: "Pin Code",
+                                          hint: "Enter pin code",
+                                          icon: Icons.pin_drop_outlined,
+                                          keyboardType: TextInputType.number,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return "Please enter pin code";
+                                            }
+                                            return null;
+                                          },
+                                          enabled: !_status,
+                                        ),
+                                      ),
+                                      SizedBox(width: 16),
+                                      Expanded(
+                                        child: _buildModernTextField(
+                                          controller: stateController,
+                                          label: "State",
+                                          hint: "Enter state",
+                                          icon: Icons.map_outlined,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return "Please enter state";
+                                            }
+                                            return null;
+                                          },
+                                          enabled: !_status,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  SizedBox(height: 16),
+
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildModernTextField(
+                                          controller: cityController,
+                                          label: "City",
+                                          hint: "Enter city",
+                                          icon: Icons.location_city_outlined,
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return "Please enter city";
+                                            }
+                                            return null;
+                                          },
+                                          enabled: !_status,
+                                        ),
+                                      ),
+                                      SizedBox(width: 16),
+                                      Expanded(
+                                        child: _buildGenderDropdown(),
+                                      ),
+                                    ],
+                                  ),
+
+                                  SizedBox(height: 16),
+
+                                  _buildAddressField(),
+
+                                  SizedBox(height: 30),
+
+                                  _buildPlaceOrderButton(),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
-  @override
-  void dispose() {
-    // Clean up the controller when the Widget is disposed
-    myFocusNode.dispose();
-    super.dispose();
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF1B5E20),
+                Color(0xFF2E7D32),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+        SizedBox(width: 12),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1B5E20),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    bool enabled = true,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1B5E20),
+          ),
+        ),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            validator: validator,
+            keyboardType: keyboardType,
+            enabled: enabled,
+            maxLines: maxLines,
+            style: TextStyle(
+              fontSize: 16,
+              color: enabled ? Colors.black87 : Colors.grey[600],
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 14,
+              ),
+              prefixIcon: Container(
+                margin: EdgeInsets.all(12),
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFF1B5E20),
+                      Color(0xFF2E7D32),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              filled: true,
+              fillColor: enabled ? Colors.grey[50] : Colors.grey[100],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(
+                  color: Colors.grey[200]!,
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(
+                  color: Color(0xFF1B5E20),
+                  width: 2,
+                ),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(
+                  color: Colors.grey[300]!,
+                  width: 1,
+                ),
+              ),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 16,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGenderDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Gender",
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1B5E20),
+          ),
+        ),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: Colors.grey[200]!,
+                width: 1,
+              ),
+            ),
+            child: DropdownButton<String>(
+              hint: Text(
+                'Select gender',
+                style: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 14,
+                ),
+              ),
+              value: _dropDownValue1,
+              isExpanded: true,
+              underline: SizedBox(),
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: Color(0xFF1B5E20),
+              ),
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 16,
+              ),
+              items: ['Male', 'Female'].map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _dropDownValue1 = newValue;
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddressField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Complete Address",
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1B5E20),
+          ),
+        ),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: resignofcause,
+            maxLines: 4,
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return "Please enter your address";
+              }
+              return null;
+            },
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+            ),
+            decoration: InputDecoration(
+              hintText: "Enter your complete address",
+              hintStyle: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 14,
+              ),
+              filled: true,
+              fillColor: Colors.grey[50],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(
+                  color: Colors.grey[200]!,
+                  width: 1,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(
+                  color: Color(0xFF1B5E20),
+                  width: 2,
+                ),
+              ),
+              contentPadding: EdgeInsets.all(16),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlaceOrderButton() {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFF1B5E20),
+            Color(0xFF2E7D32),
+            Color(0xFF388E3C),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xFF1B5E20).withOpacity(0.3),
+            blurRadius: 15,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(15),
+          onTap: isLoading ? null : _handlePlaceOrder,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Center(
+              child: isLoading
+                  ? SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.check_circle,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          "Place Order",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handlePlaceOrder() {
+    setState(() {
+      if (_formKey.currentState!.validate()) {
+        if (_dropDownValue1 == null) {
+          _showModernToast("Please select gender", Colors.orange);
+        } else {
+          setState(() {
+            isLoading = true;
+          });
+          setInfo();
+        }
+      }
+      FocusScope.of(context).requestFocus(new FocusNode());
+    });
+  }
+
+  void _showModernToast(String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Container(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                color == Colors.red ? Icons.error_outline : Icons.info_outline,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: EdgeInsets.all(16),
+      ),
+    );
   }
 
   Widget _getActionButtons() {
-    return Padding(
-      padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 45.0),
-      child: new Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(right: 10.0),
-              child: Container(
-                  child: Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20.0)),
-                    backgroundColor: Colors.green,
-                    textStyle: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                  child: new Text("Place Order"),
-                  onPressed: () {
-                    setState(() {
-                      if (_formKey.currentState!.validate()) {
-                        if (_dropDownValue1 == null) {
-                          _showLongToast("Please select gender of persion");
-                        } else {
-                          setInfo();
-//                              _getEmployee();
-                        }
-                      }
-
-//                        _status = true;
-                      FocusScope.of(context).requestFocus(new FocusNode());
-                    });
-                  },
-                ),
-              )),
-            ),
-            flex: 2,
-          ),
-          /*  Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: 10.0),
-              child: Container(
-                  child: new RaisedButton(
-                    child: new Text("Cancel"),
-                    textColor: Colors.white,
-                    color: Colors.red,
-                    onPressed: () {
-
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      } else {
-                        SystemNavigator.pop();
-                      }
-                      setState(() {
-                      });
-                    },
-                    shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20.0)),
-                  )),
-            ),
-            flex: 2,
-          ),*/
-        ],
-      ),
-    );
-  }
-
-  Widget _getEditIcon() {
-    return new GestureDetector(
-      child: new CircleAvatar(
-        backgroundColor: GroceryAppColors.pink,
-        radius: 14.0,
-        child: new Icon(
-          Icons.edit,
-          color: Colors.white,
-          size: 16.0,
-        ),
-      ),
-      onTap: () {
-        setState(() {
-          _status = false;
-        });
-      },
-    );
+    return Container(); // Removed - replaced with modern button
   }
 
 //
@@ -663,7 +919,13 @@ class _HomePageState extends State<DliveryInfo> {
     GroceryAppConstant.email = emailController.text;
     GroceryAppConstant.name = nameController.text;
 
+    setState(() {
+      isLoading = false;
+    });
+
     if (GroceryAppConstant.isLogin) {
+      _showModernToast(
+          "Order information saved successfully!", Color(0xFF1B5E20));
       // Navigator.push(context,
       //     new MaterialPageRoute(builder: (context) => CheckOutPage()));
     } else {
@@ -672,10 +934,5 @@ class _HomePageState extends State<DliveryInfo> {
         MaterialPageRoute(builder: (context) => SignInPage()),
       );
     }
-  }
-
-  void _showLongToast(String message) {
-    final snackbar = new SnackBar(content: Text("$message"));
-   ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
 }

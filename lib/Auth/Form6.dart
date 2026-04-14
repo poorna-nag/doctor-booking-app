@@ -1,39 +1,226 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:country_code_picker/country_code_picker.dart';
-import 'package:aladdinmart/Auth/signup.dart';
-import 'package:aladdinmart/Auth/widgets/custom_shape.dart';
-import 'package:aladdinmart/Auth/widgets/customappbar.dart';
-import 'package:aladdinmart/Auth/widgets/responsive_ui.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/model/RegisterModel.dart';
+import 'package:ecoshine24/Auth/signup.dart';
+import 'package:ecoshine24/Auth/signin.dart';
+import 'package:ecoshine24/Auth/widgets/custom_shape.dart';
+import 'package:ecoshine24/Auth/widgets/responsive_ui.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/model/RegisterModel.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Form6 extends StatefulWidget {
+  final String? initialMobile;
+
+  const Form6({Key? key, this.initialMobile}) : super(key: key);
+
   @override
   _Form6State createState() => _Form6State();
 }
 
-class _Form6State extends State<Form6> {
-  final updatephoneControler = TextEditingController();
+class _Form6State extends State<Form6> with TickerProviderStateMixin {
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController otpController = TextEditingController();
 
-  String result = " ";
-  void _onCountryChange(CountryCode countryCode) {
-//    this.phoneNumber =  countryCode.toString();
-    print("New Country selected: " + countryCode.toString());
+  String result = "";
+  String currentText = "";
+  bool isOtpSent = false;
+  bool isLoading = false;
+  bool isVerifying = false;
+
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  double? _height;
+  double? _width;
+  double? _pixelRatio;
+  bool _large = false;
+  bool _medium = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Pre-fill phone number if provided
+    if (widget.initialMobile != null && widget.initialMobile!.isNotEmpty) {
+      phoneController.text = widget.initialMobile!;
+    }
+
+    _fadeController = AnimationController(
+      duration: Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0, 0.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutBack,
+    ));
+
+    _fadeController.forward();
+    _slideController.forward();
   }
 
-  String photo = "", currentText = "";
-  bool flag = true;
-  bool flag1 = false;
   @override
   void dispose() {
-    updatephoneControler.dispose();
-    // TODO: implement dispose
+    _fadeController.dispose();
+    _slideController.dispose();
+    phoneController.dispose();
+    otpController.dispose();
     super.dispose();
+  }
+
+  // Country selection removed; always use plain mobile number
+
+  Future<void> sendOtp() async {
+    if (phoneController.text.length != 10) {
+      _showToast("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      // Make actual API call to step1.php
+      var map = new Map<String, dynamic>();
+      map['shop_id'] = GroceryAppConstant.Shop_id;
+      map['name'] = "User"; // Default name as per API spec
+      map['mobile'] = phoneController.text;
+
+      final response = await http.post(
+        Uri.parse(GroceryAppConstant.base_url + 'api/step1.php'),
+        body: map,
+      );
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+
+        // Check if success is true before proceeding
+        if (jsonBody['success'] == "true") {
+          setState(() {
+            isOtpSent = true;
+            isLoading = false;
+          });
+
+          _showToast(jsonBody['message'] ?? "OTP sent successfully");
+        } else {
+          // Show error message from API
+          setState(() {
+            isLoading = false;
+          });
+          _showToast(jsonBody['message'] ?? "Failed to send OTP");
+        }
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        _showToast("Network error. Please try again.");
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      _showToast("Failed to send OTP. Please try again.");
+    }
+  }
+
+  Future<void> verifyOtp() async {
+    if (otpController.text.length != 5) {
+      _showToast("Please enter a valid 5-digit OTP");
+      return;
+    }
+
+    setState(() {
+      isVerifying = true;
+    });
+
+    try {
+      // Make actual API call to step2.php
+      var map = new Map<String, dynamic>();
+      map['shop_id'] = GroceryAppConstant.Shop_id;
+      map['otp'] = otpController.text;
+      map['mobile'] = phoneController.text;
+
+      final response = await http.post(
+        Uri.parse(GroceryAppConstant.base_url + 'api/step2.php'),
+        body: map,
+      );
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+
+        // Check if success is true before proceeding
+        if (jsonBody['success'] == "true") {
+          setState(() {
+            isVerifying = false;
+          });
+
+          _showToast(jsonBody['message'] ?? "OTP verified successfully");
+
+          // Save mobile number to SharedPreferences for signup form
+          SharedPreferences pref = await SharedPreferences.getInstance();
+          pref.setString("temp_mobile", phoneController.text);
+
+          // Navigate to signup form (step 3) to collect user details
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => SignUpScreen()),
+          );
+        } else {
+          // Show error message from API
+          setState(() {
+            isVerifying = false;
+          });
+          _showToast(jsonBody['message'] ?? "Invalid OTP");
+        }
+      } else {
+        setState(() {
+          isVerifying = false;
+        });
+        _showToast("Network error. Please try again.");
+      }
+    } catch (e) {
+      setState(() {
+        isVerifying = false;
+      });
+      _showToast("Invalid OTP. Please try again.");
+    }
+  }
+
+  void _showToast(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color.fromARGB(
+            255, 66, 147, 227), // Orange from eco-shine theme
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        margin: EdgeInsets.all(16),
+      ),
+    );
   }
 
   @override
@@ -43,445 +230,572 @@ class _Form6State extends State<Form6> {
     _pixelRatio = MediaQuery.of(context).devicePixelRatio;
     _large = ResponsiveWidget.isScreenLarge(_width!, _pixelRatio!);
     _medium = ResponsiveWidget.isScreenMedium(_width!, _pixelRatio!);
-    return Material(
-      child: flag
-          ? Container(
-              height: _height,
-              width: _width,
-              padding: EdgeInsets.only(bottom: 5),
-              color: Colors.white,
-              child: new SingleChildScrollView(
-                child: Container(
-                  // margin:EdgeInsets.only(left: 20,right: 20,top: 40) ,
 
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Opacity(opacity: 0.88, child: CustomAppBar()),
-                      clipShape(),
-                      getTitle("Enter your Phone number"),
-                      new Row(
-                        children: <Widget>[
-                          new Expanded(
-                            flex: 3,
-                            child: Padding(
-                              padding: EdgeInsets.only(left: 10),
-                              child: CountryCodePicker(
-                                onChanged: _onCountryChange,
-                                // Initial selection and favorite can be one of code ('IT') OR dial_code('+39')
-                                initialSelection: 'IN',
-                                favorite: ['+91', 'IN'],
-                                // optional. Shows only country name and flag
-                                showCountryOnly: false,
-                                // optional. Shows only country name and flag when popup is closed.
-                                showOnlyCountryWhenClosed: false,
-                                // optional. aligns the flag and the Text left
-                                alignLeft: false,
-                              ),
-                            ),
-                          ),
-//                        new SizedBox(
-//                          width: ScreenUtil().setWidth(20.0),
-//                        ),
-                          new Expanded(
-                              flex: 7,
-                              child: Padding(
-                                padding: EdgeInsets.only(right: 20, left: 20),
-                                child: TextField(
-                                  onChanged: (String str) {
-                                    setState(() {
-                                      print(str);
-                                      result = str;
-                                    });
-                                  },
-                                  onSubmitted: (String str) {
-                                    setState(() {
-                                      print(str);
-                                      result = str;
-                                    });
-                                  },
-                                  controller: updatephoneControler,
-                                  maxLength: 10,
-                                  minLines: 1,
-                                  keyboardType: TextInputType.number,
-                                  cursorColor: Theme.of(context).primaryColor,
-                                  decoration: new InputDecoration(
-                                      helperText: 'Phone number'),
-                                ),
-                              )),
-                        ],
-                      ),
-                      result.length == 10
-                          ? InkWell(
-                              onTap: () async {
-                                SharedPreferences sharedPreferences =
-                                    await SharedPreferences.getInstance();
-                                if (this.mounted) {
-                                  setState(() {
-//
-
-                                    sharedPreferences.setString(
-                                        "mobile", updatephoneControler.text);
-                                    // _checkuserName();
-                                    _getEmployee();
-//                          Navigator.push(context,
-//                              new MaterialPageRoute(builder: (context) => Form1()));
-                                  });
-                                }
-                              },
-                              child: Center(
-                                child: Container(
-                                  margin: EdgeInsets.only(bottom: 10, top: 10),
-                                  padding:
-                                      EdgeInsets.only(bottom: 10, right: 10),
-                                  decoration: new BoxDecoration(
-                                    color: FoodAppColors.tela,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: getTitle1("Continue"),
-                                ),
-                              ),
-                            )
-                          : Center(
-                              child: Container(
-                                margin: EdgeInsets.only(bottom: 10, top: 10),
-                                padding: EdgeInsets.only(bottom: 10, right: 10),
-                                decoration: new BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: getTitle1("Continue"),
-                              ),
-                            ),
+    return Scaffold(
+      backgroundColor: GroceryAppColors.lightBlueBg, // Light blue background
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top section with dark green background
+            Expanded(
+              flex: 4,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xff1E88E5), // Medical blue from logo
+                      Color(0xff42A5F5), // Lighter medical blue
+                      Color(0xff64B5F6), // Even lighter medical blue
                     ],
                   ),
                 ),
-              ))
-          : Material(
-              child: Container(
-                height: _height,
-                width: _width!,
-                padding: EdgeInsets.only(bottom: 5),
-                // margin: EdgeInsets.only(top: 100),
-                child: SingleChildScrollView(
-                  child: Container(
-                    // padding: EdgeInsets.all(6),
-                    // margin: EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        // Opacity(opacity: 0.88, child: CustomAppBar()),
-                        clipShape(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 18.0),
-                              child: Text(
-                                "Enter the code send to",
-                                style: TextStyle(fontSize: 18.0),
+                child: Stack(
+                  children: [
+                    // Decorative elements
+                    Positioned(
+                      top: 20,
+                      right: -30,
+                      child: AnimatedBuilder(
+                        animation: _fadeAnimation,
+                        builder: (context, child) {
+                          return Opacity(
+                            opacity: _fadeAnimation.value * 0.15,
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 2),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 3.0, top: 18.0, right: 0.0, bottom: 0),
-                              child: Text(
-                                updatephoneControler.text != null
-                                    ? updatephoneControler.text
-                                    : " ",
-                                style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.normal,
-                                    color: FoodAppColors.tela1),
+                          );
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 30,
+                      left: -40,
+                      child: AnimatedBuilder(
+                        animation: _fadeAnimation,
+                        builder: (context, child) {
+                          return Opacity(
+                            opacity: _fadeAnimation.value * 0.1,
+                            child: Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                    width: 2),
                               ),
                             ),
-                          ],
-                        ),
-                        Container(
-//                        color: Colors.white,
-                          alignment: Alignment.center,
-                          width: 260,
-                          padding:
-                              EdgeInsets.only(left: 10, bottom: 10, top: 20),
-                          child: PinCodeTextField(
-//                isTextObscure: true,
-                            // showFieldAsBox: true,
-                            length: 5,
-
-                            onChanged: (String pin) {
-                              setState(() {
-                                currentText = pin;
-                                print(currentText);
-                              });
-                            },
-                            appContext: context, // end onSubmit
+                          );
+                        },
+                      ),
+                    ),
+                    // Content
+                    SlideTransition(
+                      position: _slideAnimation,
+                      child: FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: Padding(
+                          padding: EdgeInsets.all(30),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Back button
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Container(
+                                    height: 45,
+                                    width: 45,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.arrow_back,
+                                          color: Colors.white, size: 20),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ),
+                                ),
+                                // Logo and brand section
+                                Container(
+                                  padding: EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 20,
+                                        offset: Offset(0, 10),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    isOtpSent ? Icons.sms : Icons.person_add,
+                                    size: 40,
+                                    color: Color(
+                                        0xff1E88E5), // Medical blue from logo
+                                    // Color(0xff42A5F5), // Lighter medical blue
+                                    // Color(0xff64B5F6), // Even lighter medical blue // Orange from eco-shine
+                                  ),
+                                ),
+                                SizedBox(height: 30),
+                                Text(
+                                  isOtpSent ? "Verify OTP" : "Join LaundryPro",
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  isOtpSent
+                                      ? "Enter the 5-digit code sent to\n${phoneController.text}"
+                                      : "Create your account to access\nour premium laundry services",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color:
+                                        const Color.fromARGB(255, 255, 255, 255)
+                                            .withOpacity(0.9),
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom section with white background and form
+            Expanded(
+              flex: 6,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: GroceryAppColors.lightBlueBg, // Light blue background
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 10),
+                      // Form title
+                      Text(
+                        isOtpSent ? "Verification Code" : "Mobile Verification",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff1E88E5), // Medical blue from logo
+                          // Lighter medical blue
+                          // Even lighter medical blue // Orange from eco-shine
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        isOtpSent
+                            ? "Please enter the 5-digit verification code"
+                            : "We'll send you a verification code to confirm your number",
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      SizedBox(height: 30),
+
+                      if (!isOtpSent) ...[
+                        // Phone number input
+                        _buildModernTextField(
+                          controller: phoneController,
+                          hintText: "Enter mobile number",
+                          prefixIcon: Icons.phone_android,
+                          keyboardType: TextInputType.number,
+                          maxLength: 10,
+                        ),
+                        SizedBox(height: 30),
+                        // Send OTP button
+                        _buildModernButton(
+                          onPressed: sendOtp,
+                          text: "SEND VERIFICATION CODE",
+                          isLoading: isLoading,
+                        ),
+                        SizedBox(height: 20),
+                        _buildOrDivider(),
+                      ] else ...[
+                        // OTP input with modern design
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: PinCodeTextField(
+                            appContext: context,
+                            length: 5,
+                            controller: otpController,
+                            keyboardType: TextInputType.number,
+                            animationType: AnimationType.fade,
+                            pinTheme: PinTheme(
+                              shape: PinCodeFieldShape.box,
+                              borderRadius: BorderRadius.circular(12),
+                              fieldHeight: 55,
+                              fieldWidth: 50,
+                              activeFillColor:
+                                  Color(0xFFFFF3E0), // Light orange background
+                              inactiveFillColor:
+                                  Color(0xffFAFCFF), // Very light blue
+                              selectedFillColor:
+                                  Color(0xFFFFF3E0), // Light orange background
+                              activeColor: const Color.fromARGB(
+                                  255, 66, 143, 216), // Orange border
+                              inactiveColor: Colors.grey[300]!,
+                              selectedColor: const Color.fromARGB(
+                                  255, 63, 141, 219), // Orange border
+                              borderWidth: 2,
+                            ),
+                            animationDuration: Duration(milliseconds: 300),
+                            enableActiveFill: true,
+                            textStyle: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: const Color.fromARGB(
+                                  255, 72, 185, 234), // Orange text
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                currentText = value;
+                              });
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        // Resend OTP option
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 18.0),
-                              child: Text(
-                                "Didn't receive the code? ",
-                                style: TextStyle(fontSize: 13.0),
+                            Text(
+                              "Didn't receive the code?",
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
                               ),
                             ),
-                            InkWell(
+                            GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  flag = true;
-                                  result = "1234567890";
+                                  isOtpSent = false;
+                                  otpController.clear();
                                 });
                               },
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 5.0,
-                                    top: 18.0,
-                                    right: 0.0,
-                                    bottom: 0),
-                                child: Text(
-                                  "RESEND",
-                                  style: TextStyle(
-                                      fontSize: 13.0,
-                                      fontWeight: FontWeight.normal,
-                                      color: Colors.green),
+                              child: Text(
+                                "Resend Code",
+                                style: TextStyle(
+                                  color: const Color.fromARGB(255, 53, 211,
+                                      255), // Orange from eco-shine
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        flag1 ? circularIndi() : Row(),
-                        Center(
-                          child: Container(
-                            width: 120,
-                            height: 40,
-                            margin: EdgeInsets.only(top: 15, bottom: 15),
-                            padding: EdgeInsets.only(
-                                left: 10, right: 10, top: 5, bottom: 5),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(25),
-                              color: FoodAppColors.tela,
-                            ),
-                            child: InkWell(
-                                onTap: () {
-                                  // Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen()),);
-
-                                  currentText.length == 5
-                                      ? _getEmployeeotp()
-                                      : showLongToast("Please Enter  the otp!");
-//                           Navigator.of(context).push(new SecondPageRoute());
-//                               Navigator.push(context, MaterialPageRoute(builder: (context) => Form1()));
-                                },
-                                child: Text(
-                                  "VERIFY",
-                                  style: TextStyle(
-                                      color: FoodAppColors.black,
-                                      letterSpacing: 1.2,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 20),
-                                )),
-                          ),
-                        )
+                        SizedBox(height: 25),
+                        // Verify button
+                        _buildModernButton(
+                          onPressed: verifyOtp,
+                          text: "VERIFY & CONTINUE",
+                          isLoading: isVerifying,
+                        ),
+                        SizedBox(height: 20),
+                        _buildOrDivider(),
                       ],
-                    ),
+
+                      SizedBox(height: 20),
+                      // Back to sign in
+                      Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SignInPage(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 20),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: Color(0xffFFE5D6),
+                                  width: 1), // Light orange border
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.arrow_back,
+                                  color: Color(
+                                      0xff1E88E5), // Medical blue from logo
+
+                                  size: 18,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Go Back",
+                                  style: TextStyle(
+                                    color: const Color.fromARGB(255, 77, 190,
+                                        234), // Light orange from eco-shine
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-    );
-  }
-
-  Future _getEmployee() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    print(updatephoneControler.text);
-    var map = new Map<String, dynamic>();
-    map['shop_id'] = FoodAppConstant.Shop_id;
-    map['name'] = " ";
-    map['mobile'] = updatephoneControler.text;
-    final response = await http
-        .post(Uri.parse(FoodAppConstant.base_url + 'api/step1.php'), body: map);
-    if (response.statusCode == 200) {
-      final jsonBody = json.decode(response.body);
-      print(jsonBody.toString());
-      User user = User.fromJson(jsonDecode(response.body));
-      if (user.message.toString() == "OTP Sent Successfully") {
-        showLongToast(user.message.toString());
-        setState(() {
-          flag = false;
-        });
-      } else {
-        showLongToast(user.message.toString());
-        print(user.message);
-      }
-    } else
-      throw Exception("Unable to get Employee list");
-  }
-
-  Future<List<OtpModal>?> _getEmployeeotp() async {
-    print(currentText);
-    var map = new Map<String, dynamic>();
-    map['shop_id'] = FoodAppConstant.Shop_id;
-    map['otp'] = currentText;
-    map['mobile'] = updatephoneControler.text;
-    final response = await http
-        .post(Uri.parse(FoodAppConstant.base_url + 'api/step2.php'), body: map);
-    if (response.statusCode == 200) {
-      final jsonBody = json.decode(response.body);
-      print(jsonBody);
-      OtpModal user = OtpModal.fromJson(jsonDecode(response.body));
-      if (user.message.toString() == "OTP Verified Successfully.") {
-        showLongToast(user.message.toString());
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SignUpScreen()),
-        );
-      } else {
-        showLongToast(user.message.toString());
-      }
-    } else
-      throw Exception("Unable to get Employee list");
-  }
-
-/*
-  Future<List<OtpModal>> _getEmployeeotp() async {
-setState(() {
-  flag1= true;
-});
-    var map = new Map<String, dynamic>();
-    // map['shop_id']=Constant.Shop_id;
-    map['otp']=currentText   ;
-    map['mobile']= updatephoneControler.text;
-    final response = await http.post(Constant.base_url+'api/cpsms.php',body:map);
-    if (response.statusCode == 200) {
-
-      final jsonBody = json.decode(response.body);
-      print(jsonBody.toString());
-      OtpModal user = OtpModal.fromJson(jsonDecode(response.body));
-      if(user.message.toString()== "OTP Verified Successfully." )
-      {
-        setState(() {
-          flag1= false;
-        });
-        showLongToast(user.message);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => Form1()));
-
-
-      }
-      else {
-        setState(() {
-          flag1= false;
-        });
-        showLongToast(user.message);
-
-      }
-
-    } else
-      throw Exception("Unable to get Employee list");
-  }
-*/
-
-  Widget getTitle(String title) {
-    return Padding(
-      padding: EdgeInsets.only(left: 20, top: 10),
-      child: Text(
-        title,
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          ],
+        ),
       ),
     );
   }
 
-  Widget getTitle1(String title) {
-    return Padding(
-      padding: EdgeInsets.only(left: 20, top: 10),
-      child: Text(
-        title,
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData prefixIcon,
+    TextInputType keyboardType = TextInputType.text,
+    int? maxLength,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0xffFAFCFF), // Light blue background
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+            color: Color(0xffFFE5D6), width: 1), // Light orange border
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(255, 53, 158, 207).withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLength: maxLength,
         style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: FoodAppColors.black),
+          fontSize: 16,
+          color: Color(0xff1E88E5), // Medical blue from logo
+          // Even lighter medical blue, // Orange from eco-shine
+          fontWeight: FontWeight.w500,
+        ),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: TextStyle(
+            color: Colors.grey[500],
+            fontSize: 16,
+          ),
+          prefixIcon: Icon(
+            prefixIcon,
+            color: const Color.fromARGB(
+                255, 65, 148, 208), // Light orange from eco-shine
+            size: 20,
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 18,
+          ),
+          counterText: "",
+        ),
+        onChanged: (value) {
+          setState(() {
+            result = value;
+          });
+        },
       ),
     );
   }
 
-  double? _height;
-  double? _width;
-  double? _pixelRatio;
-  bool _large = false;
-  bool _medium = false;
-  Widget clipShape() {
-    //double height = MediaQuery.of(context).size.height;
-    return Stack(
-      children: <Widget>[
-        Opacity(
-          opacity: 0.75,
-          child: ClipPath(
-            clipper: CustomShapeClipper(),
-            child: Container(
-              height: _large
-                  ? _height! / 3
-                  : (_medium ? _height! / 2.75 : _height! / 2.5),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [FoodAppColors.tela, FoodAppColors.tela1],
-                ),
-              ),
+  Widget _buildOrDivider() {
+    return Row(
+      children: [
+        Expanded(
+            child: Divider(color: Color(0xffFFE5D6))), // Light orange divider
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            "OR",
+            style: TextStyle(
+              color: Color(0xff1E88E5), // Medical blue from logo
+              //  Even lighter medical blue // Light orange text
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
-        Opacity(
-          opacity: 0.5,
-          child: ClipPath(
-            clipper: CustomShapeClipper2(),
-            child: Container(
-              height: _large
-                  ? _height! / 3.5
-                  : (_medium ? _height! / 2.99999 : _height! / 3),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [FoodAppColors.tela, FoodAppColors.tela1],
-                ),
-              ),
-            ),
-          ),
-        ),
-        Container(
-          // color: Colors.grey,
-          alignment: Alignment.center,
-          margin: EdgeInsets.only(
-              top: _large
-                  ? _height! / 35
-                  : (_medium ? _height! / 10 : _height! / 20)),
-          child: Container(
-            width: 200,
-            height: 150,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
-              image: DecorationImage(
-                image: AssetImage(
-                  'assets/images/logo.png',
-                ),
-                fit: BoxFit.fill,
-              ),
-            ),
-            // child: Image.asset(
-            //   'assets/images/logo.png',
-            //   height: 260,
-            //   width: 260,
-            //   fit: BoxFit.fill,
-            // ),
-          ),
-        ),
+        Expanded(
+            child: Divider(color: Color(0xffFFE5D6))), // Light orange divider
       ],
     );
   }
 
-  Widget circularIndi() {
-    return Align(
-      alignment: Alignment.center,
-      child: Center(
-        child: CircularProgressIndicator(),
+  Widget _buildModernButton({
+    required VoidCallback onPressed,
+    required String text,
+    bool isLoading = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Color(0xff1E88E5), // Medical blue from logo
+            Color(0xff42A5F5), // Lighter medical blue
+            Color(0xff64B5F6), // Even lighter medical blue
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xff1E88E5), // Medical blue from logo
+
+            blurRadius: 15,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: isLoading
+            ? SizedBox(
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                text,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+// Placeholder for actual signup form
+class SignUpForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Complete Registration"),
+        backgroundColor: Color(0xFF667eea),
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.check_circle,
+                size: 100,
+                color: Colors.green,
+              ),
+              SizedBox(height: 20),
+              Text(
+                "Phone Verified Successfully!",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                "Please complete your profile information",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+              SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignInPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF667eea),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                child: Text(
+                  "Continue to Sign In",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

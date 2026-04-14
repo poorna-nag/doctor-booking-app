@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 
 class CustomAppBar1 extends StatefulWidget {
   @override

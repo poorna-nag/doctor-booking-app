@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -99,3 +101,6 @@ android/app/build/
 # Large asset files (optional, comment out if needed)
 assets/videos/
 *.mp4
+
+# FVM Version Cache
+.fvm/

@@ -1,17 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:aladdinmart/Auth/signin.dart';
-import 'package:aladdinmart/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/screen/mv_products.dart';
-import 'package:aladdinmart/model/CategaryModal.dart';
-import 'package:aladdinmart/model/productmodel.dart';
-import 'package:aladdinmart/model/slidermodal.dart';
-import 'package:aladdinmart/screen/MvProduct.dart';
-import 'package:page_indicator/page_indicator.dart';
+import 'package:ecoshine24/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/screen/mv_products.dart';
+import 'package:ecoshine24/model/CategaryModal.dart';
+import 'package:ecoshine24/model/productmodel.dart';
+import 'package:ecoshine24/model/slidermodal.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VendorProductCategories extends StatefulWidget {
@@ -41,6 +39,7 @@ class _VendorProductCategories extends State<VendorProductCategories> {
   String textval = "Select varient";
 
   int _current = 0;
+  PageController _pageController = PageController();
   List<Categary> list1 = [];
   void gatinfoCount() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -221,31 +220,42 @@ class _VendorProductCategories extends State<VendorProductCategories> {
                           width: _width,
                           child: Stack(
                             children: <Widget>[
-                              PageIndicatorContainer(
-                                align: IndicatorAlign.bottom,
-                                length: sliderlist.length,
-                                indicatorColor: Colors.grey,
-                                indicatorSelectorColor: Colors.pink,
-
-                                //size: 10.0,
-                                indicatorSpace: 10.0,
-                                child: PageView.builder(
-                                    itemCount: sliderlist.length,
-                                    itemBuilder: (BuildContext context, int i) {
-                                      return Container(
-                                        child: CachedNetworkImage(
-                                          fit: BoxFit.cover,
-                                          imageUrl:
-                                              GroceryAppConstant.Base_Imageurl +
-                                                  sliderlist[i].img.toString(),
-                                          placeholder: (context, url) => Center(
-                                              child:
-                                                  CircularProgressIndicator()),
-                                          errorWidget: (context, url, error) =>
-                                              new Icon(Icons.error),
-                                        ),
-                                      );
-                                    }),
+                              PageView.builder(
+                                  controller: _pageController,
+                                  onPageChanged: (int page) {
+                                    setState(() {
+                                      _current = page;
+                                    });
+                                  },
+                                  itemCount: sliderlist.length,
+                                  itemBuilder: (BuildContext context, int i) {
+                                    return Container(
+                                      child: CachedNetworkImage(
+                                        fit: BoxFit.cover,
+                                        imageUrl:
+                                            GroceryAppConstant.Base_Imageurl +
+                                                sliderlist[i].img.toString(),
+                                        placeholder: (context, url) => Center(
+                                            child: CircularProgressIndicator()),
+                                        errorWidget: (context, url, error) =>
+                                            new Icon(Icons.error),
+                                      ),
+                                    );
+                                  }),
+                              Positioned(
+                                bottom: 10.0,
+                                left: 0.0,
+                                right: 0.0,
+                                child: DotsIndicator(
+                                  dotsCount: sliderlist.length,
+                                  position: _current,
+                                  decorator: DotsDecorator(
+                                    color: Colors.grey,
+                                    activeColor: Colors.pink,
+                                    spacing:
+                                        EdgeInsets.symmetric(horizontal: 5.0),
+                                  ),
+                                ),
                               ),
                             ],
                           )
@@ -312,18 +322,11 @@ class _VendorProductCategories extends State<VendorProductCategories> {
                                           child: Column(
                                             children: [
                                               Container(
-                                                child: list1[index].img!.isEmpty
-                                                    ? Image.asset(
-                                                        "assets/images/logo.png")
-                                                    : Image.network(
-                                                        GroceryAppConstant
-                                                                .base_url +
-                                                            "manage/uploads/p_category/" +
-                                                            list1[index]
-                                                                .img
-                                                                .toString(),
-                                                        fit: BoxFit.fill,
-                                                      ),
+                                                child:
+                                                    getGroceryCategoryImageWidget(
+                                                  list1[index].img,
+                                                  fit: BoxFit.fill,
+                                                ),
                                               ),
                                               Container(
                                                 padding: EdgeInsets.only(

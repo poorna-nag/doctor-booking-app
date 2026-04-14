@@ -2,15 +2,15 @@
 // import 'package:flutter/cupertino.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
-// import 'package:aladdinmart/Auth/signin.dart';
-// import 'package:aladdinmart/BottomNavigation/wishlist.dart';
-// import 'package:aladdinmart/General/AppConstant.dart';
-// import 'package:aladdinmart/dbhelper/CarrtDbhelper.dart';
-// import 'package:aladdinmart/dbhelper/database_helper.dart';
-// import 'package:aladdinmart/model/CategaryModal.dart';
-// import 'package:aladdinmart/model/productmodel.dart';
-// import 'package:aladdinmart/model/slidermodal.dart';
-// import 'package:aladdinmart/screen/detailpage.dart';
+// import 'package:ecoshine24/Auth/signin.dart';
+// import 'package:ecoshine24/BottomNavigation/wishlist.dart';
+// import 'package:ecoshine24/General/AppConstant.dart';
+// import 'package:ecoshine24/dbhelper/CarrtDbhelper.dart';
+// import 'package:ecoshine24/dbhelper/database_helper.dart';
+// import 'package:ecoshine24/model/CategaryModal.dart';
+// import 'package:ecoshine24/model/productmodel.dart';
+// import 'package:ecoshine24/model/slidermodal.dart';
+// import 'package:ecoshine24/screen/detailpage.dart';
 // import 'package:page_indicator/page_indicator.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
@@ -670,7 +670,7 @@
 //                                                                             index]
 //                                                                         .img
 //                                                                         .toString()
-//                                                                 : "https://www.drawplanet.cz/wp-content/uploads/2019/10/dsc-0009-150x100.jpg",
+//                                                                 : "https://www.bigwelt.com/manage/uploads/gallery/no-img.png",
 //                                                           ))),
 //                                                 ),
 //                                                 /*Column(
@@ -1348,7 +1348,7 @@
 //                             products1[index].img != null
 //                                 ? FoodAppConstant.Base_Imageurl +
 //                                     products1[index].img.toString()
-//                                 : "ttps://www.drawplanet.cz/wp-content/uploads/2019/10/dsc-0009-150x100.jpg",
+//                                 : "https://www.bigwelt.com/manage/uploads/gallery/no-img.png",
 //                           ))),
 //                 ),
 //                 Container(

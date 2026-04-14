@@ -1,35 +1,33 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:aladdinmart/model/ShopDModel.dart';
+import 'package:ecoshine24/model/ShopDModel.dart';
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/grocery_app_home_screen.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/model/AddressModel.dart';
-import 'package:aladdinmart/grocery/model/BlogModel.dart';
-import 'package:aladdinmart/grocery/model/CategaryModal.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/grocery_app_home_screen.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/model/AddressModel.dart';
+import 'package:ecoshine24/grocery/model/BlogModel.dart';
+import 'package:ecoshine24/grocery/model/CategaryModal.dart';
 
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:aladdinmart/grocery/model/CityName.dart';
-import 'package:aladdinmart/grocery/model/CoupanModel.dart';
-import 'package:aladdinmart/grocery/model/Cuponcode.dart';
-import 'package:aladdinmart/grocery/model/CustmerModel.dart';
-import 'package:aladdinmart/grocery/model/Gallerymodel.dart';
-import 'package:aladdinmart/grocery/model/GroupProducts.dart';
-import 'package:aladdinmart/grocery/model/InvoiceTrackmodel.dart';
-import 'package:aladdinmart/grocery/model/MyReviewModel.dart';
-import 'package:aladdinmart/grocery/model/RegisterModel.dart';
-import 'package:aladdinmart/grocery/model/TrackInvoiceModel.dart';
-import 'package:aladdinmart/grocery/model/Varient.dart';
-import 'package:aladdinmart/grocery/model/aminities_model.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
-import 'package:aladdinmart/grocery/model/slidermodal.dart';
-import 'package:aladdinmart/model/ListModel.dart';
+import 'package:ecoshine24/grocery/model/CityName.dart';
+import 'package:ecoshine24/grocery/model/CoupanModel.dart';
+import 'package:ecoshine24/grocery/model/Cuponcode.dart';
+import 'package:ecoshine24/grocery/model/CustmerModel.dart';
+import 'package:ecoshine24/grocery/model/Gallerymodel.dart';
+import 'package:ecoshine24/grocery/model/GroupProducts.dart';
+import 'package:ecoshine24/grocery/model/InvoiceTrackmodel.dart';
+import 'package:ecoshine24/grocery/model/MyReviewModel.dart';
+import 'package:ecoshine24/grocery/model/RegisterModel.dart';
+import 'package:ecoshine24/grocery/model/TrackInvoiceModel.dart';
+import 'package:ecoshine24/grocery/model/Varient.dart';
+import 'package:ecoshine24/grocery/model/aminities_model.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/model/slidermodal.dart';
+import 'package:ecoshine24/model/ListModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../widgets/calculate_distance.dart';
 
 // abstract class ArticleRepository {
 //   Future<List<Categary>?> getArticles();
@@ -64,6 +62,7 @@ Future<ShopDModel?> getShopD() async {
 
     return user;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -87,6 +86,7 @@ class DatabaseHelper {
       List<Categary> list = Categary.getListFromJson(galleryArray);
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -106,6 +106,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
   }
 
   static Future<AmenitiesModel?> getAmenities(String productId) async {
@@ -125,6 +126,7 @@ class DatabaseHelper {
     } catch (e) {
       log('getAmenities error--> $e');
     }
+    return null;
   }
 
   static Future<PromotionBanner?> getPromotionBanner(String shop_id) async {
@@ -149,25 +151,18 @@ class DatabaseHelper {
     } catch (e, s) {
       print('getSlider error --> e:-$e s:-$s');
     }
+    return null;
   }
 
-  static Future<List<Products>?> getTopProduct(String dil, String lim) async {
+  static Future<List<Products>?> getTopProductOld(
+      String dil, String lim) async {
     List<Products> getTopProductList = [];
     double radiusv = 0.0;
     double disrv;
     num latv;
     num longv;
-    String link = GroceryAppConstant.base_url +
-        "manage/api/products/all/?X-Api-Key=" +
-        GroceryAppConstant.API_KEY +
-        "&start=0&limit=" +
-        lim +
-        "&deals=" +
-        dil +
-        "&field=shop_id&filter=" +
-        GroceryAppConstant.Shop_id +
-        "&loc_id=" +
-        GroceryAppConstant.cityid;
+    String link =
+        "${GroceryAppConstant.base_url}manage/api/products/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=$lim&deals=$dil&field=shop_id&filter=${GroceryAppConstant.Shop_id}&loc_id=${GroceryAppConstant.cityid}";
     print("${dil} ...." + link);
 
 //    Const.Base_Url + "manage/api/products/all/?X-Api-Key=" + Const.API_KEY + "&start=0&limit=4&field=shop_id&filter=" + Const.Shop_id + "&sort=DESC&loc_id=" + HomePage.loc_id,
@@ -203,21 +198,34 @@ class DatabaseHelper {
       //   }
       return list;
     }
+    return null;
+  }
+
+  // New method with category filtering support
+  static Future<List<Products>?> getTopProduct(
+      String dil, String categoryId) async {
+    String link =
+        "${GroceryAppConstant.base_url}manage/api/products/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=20&deals=$dil&field=shop_id&filter=${GroceryAppConstant.Shop_id}&loc_id=${GroceryAppConstant.cityid}";
+
+    // Add category filter if category ID is provided and not "0"
+    if (categoryId.isNotEmpty && categoryId != "0") {
+      link += "&cats=$categoryId";
+    }
+
+    final response = await http.get(Uri.parse(link));
+    if (response.statusCode == 200) {
+      var responseData = json.decode(response.body);
+      List<dynamic> galleryArray = responseData["data"]["products"];
+      List<Products> list = Products.getListFromJson(galleryArray);
+      return list;
+    }
+    return null;
   }
 
   static Future<List<Products>?> getTopProductSearch(
       String dil, String lim, String q) async {
-    String link = GroceryAppConstant.base_url +
-        "manage/api/products/all/?X-Api-Key=" +
-        GroceryAppConstant.API_KEY +
-        "&start=0&limit=" +
-        lim +
-        "&q=" +
-        q +
-        "&deals=&field=shop_id&filter=" +
-        GroceryAppConstant.Shop_id +
-        "&loc_id=" +
-        GroceryAppConstant.cityid;
+    String link =
+        "${GroceryAppConstant.base_url}manage/api/products/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=$lim&q=$q&deals=&field=shop_id&filter=${GroceryAppConstant.Shop_id}&loc_id=${GroceryAppConstant.cityid}";
     print("${dil} ...." + link);
 
 //    Const.Base_Url + "manage/api/products/all/?X-Api-Key=" + Const.API_KEY + "&start=0&limit=4&field=shop_id&filter=" + Const.Shop_id + "&sort=DESC&loc_id=" + HomePage.loc_id,
@@ -229,22 +237,14 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
   static Future<List<Products>?> getAllProductSearch(
       String dil, String lim, String q) async {
-    String link = GroceryAppConstant.base_url +
-        "manage/api/products/all/?X-Api-Key=" +
-        GroceryAppConstant.API_KEY +
-        "&start=0&limit=" +
-        lim +
-        "&q=" +
-        q +
-        "&deals=&field=shop_id&filter=" +
-        GroceryAppConstant.Shop_id +
-        "&loc_id=" +
-        GroceryAppConstant.cityid;
+    String link =
+        "${GroceryAppConstant.base_url}manage/api/products/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=$lim&q=$q&deals=&field=shop_id&filter=${GroceryAppConstant.Shop_id}&loc_id=${GroceryAppConstant.cityid}";
     print("${dil} ...." + link);
 
 //    Const.Base_Url + "manage/api/products/all/?X-Api-Key=" + Const.API_KEY + "&start=0&limit=4&field=shop_id&filter=" + Const.Shop_id + "&sort=DESC&loc_id=" + HomePage.loc_id,
@@ -256,6 +256,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -309,27 +310,33 @@ class DatabaseHelper {
       // }
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
-  static Future<List<Products>?> getTopProduct1(String dil, String lim) async {
+  static Future<List<Products>?> getTopProduct1(
+      String dil, String categoryId) async {
     List<Products> getTopProductList1 = [];
     double radiusv = 0.0;
     double disrv;
     num latv;
     num longv;
+
+    // Build the API URL with category filter if provided
     String link = GroceryAppConstant.base_url +
         "manage/api/products/all/?X-Api-Key=" +
         GroceryAppConstant.API_KEY +
-        "&start=0&limit=" +
-        lim +
+        "&start=0&limit=20" +
         "&field=shop_id&filter=" +
         GroceryAppConstant.Shop_id +
         "&sort=DESC&loc_id=" +
         GroceryAppConstant.cityid;
-    print("new.........." + link);
 
-//    Const.Base_Url + "manage/api/products/all/?X-Api-Key=" + Const.API_KEY + "&start=0&limit=4&field=shop_id&filter=" + Const.Shop_id + "&sort=DESC&loc_id=" + HomePage.loc_id,
+    // Add category filter if category ID is provided and not "0"
+    if (categoryId.isNotEmpty && categoryId != "0") {
+      link += "&cats=" + categoryId;
+    }
+
     final response = await http.get(Uri.parse(link));
     if (response.statusCode == 200) {
       var responseData = json.decode(response.body);
@@ -362,16 +369,14 @@ class DatabaseHelper {
       //  }
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
   static Future<List<Gallery>?> getImage(String id) async {
     print("Future id" + id);
-    String link = GroceryAppConstant.base_url +
-        "manage/api/gallery/all/?X-Api-Key=" +
-        GroceryAppConstant.API_KEY +
-        "&start=0&limit=10&place=" +
-        id;
+    String link =
+        "${GroceryAppConstant.base_url}manage/api/gallery/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=10&place=$id";
 //print("Slider"+link);
     final response = await http.get(Uri.parse(link));
     if (response.statusCode == 200) {
@@ -381,6 +386,7 @@ class DatabaseHelper {
 
       return glist;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -389,15 +395,8 @@ class DatabaseHelper {
 
 Future<List<Categary>?> get_Category(String val) async {
   // String link =Constant.base_url+'manage/api/mv_delivery_locations/all/?X-Api-Key='+Constant.API_KEY+'&field=shop_id&filter='+Constant.Shop_id;
-  String link = GroceryAppConstant.base_url +
-      "manage/api/mv_cats/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=0&limit=100&field=shop_id&filter=" +
-      GroceryAppConstant.Shop_id +
-      "&parent=" +
-      val +
-      "&loc_id= " +
-      GroceryAppConstant.cityid;
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/mv_cats/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=100&field=shop_id&filter=${GroceryAppConstant.Shop_id}&parent=$val&loc_id= ${GroceryAppConstant.cityid}";
   print("cat linl  " + link);
   final response = await http.get(Uri.parse(link));
   if (response.statusCode == 200) {
@@ -408,21 +407,13 @@ Future<List<Categary>?> get_Category(String val) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<Products>?> getTServicebymv_id(
     String mv_id, String catid, String slim) async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/products/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=" +
-      slim +
-      "&limit=100&field=shop_id&filter=" +
-      GroceryAppConstant.Shop_id +
-      "&sort=DESC&loc_id=&mv=" +
-      mv_id +
-      "&cats=" +
-      catid;
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/products/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=$slim&limit=100&field=shop_id&filter=${GroceryAppConstant.Shop_id}&sort=DESC&loc_id=&mv=$mv_id&cats=$catid";
 // +Constant.cityid;
   print("new.........." + link);
 
@@ -435,43 +426,50 @@ Future<List<Products>?> getTServicebymv_id(
 
     return list;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
 Future<List<Categary>?> getData(String id) async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/p_category/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=0&limit=20&field=shop_id&ield=shop_id&filter=" +
-      GroceryAppConstant.Shop_id +
-      "&parent=" +
-      id +
-      "&loc_id=" +
-      GroceryAppConstant.cityid +
-      "&type=1";
-  print("1-------->${link}");
-  final response = await http.get(Uri.parse(link));
-  if (response.statusCode == 200) {
-    var responseData = json.decode(response.body);
-    List<dynamic> galleryArray = responseData["data"]["p_category"];
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/p_category/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=20&field=shop_id&filter=${GroceryAppConstant.Shop_id}&parent=$id&loc_id=${GroceryAppConstant.cityid}&type=1";
 
-    return Categary.getListFromJson(galleryArray);
-    ;
+  // 🔍 Print the complete API URL
+  print("🛰️ [API REQUEST] -> $link");
+
+  try {
+    final response = await http.get(Uri.parse(link));
+
+    // 📡 Print status and response
+    print("✅ [API RESPONSE] Status Code: ${response.statusCode}");
+    print("📦 [API RESPONSE BODY]: ${response.body}");
+
+    if (response.statusCode == 200) {
+      var responseData = json.decode(response.body);
+
+      if (responseData["data"] != null &&
+          responseData["data"]["p_category"] != null) {
+        List<dynamic> galleryArray = responseData["data"]["p_category"];
+        print("📊 [Parsed Data Count]: ${galleryArray.length}");
+        return Categary.getListFromJson(galleryArray);
+      } else {
+        print("⚠️ [WARNING] Missing 'p_category' key in response data!");
+      }
+    } else {
+      print("❌ [ERROR] Failed request. Status: ${response.statusCode}");
+    }
+  } catch (e, stacktrace) {
+    // 🧯 Catch any runtime or parsing errors
+    print("💥 [EXCEPTION] $e");
+    print("📜 [STACKTRACE] $stacktrace");
   }
+
+  return null;
 }
 
 Future<List<Products>> catby_productData(String id, String lim) async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/products/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=" +
-      lim +
-      "&limit=15&cats=" +
-      id +
-      "&field=shop_id&filter=" +
-      GroceryAppConstant.Shop_id +
-      "&loc_only=" +
-      GroceryAppConstant.cityid;
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/products/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=$lim&limit=15&cats=$id&field=shop_id&filter=${GroceryAppConstant.Shop_id}&loc_only=${GroceryAppConstant.cityid}";
 
   print('linkcatpro   ${link}');
   final response = await http.get(Uri.parse(link));
@@ -520,6 +518,7 @@ Future<List<CustmerModel>?> mywallet(String userid) async {
     return CustmerModel.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<CuponCode>?> getCoupanlist() async {
@@ -540,6 +539,7 @@ Future<List<CuponCode>?> getCoupanlist() async {
     List<CuponCode> list = CuponCode.getListFromJson(galleryArray);
     return list;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -560,6 +560,7 @@ Future<List<TrackInvoice>?> trackInvoice1(String mobile) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<TrackInvoice>?> trackInvoice(String mobile) async {
@@ -578,6 +579,7 @@ Future<List<TrackInvoice>?> trackInvoice(String mobile) async {
     return TrackInvoice.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<InvoiceInvoice>?> trackInvoiceOrder(String invoice) async {
@@ -595,25 +597,47 @@ Future<List<InvoiceInvoice>?> trackInvoiceOrder(String invoice) async {
     return InvoiceInvoice.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<Products>?> productdetail(String id) async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/products/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=0&limit=10&field=shop_id&filter=" +
-      GroceryAppConstant.Shop_id +
-      "&id=" +
-      id;
-  print(link);
-  final response = await http.get(Uri.parse(link));
-  if (response.statusCode == 200) {
-    var responseData = json.decode(response.body);
-//    print(responseData.toString());
-    List<dynamic> galleryArray = responseData["data"]["products"];
+  // Check if id is valid
+  if (id.isEmpty) {
+    print("Error: Product ID is empty");
+    return null;
+  }
 
-    return Products.getListFromJson(galleryArray);
-    ;
+  try {
+    String link = GroceryAppConstant.base_url +
+        "manage/api/products/all/?X-Api-Key=" +
+        GroceryAppConstant.API_KEY +
+        "&start=0&limit=10&field=shop_id&filter=" +
+        GroceryAppConstant.Shop_id +
+        "&id=" +
+        id;
+    print(link);
+
+    final response = await http.get(Uri.parse(link));
+    if (response.statusCode == 200) {
+      var responseData = json.decode(response.body);
+
+      // Check if response data is valid
+      if (responseData != null &&
+          responseData["data"] != null &&
+          responseData["data"]["products"] != null) {
+        List<dynamic> galleryArray = responseData["data"]["products"];
+        return Products.getListFromJson(galleryArray);
+      } else {
+        print("Error: Invalid response data structure");
+        return null;
+      }
+    } else {
+      print("Error: HTTP ${response.statusCode} - ${response.reasonPhrase}");
+      return null;
+    }
+  } catch (e) {
+    print("Error in productdetail: $e");
+    return null;
   }
 }
 
@@ -634,13 +658,16 @@ Future<List<Products>?> search(String query) async {
     return Products.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<Review>?> myReview(String userid) async {
   print(userid);
 //  String link = "http://www.sanjarcreation.com/manage/api/reviews/all?X-Api-Key=9C03CAEC0A143D345578448E263AF8A6&user_id=2345&field=shop_id&filter=49" ;
   String link = GroceryAppConstant.base_url +
-      "manage/api/reviews/all?X-Api-Key=9C03CAEC0A143D345578448E263AF8A6&user_id=" +
+      "manage/api/reviews/all?X-Api-Key=" +
+      GroceryAppConstant.API_KEY +
+      "&user_id=" +
       userid +
       "&field=shop_id&filter=" +
       GroceryAppConstant.Shop_id;
@@ -653,26 +680,48 @@ Future<List<Review>?> myReview(String userid) async {
     return Review.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<GroupProducts>?> GroupPro(String userid) async {
-  String link = "https://www.bigwelt.com/api/pg.php?id=" +
-      userid +
-      "&shop_id=" +
-      GroceryAppConstant.Shop_id;
-  print(link);
-  final response = await http.get(Uri.parse(link));
-  if (response.statusCode == 200) {
-    var responseData = json.decode(response.body);
-    List<GroupProducts> galleryArray = responseData;
-//    GroupProducts  groupProducts= GroupProducts.fromMap(json.decode(response.body));
-////    List<dynamic> galleryArray = responseData["data"]["reviews"];
-//    print(galleryArray.toString()+"Gallery");
-    if (galleryArray == null) {
-      return galleryArray;
-    } else {
-      return GroupProducts.getListFromJson(galleryArray);
+  try {
+    // Check if userid is valid
+    if (userid.isEmpty) {
+      print("Error: User ID is empty for GroupPro");
+      return [];
     }
+
+    String link = "https://www.bigwelt.com/api/pg.php?id=" +
+        userid +
+        "&shop_id=" +
+        GroceryAppConstant.Shop_id;
+    print(link);
+
+    final response = await http.get(Uri.parse(link));
+    if (response.statusCode == 200) {
+      var responseData = json.decode(response.body);
+
+      // Check if responseData is valid and is a list
+      if (responseData != null) {
+        if (responseData is List) {
+          return GroupProducts.getListFromJson(responseData);
+        } else {
+          print(
+              "Error: GroupPro response is not a list: ${responseData.runtimeType}");
+          return [];
+        }
+      } else {
+        print("Error: GroupPro response data is null");
+        return [];
+      }
+    } else {
+      print(
+          "Error: GroupPro HTTP ${response.statusCode} - ${response.reasonPhrase}");
+      return [];
+    }
+  } catch (e) {
+    print("Error in GroupPro: $e");
+    return [];
   }
 }
 
@@ -704,6 +753,7 @@ Future<List<Products>?> searchval(String query) async {
 
     return Products.getListFromJson(galleryArray);
   }
+  return null;
 }
 
 searchdatasave(String query, String md5) async {
@@ -745,6 +795,7 @@ Future<List<Slider1>?> getBanner() async {
 
     return list;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -768,17 +819,13 @@ Future<List<UserAddress>?> getAddress() async {
 
     return UserAddress.getListFromJson(galleryArray);
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
 Future<Coupan?> getCoupan(String code) async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/coupon_codes/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&shop_id=" +
-      GroceryAppConstant.Shop_id +
-      "&code=" +
-      code;
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/coupon_codes/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&shop_id=${GroceryAppConstant.Shop_id}&code=$code";
 //      Constant.base_url + "manage/api/coupon_codes/all/?X-Api-Key=" +
 //      Constant.API_KEY + "shop_id=" + Constant.Shop_id +"code="+code;
   print(link);
@@ -789,15 +836,13 @@ Future<Coupan?> getCoupan(String code) async {
     Coupan coupan = Coupan.fromMap(json.decode(response.body));
     return coupan;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
 Future<List<PVariant>?> getPvarient(String id) async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/p_variant/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=0&limit=100&pid=" +
-      id;
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/p_variant/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=100&pid=$id";
   final response = await http.get(Uri.parse(link));
   if (response.statusCode == 200) {
     var responseData = json.decode(response.body);
@@ -806,14 +851,12 @@ Future<List<PVariant>?> getPvarient(String id) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<CityName>?> getPcity() async {
-  String link = GroceryAppConstant.base_url +
-      'manage/api/mv_delivery_locations/all/?X-Api-Key=' +
-      GroceryAppConstant.API_KEY +
-      '&field=shop_id&filter=' +
-      GroceryAppConstant.Shop_id;
+  String link =
+      '${GroceryAppConstant.base_url}manage/api/mv_delivery_locations/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&field=shop_id&filter=${GroceryAppConstant.Shop_id}';
   print(link);
   final response = await http.get(Uri.parse(link));
   if (response.statusCode == 200) {
@@ -823,17 +866,12 @@ Future<List<CityName>?> getPcity() async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<BlogModel>?> getfeature(String dil, String lim) async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/manage_pages/all?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=0&limit=" +
-      lim +
-      "&wht=blog&shop_id=" +
-      GroceryAppConstant.Shop_id +
-      "&place=publish&type=";
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/manage_pages/all?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=$lim&wht=blog&shop_id=${GroceryAppConstant.Shop_id}&place=publish&type=";
   print("${dil} ...." + link);
 
 //    Const.Base_Url + "manage/api/products/all/?X-Api-Key=" + Const.API_KEY + "&start=0&limit=4&field=shop_id&filter=" + Const.Shop_id + "&sort=DESC&loc_id=" + HomePage.loc_id,
@@ -845,19 +883,13 @@ Future<List<BlogModel>?> getfeature(String dil, String lim) async {
 
     return list;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
 Future<List<BlogModel>?> searchBlogs(String q, String lim) async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/manage_pages/all?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=0&limit=" +
-      lim +
-      "&wht=blog&shop_id=" +
-      GroceryAppConstant.Shop_id +
-      "&place=publish&type=&q=" +
-      q;
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/manage_pages/all?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=$lim&wht=blog&shop_id=${GroceryAppConstant.Shop_id}&place=publish&type=&q=$q";
   print("${q} ...." + link);
 
 //    Const.Base_Url + "manage/api/products/all/?X-Api-Key=" + Const.API_KEY + "&start=0&limit=4&field=shop_id&filter=" + Const.Shop_id + "&sort=DESC&loc_id=" + HomePage.loc_id,
@@ -869,16 +901,13 @@ Future<List<BlogModel>?> searchBlogs(String q, String lim) async {
 
     return list;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
 Future<List<ListModel>?> getMV() async {
-  String link = GroceryAppConstant.base_url +
-      "manage/api/mv_list/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=0&limit=100" +
-      "&shop_id=" +
-      GroceryAppConstant.Shop_id;
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/mv_list/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=100&shop_id=${GroceryAppConstant.Shop_id}";
   log(link);
   final response = await http.get(Uri.parse(link));
   if (response.statusCode == 200) {
@@ -890,6 +919,7 @@ Future<List<ListModel>?> getMV() async {
     print("!!!--- VENDOR LIST ---!!! $list");
     return list;
   }
+  return null;
 }
 
 Future updateAny(String table, String field, String value) async {
@@ -923,13 +953,8 @@ Future updateAny(String table, String field, String value) async {
 
 Future<List<ListModel>?> getShopListby(String mvid) async {
   // String link =Constant.base_url+'manage/api/mv_delivery_locations/all/?X-Api-Key='+Constant.API_KEY+'&field=shop_id&filter='+Constant.Shop_id;
-  String link = GroceryAppConstant.base_url +
-      "manage/api/mv_list/all/?X-Api-Key=" +
-      GroceryAppConstant.API_KEY +
-      "&start=0&limit=100&shop_id=" +
-      GroceryAppConstant.Shop_id +
-      "&mv_id=" +
-      mvid;
+  String link =
+      "${GroceryAppConstant.base_url}manage/api/mv_list/all/?X-Api-Key=${GroceryAppConstant.API_KEY}&start=0&limit=100&shop_id=${GroceryAppConstant.Shop_id}&mv_id=$mvid";
   print(link);
   final response = await http.get(Uri.parse(link));
   if (response.statusCode == 200) {
@@ -941,4 +966,5 @@ Future<List<ListModel>?> getShopListby(String mvid) async {
 
     return list;
   }
+  return null;
 }

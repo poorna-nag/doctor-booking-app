@@ -1,7 +1,7 @@
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:page_indicator/page_indicator.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ZoomImage extends StatefulWidget {
@@ -14,6 +14,7 @@ class ZoomImage extends StatefulWidget {
 
 class _ZoomImageState extends State<ZoomImage> {
   final PageController _pageController = PageController(initialPage: 0);
+  int _current = 0;
 
   PhotoViewScaleStateController? scaleStateController;
   @override
@@ -36,8 +37,6 @@ class _ZoomImageState extends State<ZoomImage> {
     }
     return result;
   }
-
-  int _current = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -64,32 +63,49 @@ class _ZoomImageState extends State<ZoomImage> {
       body: Stack(children: <Widget>[
         Container(
           color: GroceryAppColors.white,
-          child: PageIndicatorContainer(
-            align: IndicatorAlign.bottom,
-            length: widget.plist.length,
-            indicatorColor: Colors.black,
-            indicatorSelectorColor: Colors.pink,
-            //size: 10.0,
-            indicatorSpace: 10.0,
-           child:  PageView.builder(
-                scrollDirection: Axis.horizontal,
-                controller: _pageController,
-                itemCount: widget.plist.length,
-                itemBuilder: (BuildContext context, int i) {
-                  return Stack(
-                    children: <Widget>[
-                      PhotoView(
-                        maxScale: 70.0,
-                        minScale: 0.0,
-                        backgroundDecoration: BoxDecoration(color: GroceryAppColors.white),
-                        imageProvider: NetworkImage(
-                          GroceryAppConstant.Product_Imageurl2 + widget.plist[i],
+          child: Stack(
+            children: <Widget>[
+              PageView.builder(
+                  scrollDirection: Axis.horizontal,
+                  controller: _pageController,
+                  onPageChanged: (int page) {
+                    setState(() {
+                      _current = page;
+                    });
+                  },
+                  itemCount: widget.plist.length,
+                  itemBuilder: (BuildContext context, int i) {
+                    return Stack(
+                      children: <Widget>[
+                        PhotoView(
+                          maxScale: 70.0,
+                          minScale: 0.0,
+                          backgroundDecoration:
+                              BoxDecoration(color: GroceryAppColors.white),
+                          imageProvider: NetworkImage(
+                            GroceryAppConstant.Product_Imageurl2 +
+                                widget.plist[i],
+                          ),
+                          scaleStateController: scaleStateController,
                         ),
-                        scaleStateController: scaleStateController,
-                      ),
-                    ],
-                  );
-                }),
+                      ],
+                    );
+                  }),
+              Positioned(
+                bottom: 10.0,
+                left: 0.0,
+                right: 0.0,
+                child: DotsIndicator(
+                  dotsCount: widget.plist.length,
+                  position: _current,
+                  decorator: DotsDecorator(
+                    color: Colors.black,
+                    activeColor: Colors.pink,
+                    spacing: EdgeInsets.symmetric(horizontal: 5.0),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
 

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 
 class Products {
   String? productIs;
@@ -30,6 +29,7 @@ class Products {
   String? youtube;
   String? image;
   String? img;
+  String? img_url;
   String? HSN;
   String? APMC;
   String? shipping;
@@ -68,6 +68,7 @@ class Products {
     this.warrantys,
     this.returns,
     this.youtube,
+    this.img_url,
     this.img,
     this.HSN,
     this.APMC,
@@ -115,6 +116,7 @@ class Products {
       returns: json["returns"],
       youtube: json["youtube"],
       img: json["img"],
+      img_url: json["img_url"],
       HSN: json["HSN"],
       APMC: json["APMC"],
       shipping: json["shipping"],

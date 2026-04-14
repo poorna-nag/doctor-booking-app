@@ -2,25 +2,22 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:aladdinmart/Auth/Form5.dart';
-import 'package:aladdinmart/Auth/signin.dart';
-import 'package:aladdinmart/Auth/widgets/custom_shape.dart';
-import 'package:aladdinmart/Auth/widgets/customappbar.dart';
-import 'package:aladdinmart/Auth/widgets/responsive_ui.dart';
-import 'package:aladdinmart/Auth/widgets/textformfield.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/Auth/Form5.dart';
+import 'package:ecoshine24/Auth/signin.dart';
+import 'package:ecoshine24/Auth/widgets/custom_shape.dart';
+import 'package:ecoshine24/Auth/widgets/customappbar.dart';
+import 'package:ecoshine24/Auth/widgets/responsive_ui.dart';
+import 'package:ecoshine24/Auth/widgets/textformfield.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-// import 'package:aladdinmart/grocery/Auth/signin.dart';
-import 'package:aladdinmart/grocery/General/Home.dart';
+// import 'package:ecoshine24/grocery/Auth/signin.dart';
+import 'package:ecoshine24/grocery/General/Home.dart';
 
-import 'package:aladdinmart/model/RegisterModel.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:ecoshine24/grocery/model/RegisterModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
-
-import 'UploadImage.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -44,6 +41,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   TextEditingController sponsorController = TextEditingController();
+  TextEditingController pincodeController = TextEditingController();
   String pinval = "";
   String? message;
   bool isLoading = false;
@@ -92,8 +90,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       position = res;
       lat = position!.latitude;
       long = position!.longitude;
-      FoodAppConstant.latitude = lat!;
-      FoodAppConstant.longitude = long!;
+      GroceryAppConstant.latitude = lat!;
+      GroceryAppConstant.longitude = long!;
 
       getAddress();
       print(lat);
@@ -121,38 +119,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future _getEmployee() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    print(FoodAppConstant.Shop_id);
+    print(GroceryAppConstant.Shop_id);
     print(namelController.text);
     print(mobileController.text);
     print(emailController.text);
     print(passwordController.text);
     print(SHOPADDRESSController.text);
-    print(FoodAppConstant.latitude.toString());
-    print(FoodAppConstant.longitude.toString());
+    print(GroceryAppConstant.latitude.toString());
+    print(GroceryAppConstant.longitude.toString());
     print(cityController.text);
-    print(pinval);
+    print(pincodeController.text);
 
     var map = new Map<String, dynamic>();
-    map['shop_id'] = FoodAppConstant.Shop_id;
+    map['shop_id'] = GroceryAppConstant.Shop_id;
     map['name'] = namelController.text;
-    map['mobile'] = mobileController.text;
+    map['mobile'] =
+        mobileController.text; // Mobile from previous step (already verified)
     map['email'] = emailController.text;
-    map['password'] = passwordController.text;
     map['address'] = SHOPADDRESSController.text;
-    map['lat'] = FoodAppConstant.latitude.toString();
-    map['lng'] = FoodAppConstant.longitude.toString();
+    map['lat'] = GroceryAppConstant.latitude.toString();
+    map['lng'] = GroceryAppConstant.longitude.toString();
     map['cities'] = cityController.text;
-    map['pin'] = pinval;
-    map['sponsor'] = sponsorController.text;
-    final response = await http
-        .post(Uri.parse(FoodAppConstant.base_url + 'api/step3.php'), body: map);
+    map['pincode'] = pincodeController.text;
+    final response = await http.post(
+        Uri.parse(GroceryAppConstant.base_url + 'api/step3.php'),
+        body: map);
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);
       RegisterModel user = RegisterModel.fromJson(jsonDecode(response.body));
-      if (user.message.toString() == "User Registered Successfully") {
+
+      // Check if success is true before proceeding
+      if (user.success == "true") {
         setState(() {
           flag = false;
-          FoodAppConstant.user_id = user.userId.toString();
+          GroceryAppConstant.user_id = user.userId.toString();
         });
         _showLongToast(user.message.toString());
         pref.setString("email", user.email.toString());
@@ -162,22 +162,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
         pref.setString("mobile", user.username.toString());
         pref.setString("user_id", user.userId.toString());
         pref.setString("pp", user.pp.toString());
-        pref.setString("lat", FoodAppConstant.latitude.toString());
-        pref.setString("lng", FoodAppConstant.longitude.toString());
+        pref.setString("lat", GroceryAppConstant.latitude.toString());
+        pref.setString("lng", GroceryAppConstant.longitude.toString());
+        pref.setString("pincode", pincodeController.text);
 
         pref.setBool("isLogin", true);
-        FoodAppConstant.email = user.email.toString();
-        FoodAppConstant.name = user.name.toString();
-        FoodAppConstant.isLogin = true;
-        FoodAppConstant.image = user.pp.toString();
+        GroceryAppConstant.email = user.email.toString();
+        GroceryAppConstant.name = user.name.toString();
+        GroceryAppConstant.isLogin = true;
+        GroceryAppConstant.image = user.pp.toString();
         if (user.pp == null) {
-          FoodAppConstant.image = "";
+          GroceryAppConstant.image = "";
         } else {
-          FoodAppConstant.image = user.pp.toString();
+          GroceryAppConstant.image = user.pp.toString();
         }
-        //FoodAppConstant.image = user.pp.toString();
+        //GroceryAppConstant.image = user.pp.toString();
 
 //        pref.setString("mobile",phoneController.text);
+
+        // Clear temporary registration data after successful registration
+        pref.remove("temp_mobile");
+        pref.remove("temp_name"); // Also clear temporary name
 
         Navigator.pushAndRemoveUntil(
             context,
@@ -186,10 +191,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
         // Navigator.push(context, MaterialPageRoute(builder: (context) => Uploadimage(user.userId,user.username)),);
       } else {
+        // Show error message from API
         _showLongToast(user.message.toString());
       }
-    } else
-      throw Exception("Unable to get Employee list");
+    } else {
+      _showLongToast("Network error. Please try again.");
+    }
   }
 
   @override
@@ -202,24 +209,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void gatinfo() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    name = pref.getString("name");
-    mobile = pref.getString("mobile");
+    name =
+        pref.getString("temp_name"); // Read from temp key for registration flow
+    mobile = pref
+        .getString("temp_mobile"); // Read from temp key for registration flow
     String? add = pref.getString("address");
     String? lat = pref.getString("lat");
     String? lng = pref.getString("lng");
-    String? pin = pref.getString("pin");
+    String? pin = pref.getString("pincode");
     String? city = pref.getString("city");
     setState(() {
-      // namelController.text= name;
+      namelController.text = name ?? "";
       mobileController.text = mobile ?? "";
 
       add != null
           ? SHOPADDRESSController.text = add
           : SHOPADDRESSController.text = valArea ?? "";
       pinval = pin != null ? pin : "";
+      pincodeController.text = pin != null ? pin : "";
       cityController.text = city != null ? city : "";
-      FoodAppConstant.latitude = double.parse(lat!);
-      FoodAppConstant.longitude = double.parse(lng!);
+      if (lat != null && lng != null) {
+        GroceryAppConstant.latitude = double.parse(lat);
+        GroceryAppConstant.longitude = double.parse(lng);
+      }
     });
   }
 
@@ -229,6 +241,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // _showPasswordDialog();
       print("Hii RAhul");
     }
+  }
+
+  @override
+  void dispose() {
+    namelController.dispose();
+    ShopnamelController.dispose();
+    SHOPADDRESSController.dispose();
+    mobileController.dispose();
+    emailController.dispose();
+    cityController.dispose();
+    pincodeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -300,19 +324,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 value.isEmpty && value.length > 10) {
                               return " Please enter the  address";
                             }
+                            return null;
                           },
                           decoration: new InputDecoration(
                             hintText: 'Address',
                             labelText: 'Enter the  address',
                             focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.black54, width: 3.0),
+                              borderSide: BorderSide(
+                                  color: GroceryAppColors.boxColor1,
+                                  width: 3.0), // Eco-shine orange
                             ),
 
 //                                      icon: new Icon(Icons.queue_play_next),
                             enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.black54, width: 3.0),
+                              borderSide: BorderSide(
+                                  color: GroceryAppColors.boxColor2,
+                                  width: 2.0), // Eco-shine blue
                             ),
                           ))),
                 ),
@@ -346,7 +373,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   : (_medium ? _height! / 3.75 : _height! / 3.5),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [FoodAppColors.tela, FoodAppColors.tela],
+                  colors: [GroceryAppColors.tela, GroceryAppColors.tela],
                 ),
               ),
             ),
@@ -362,7 +389,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   : (_medium ? _height! / 4.25 : _height! / 4),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [FoodAppColors.tela, FoodAppColors.tela],
+                  colors: [GroceryAppColors.tela, GroceryAppColors.tela],
                 ),
               ),
             ),
@@ -400,52 +427,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             SizedBox(height: _height! / 60.0),
             emailTextFormField(),
             SizedBox(height: _height! / 60.0),
-            passwordTextFormField(),
+            cityTextFormField(),
             SizedBox(height: _height! / 60.0),
-            sponsorTextFormField(),
+            pincodeTextFormField(),
             SizedBox(height: _height! / 60.0),
             isLoading
                 ? Center(
                     child: CircularProgressIndicator(
-                      backgroundColor: FoodAppColors.tela,
+                      color: GroceryAppColors.boxColor1, // Eco-shine orange
                     ),
                   )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Check Referral Code",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      MaterialButton(
-                        onPressed: () {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          getRefferalDetails(sponsorController.text);
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        color: FoodAppColors.sellp,
-                        textColor: FoodAppColors.white,
-                        child: Text("Check"),
-                      )
-                    ],
-                  ),
-            message != null
-                ? Text(
-                    "${message}",
-                    style: TextStyle(
-                        color: message == "Incorrect Referral Code..."
-                            ? Colors.red
-                            : FoodAppColors.sellp,
-                        fontWeight: FontWeight.bold),
-                  )
                 : Container(),
-            flag ? circularIndi() : Row(),
           ],
         ),
       ),
@@ -477,7 +469,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             Padding(
               padding: EdgeInsets.all(5),
               child: Icon(Icons.location_on_outlined,
-                  size: 30, color: FoodAppColors.black),
+                  size: 30, color: GroceryAppColors.black),
             ),
             Expanded(
                 child: Container(
@@ -491,7 +483,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       "Use Current Location",
                       style: TextStyle(
                           fontSize: 13,
-                          color: FoodAppColors.black,
+                          color: GroceryAppColors.black,
                           fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -500,7 +492,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             )),
             Padding(
               padding: EdgeInsets.all(5),
-              child: Icon(Icons.forward, size: 30, color: FoodAppColors.black),
+              child:
+                  Icon(Icons.forward, size: 30, color: GroceryAppColors.black),
             ),
           ],
         ),
@@ -525,26 +518,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
       obscureText: false,
       icon: Icons.phone,
       hint: "Mobile Number",
+      enabled: false, // Make field non-editable
     );
   }
 
-  Widget passwordTextFormField() {
+  Widget cityTextFormField() {
     return CustomTextField(
       keyboardType: TextInputType.text,
-      textEditingController: passwordController,
-      obscureText: true,
-      icon: Icons.lock,
-      hint: "Password",
+      textEditingController: cityController,
+      icon: Icons.location_city,
+      obscureText: false,
+      hint: "City",
     );
   }
 
-  Widget sponsorTextFormField() {
+  Widget pincodeTextFormField() {
     return CustomTextField(
       keyboardType: TextInputType.number,
-      textEditingController: sponsorController,
-      icon: Icons.person,
+      textEditingController: pincodeController,
+      icon: Icons.pin_drop,
       obscureText: false,
-      hint: "Referral Code (optional)",
+      hint: "Pincode",
     );
   }
 
@@ -555,7 +549,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Checkbox(
-              activeColor: Colors.redAccent,
+              activeColor: GroceryAppColors.boxColor1, // Eco-shine orange
               value: checkBoxValue,
               onChanged: (bool? newValue) {
                 setState(() {
@@ -589,12 +583,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         onPressed: () {
           if (namelController.text.length < 1) {
             _showLongToast("Name is Empty !");
-          } else if (mobileController.text.length != 10) {
-            _showLongToast("Please enter ten digit No ");
           } else if (emailController.text.length < 1) {
             _showLongToast("Enter the email");
-          } else if (passwordController.text.length <= 4) {
-            _showLongToast("Password should be at least 5 digit");
+          } else if (cityController.text.isEmpty) {
+            _showLongToast("Please enter city");
+          } else if (pincodeController.text.isEmpty) {
+            _showLongToast("Please enter pincode");
           } else {
             setState(() {
               flag = true;
@@ -610,7 +604,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(20.0)),
             gradient: LinearGradient(
-              colors: <Color>[FoodAppColors.tela, FoodAppColors.tela1],
+              colors: <Color>[GroceryAppColors.tela, GroceryAppColors.tela1],
             ),
           ),
           padding: const EdgeInsets.all(12.0),
@@ -695,7 +689,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               "Sign in",
               style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: Colors.redAccent[200],
+                  color: GroceryAppColors.boxColor1, // Eco-shine orange
                   fontSize: 19),
             ),
           )
@@ -714,7 +708,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   getRefferalDetails(String username) async {
     try {
       var link =
-          "${FoodAppConstant.base_url}api/username.php?reffer_id=${username}";
+          "${GroceryAppConstant.base_url}api/username.php?reffer_id=${username}";
       var response = await http.get(Uri.parse(link));
       if (response.statusCode == 200) {
         setState(() {
@@ -738,14 +732,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
           sponsorController.clear();
         });
       }
-    } catch (e, s) {}
+    } catch (e) {}
   }
 
   Widget circularIndi() {
     return Align(
       alignment: Alignment.center,
       child: Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(
+          color: GroceryAppColors.boxColor1, // Eco-shine orange
+        ),
       ),
     );
   }

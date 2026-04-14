@@ -1,28 +1,26 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:aladdinmart/grocery/screen/coupen_codes.dart';
-import 'package:aladdinmart/grocery/screen/deliveryinfo.dart';
-import 'package:aladdinmart/grocery/screen/instamojo.dart';
-import 'package:aladdinmart/grocery/screen/phonepay.dart';
+import 'package:ecoshine24/grocery/screen/coupen_codes.dart';
+import 'package:ecoshine24/grocery/screen/instamojo.dart';
+import 'package:ecoshine24/grocery/screen/phonepay.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:aladdinmart/constent/app_constent.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/StyleDecoration/styleDecoration.dart';
-import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/AddressModel.dart';
-import 'package:aladdinmart/grocery/model/CoupanModel.dart';
-import 'package:aladdinmart/grocery/model/CustmerModel.dart';
-import 'package:aladdinmart/grocery/model/InvoiceModel.dart';
-import 'package:aladdinmart/grocery/model/OrderDliverycharge.dart';
-import 'package:aladdinmart/grocery/model/TrackInvoiceModel.dart';
-import 'package:aladdinmart/grocery/model/usable_wallet_amount.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/StyleDecoration/styleDecoration.dart';
+import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/AddressModel.dart';
+import 'package:ecoshine24/grocery/model/CoupanModel.dart';
+import 'package:ecoshine24/grocery/model/CustmerModel.dart';
+import 'package:ecoshine24/grocery/model/InvoiceModel.dart';
+import 'package:ecoshine24/grocery/model/OrderDliverycharge.dart';
+import 'package:ecoshine24/grocery/model/TrackInvoiceModel.dart';
+import 'package:ecoshine24/grocery/model/usable_wallet_amount.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -30,6 +28,7 @@ import 'package:provider/provider.dart';
 
 import '../../General/AppConstant.dart';
 import '../../controller/phonepay_controller.dart';
+import '../General/Home.dart';
 import 'ShowINVoiceIc1.dart';
 import 'ShowInvoiceid2.dart';
 import 'finalScreen.dart';
@@ -89,6 +88,11 @@ class _CheckOutPageState extends State<CheckOutPage> {
   String? finalUsableWAlletAmount;
   String textval = "Select Date";
   String textval1 = "Select Time";
+  // Modern date/time slot state
+  DateTime? selectedDate;
+  DateTime? selectedTimeSlot;
+  int serviceDurationHours = 4; // configurable if needed
+  String displayDate = "Select Date";
   String selectedPayment = "";
   bool loader = false;
   bool applyButtonLoader = false;
@@ -315,25 +319,32 @@ class _CheckOutPageState extends State<CheckOutPage> {
     await getUserInfo();
     finalamount = GroceryAppConstant.totalAmount;
     calcutateAmount = GroceryAppConstant.totalAmount;
-    _gefreedelivery();
-
-    await dbmanager.getProductList().then((usersFromServe) {
+    await dbmanager.getProductList().then((usersFromServe) async {
       if (this.mounted) {
         setState(() {
           prodctlist1 = usersFromServe;
-          print(" Shipping ${prodctlist1[0].shipping}");
-          print(" Shipping ${prodctlist1[0].shipping!.length}");
-
+          // Reset and recompute shipping amount
+          GroceryAppConstant.shipingAmount = 0.0;
           for (var i = 0; i < prodctlist1.length; i++) {
-            GroceryAppConstant.shipingAmount =
-                GroceryAppConstant.shipingAmount +
-                            prodctlist1[i].shipping!.trim().length >
-                        1
-                    ? double.parse(prodctlist1[i].shipping!.trim())
-                    : 0.0;
-            print(" Shipping ${GroceryAppConstant.shipingAmount}");
+            final String ship = prodctlist1[i].shipping?.trim() ?? '';
+            GroceryAppConstant.shipingAmount +=
+                ship.isNotEmpty ? double.tryParse(ship) ?? 0.0 : 0.0;
           }
+
+          // Recompute cart totals when arriving directly from Home
+          double computedTotal = 0.0;
+          for (var i = 0; i < prodctlist1.length; i++) {
+            computedTotal +=
+                double.tryParse(prodctlist1[i].pprice ?? '0') ?? 0.0;
+          }
+          GroceryAppConstant.totalAmount = computedTotal;
+          GroceryAppConstant.itemcount = prodctlist1.length;
+          calcutateAmount = computedTotal;
+          finalamount = computedTotal;
         });
+
+        // After totals are in place, refresh delivery logic based on new total
+        await _gefreedelivery();
       }
     });
     await mywallet(GroceryAppConstant.User_ID).then((usersFromServe) {
@@ -401,160 +412,283 @@ class _CheckOutPageState extends State<CheckOutPage> {
     Navigator.of(context, rootNavigator: true).pop('dialog');
   }
 
-  void openCheckout() {
-//    var options1 = {
-//      'key': 'rzp_live_y9LCkyj468leuC',
-//      'amount': finalamount*100, //in the smallest currency sub-unit.
-//      'name':GroceryAppConstant.name,
-//      'order_id': invoiceid, // Generate order_id using Orders API
-//      'description': 'Fine T-Shirt',
-//      'prefill': {
-//        'contact': mobile1,
-//        'email': email1
-//      }
-//    };
+  // Add this variable to store the created order ID
+  String? razorpayOrderId;
 
-//    rzp_live_vkeFphEQQ90LK1
+  // Method to create Razorpay order before payment
+  Future<String?> createRazorpayOrder() async {
+    print('=== Creating Razorpay Order ===');
+    var map = Map<String, String>(); // Changed to String for form data
 
-    // 'amount': (twltamount-difference) * 100.0,
+    // Calculate final amount
+    double amount = checkBoxValue || discountval_flag
+        ? (twltamount! - difference!)
+        : finalamount!;
+
+    print('Amount to be charged: $amount');
+
+    map['amount'] =
+        ((amount * 100).toInt()).toString(); // Amount in paise as string
+    map['currency'] = 'INR';
+    map['receipt'] = 'receipt_${DateTime.now().millisecondsSinceEpoch}';
+    map['payment_capture'] = '1'; // Auto capture payment as string
+
+    print('Request data: $map');
+
+    try {
+      String apiUrl =
+          GroceryAppConstant.base_url + 'api/create_razorpay_order.php';
+      print('API URL: $apiUrl');
+
+      final response = await http.post(Uri.parse(apiUrl), body: map);
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        print('Parsed JSON Response: $jsonResponse');
+
+        if (jsonResponse['success'] == true) {
+          print('Order created successfully: ${jsonResponse['order_id']}');
+          return jsonResponse['order_id'];
+        } else {
+          print('Order creation failed: ${jsonResponse['message']}');
+          showLongToast('Failed to create order: ${jsonResponse['message']}');
+          return null;
+        }
+      } else {
+        print('HTTP Error: ${response.statusCode}');
+        showLongToast('Failed to create order. Please try again.');
+        return null;
+      }
+    } catch (e) {
+      print('Exception in createRazorpayOrder: $e');
+      showLongToast('Network error. Please try again.');
+      return null;
+    }
+  }
+
+  void openCheckout() async {
+    // First create a Razorpay order
+    showLoaderDialog(context);
+
+    razorpayOrderId = await createRazorpayOrder();
+    Navigator.of(context, rootNavigator: true).pop('dialog');
+
+    if (razorpayOrderId == null) {
+      showLongToast('Unable to create order. Please try again.');
+      return;
+    }
+
+    // Now create payment options with the order ID
     var options = {
       'key': razorpay_key,
       'amount': checkBoxValue || discountval_flag
           ? (twltamount! - difference!) * 100.0
           : finalamount! * 100.0,
       "currency": "INR",
+      'order_id': razorpayOrderId, // Use the created order ID for auto-capture
       'name': GroceryAppConstant.name,
-      'description': prodctlist1[0].pname,
+      'description': prodctlist1![0].pname,
       'prefill': {'contact': mobile1, 'email': email1},
       'external': {
         'wallets': ['paytm']
       }
     };
-/*     var options = {
-      "key" : "[YOUR_API_KEY]",
-      "amount" : "10000",
-      "name" : "Sample App",
-      "description" : "Payment for the some random product",
-      "prefill" : {
-        "contact" : "2323232323",
-        "email" : "shdjsdh@gmail.com"
-      },
-      "external" : {
-        "wallets" : ["paytm"]
-      }
-    };*/
 
     try {
       razorpay?.open(options);
     } catch (e) {
-      print(e.toString());
+      print('Error opening Razorpay: $e');
+      showLongToast('Payment initialization failed. Please try again.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-          resizeToAvoidBottomInset: false,
-          floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
-          floatingActionButton: GestureDetector(
-            onTap: () {
-              if (textval == "Select Date" || textval1 == "Select Time") {
-                showLongToast("Please select date & time...");
-              } else {
-                if (twltamount! - difference! == 0.0 && checkBoxValue) {
-                  setState(() {
-                    loader = true;
-                  });
-                  _getInvoice1("WALLET", "");
-                } else {
-                  paymentPopUp();
-                }
-              }
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-                color: GroceryAppColors.tela,
-                // color: Colors.green,
-              ),
-              child: Center(
-                  child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('TOTAL',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: GroceryAppColors.white,
-                              fontSize: 14)),
-                      Text(
-                        checkBoxValue || discountval_flag
-                            ? "\u{20B9}${(twltamount! - difference!).round()}"
-                            : "\u{20B9}${finalamount!.round()}",
-                        style: CustomTextStyle.textFormFieldMedium.copyWith(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+    return Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xff1E88E5), // Medical blue
+              Color(0xff42A5F5), // Lighter medical blue
+              Color(0xff64B5F6), // Lightest medical blue
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Scaffold(
+              backgroundColor: Colors.transparent,
+              extendBodyBehindAppBar: true,
+              resizeToAvoidBottomInset: false,
+              floatingActionButtonAnimator:
+                  FloatingActionButtonAnimator.scaling,
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              floatingActionButton: GestureDetector(
+                onTap: () {
+                  if (textval == "Select Date" || textval1 == "Select Time") {
+                    showLongToast("Please select date & time...");
+                  } else {
+                    if (twltamount! - difference! == 0.0 && checkBoxValue) {
+                      setState(() {
+                        loader = true;
+                      });
+                      _getInvoice1("WALLET", "");
+                    } else {
+                      paymentPopUp();
+                    }
+                  }
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(25),
+                      topRight: Radius.circular(25),
+                    ),
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xff1E88E5), // Medical blue
+                        Color(0xff42A5F5), // Lighter medical blue
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 15,
+                        offset: Offset(0, -5),
                       ),
                     ],
                   ),
-                  Text('CONFIRM BOOKING',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: GroceryAppColors.white,
-                          fontSize: 18)),
-                ],
-              )),
-            ),
-          ),
-          key: _scaffoldKey,
-          appBar: AppBar(
-            backgroundColor: GroceryAppColors.tela,
-            leading: IconButton(
-                color: Colors.white,
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.pop(context);
-                }),
-            title: Text(
-              "Checkout",
-              style: TextStyle(color: Colors.white, fontSize: 20),
-            ),
-          ),
-          body: ValueListenableBuilder(
-            valueListenable: isLoading,
-            builder: (BuildContext context, bool value, Widget? child) {
-              return isLoading.value
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            GroceryAppColors.tela),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('TOTAL',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                    fontSize: 14)),
+                            SizedBox(height: 2),
+                            Text(
+                              checkBoxValue || discountval_flag
+                                  ? "\u{20B9}${(twltamount! - difference!).round()}"
+                                  : "\u{20B9}${finalamount!.round()}",
+                              style: CustomTextStyle.textFormFieldMedium
+                                  .copyWith(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle_outline,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text('CONFIRM BOOKING',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    fontSize: 16)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              key: _scaffoldKey,
+              appBar: AppBar(
+                leading: Container(
+                  margin: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
                       ),
-                    )
-                  : Column(
-                      children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            child: ListView(
-                              children: <Widget>[
-                                selectedAddressSection(),
-                                timeSlote(),
-
-                                // standardDelivery(),
-                                checkoutItem(),
-                                priceSection(),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Color(0xff1E88E5), // Medical blue
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                title: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    "Checkout",
+                    style: TextStyle(
+                      color: Color(0xff1E88E5), // Medical blue
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                centerTitle: true,
+              ),
+              body: ValueListenableBuilder(
+                valueListenable: isLoading,
+                builder: (BuildContext context, bool value, Widget? child) {
+                  return isLoading.value
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          child: SingleChildScrollView(
+                            physics: BouncingScrollPhysics(),
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(15, 120, 15, 90),
+                              child: Column(
+                                children: <Widget>[
+                                  selectedAddressSection(),
+                                  SizedBox(height: 15),
+                                  timeSlote(),
+                                  SizedBox(height: 15),
+                                  checkoutItem(),
+                                  SizedBox(height: 15),
+                                  priceSection(),
 
 //                                 Expanded(
 //                                   child: Container(
@@ -859,95 +993,118 @@ class _CheckOutPageState extends State<CheckOutPage> {
 //                                   ),
 //                                   //  flex: 10,
 //                                 )
-                              ],
+                                ],
+                              ),
                             ),
+                            // flex: 30,
                           ),
-                          // flex: 30,
-                        ),
-                      ],
-                    );
-            },
-          )),
-    );
+                        );
+                },
+              )),
+        ));
   }
 
   selectedAddressSection() {
-    return Card(
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(10),
-        ),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
+        ],
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        padding: EdgeInsets.only(left: 12, top: 8, right: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              height: 6,
-            ),
-            Text(
-              "Address :",
-              style: TextStyle(color: Colors.black, fontSize: 16),
-            ),
-            createAddressText("Name: $name1", 5),
-            createAddressText(
-                address1 != null
-                    ? address1.toString() + " " + address2.toString()
-                    : "address",
-                6),
-            // createAddressText(
-            //     city1 == null ? '' : '$city1 : $pin1 :$state1 ', 6),
-            // SizedBox(
-            //   height: 6,
-            // ),
-            RichText(
-              text: TextSpan(children: [
-                TextSpan(
-                    text: "Mobile : ",
-                    style: CustomTextStyle.textFormFieldMedium
-                        .copyWith(fontSize: 12, color: Colors.grey.shade800)),
-                TextSpan(
-                    text: mobile1 != null ? mobile1 : '',
-                    style: CustomTextStyle.textFormFieldBold
-                        .copyWith(color: Colors.black, fontSize: 12)),
-              ]),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: 10),
-                  child: Text(
-                    "Edit / Change",
-                    style: CustomTextStyle.textFormFieldSemiBold
-                        .copyWith(fontSize: 14, color: Colors.indigo.shade700),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xff42A5F5), // Primary orange
+                      Color(0xff42A5F5), // Light orange
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.location_on,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                "Delivery Address",
+                style: TextStyle(
+                  color: Color(0xff42A5F5), // Primary orange
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 15),
+          createAddressText("Name: $name1", 5),
+          createAddressText(
+              address1 != null
+                  ? address1.toString() + " " + address2.toString()
+                  : "address",
+              6),
+          SizedBox(height: 8),
+          RichText(
+            text: TextSpan(children: [
+              TextSpan(
+                  text: "Mobile : ",
+                  style: CustomTextStyle.textFormFieldMedium
+                      .copyWith(fontSize: 14, color: Colors.grey.shade700)),
+              TextSpan(
+                  text: mobile1 != null ? mobile1 : '',
+                  style: CustomTextStyle.textFormFieldBold
+                      .copyWith(color: Colors.black, fontSize: 14)),
+            ]),
+          ),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                "Edit / Change",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xff1E88E5), // Medical blue
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Color(0xff1E88E5)
+                        .withOpacity(0.1), // Light medical blue background
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.edit,
+                    color: Color(0xff1E88E5), // Medical blue
+                    size: 18,
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.only(right: 20),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Icon(
-                      Icons.edit,
-                      color: Colors.pink,
-                      size: 16.0,
-                    ),
-                  ),
-                )
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-          ],
-        ),
+              )
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1211,12 +1368,10 @@ class _CheckOutPageState extends State<CheckOutPage> {
     DateTime today = DateTime.now();
     DateTime startDate = DateTime(today.year, today.month, today.day);
     DateTime endDate = startDate.add(Duration(days: 30));
-    
-    return day.isAfter(startDate.subtract(Duration(days: 1))) && 
-           day.isBefore(endDate.add(Duration(days: 1)));
-  }
 
-  DateTime? selectedDate;
+    return day.isAfter(startDate.subtract(Duration(days: 1))) &&
+        day.isBefore(endDate.add(Duration(days: 1)));
+  }
 
   showCalander() {
     showDatePicker(
@@ -1229,9 +1384,12 @@ class _CheckOutPageState extends State<CheckOutPage> {
       if (date != null) {
         setState(() {
           selectedDate = date;
-          String formattedDate = DateFormat('dd/MM/yyyy ').format(date);
-          textval = formattedDate;
-          print('Selected date: $formattedDate');
+          // Keep internal value in legacy format, UI uses ISO style
+          textval = DateFormat('dd/MM/yyyy ').format(date);
+          displayDate = DateFormat('yyyy-MM-dd').format(date);
+          // Reset previously selected time if date changes
+          selectedTimeSlot = null;
+          textval1 = "Select Time";
         });
       }
     }).catchError((error) {
@@ -1240,105 +1398,336 @@ class _CheckOutPageState extends State<CheckOutPage> {
     });
   }
 
+  List<DateTime> _generateSlots(DateTime date) {
+    final start = DateTime(date.year, date.month, date.day, 7, 0);
+    return List.generate(13, (i) => start.add(Duration(hours: i)));
+  }
+
+  bool _isPastSlot(DateTime slot) {
+    final now = DateTime.now();
+    if (selectedDate == null) return false;
+    final sameDay =
+        slot.year == now.year && slot.month == now.month && slot.day == now.day;
+    if (!sameDay) return false;
+    // Disable slots strictly before current hour
+    return slot.isBefore(DateTime(now.year, now.month, now.day, now.hour));
+  }
+
+  Widget _slotChip(DateTime slot) {
+    final isSelected =
+        selectedTimeSlot != null && slot.hour == selectedTimeSlot!.hour;
+    final disabled = _isPastSlot(slot);
+    final label = DateFormat('h:00 a').format(slot);
+    Color bg;
+    Color fg;
+    if (disabled) {
+      bg = Colors.grey.shade300;
+      fg = Colors.grey.shade600;
+    } else if (isSelected) {
+      bg = const Color(0xff42A5F5); // Medical blue (selected)
+      fg = Colors.white;
+    } else {
+      bg = const Color(0xffE3F2FD); // Light medical blue (available)
+      fg = Colors.black87;
+    }
+    return GestureDetector(
+      onTap: disabled
+          ? null
+          : () {
+              setState(() {
+                selectedTimeSlot = slot;
+                textval1 = DateFormat('h:00 a').format(slot);
+              });
+            },
+      child: Container(
+        width: 88,
+        height: 40,
+        alignment: Alignment.center,
+        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+              color: disabled
+                  ? Colors.grey.shade400
+                  : Color(0xff1E88E5).withOpacity(0.5)),
+        ),
+        child: Text(label,
+            style: TextStyle(color: fg, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  // Grid cell version of the slot for a 4-column layout
+  Widget _slotGridCell(DateTime slot) {
+    final isSelected =
+        selectedTimeSlot != null && slot.hour == selectedTimeSlot!.hour;
+    final disabled = _isPastSlot(slot);
+    final label = DateFormat('h:00 a').format(slot);
+    Color bg;
+    Color fg;
+    if (disabled) {
+      bg = Colors.grey.shade300;
+      fg = Colors.grey.shade600;
+    } else if (isSelected) {
+      bg = const Color(0xff42A5F5); // Medical blue
+      fg = Colors.white;
+    } else {
+      bg = const Color(0xffE3F2FD); // Light medical blue
+      fg = Colors.black87;
+    }
+    return GestureDetector(
+      onTap: disabled
+          ? null
+          : () {
+              setState(() {
+                selectedTimeSlot = slot;
+                textval1 = DateFormat('h:00 a').format(slot);
+              });
+            },
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+              color: disabled
+                  ? Colors.grey.shade400
+                  : Color(0xff1E88E5).withOpacity(0.5)),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                color: fg, fontWeight: FontWeight.w600, fontSize: 12)),
+      ),
+    );
+  }
+
+  String _selectedDurationText() {
+    if (selectedTimeSlot == null) return '';
+    final end = selectedTimeSlot!.add(Duration(hours: serviceDurationHours));
+    return 'Service Duration: ${DateFormat('h:00 a').format(selectedTimeSlot!)} to ${DateFormat('h:00 a').format(end)} ($serviceDurationHours hours)';
+  }
+
   timeSlote() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Padding(
-            padding: const EdgeInsets.only(left: 10.0, top: 20.0, right: 0),
-            child: InkWell(
-              onTap: () {
-                showCalander();
-                // _showSelectionDialog(context);
-              },
-              child: Container(
-                // width: MediaQuery.of(context).size.width/1.5,
-                padding: const EdgeInsets.only(left: 10.0, top: 0.0, right: 10),
-                margin: const EdgeInsets.only(left: 0.0, top: 0.0, right: 0),
+    final hasDate = selectedDate != null;
+    final slots = hasDate ? _generateSlots(selectedDate!) : <DateTime>[];
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xff1E88E5), // Medical blue
+                      Color(0xff42A5F5), // Lighter medical blue
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.schedule,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                "Schedule Service",
+                style: TextStyle(
+                  color: Color(0xff1E88E5), // Medical blue
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
 
-                child: Center(
-                    child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      child: Text(
-                        textval.length > 20
-                            ? textval.substring(0, 20) + ".."
-                            : textval,
-
-                        overflow: TextOverflow.fade,
-                        // maxLines: 2,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: GroceryAppColors.black,
+          // Date selector
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    color: Color(0xff1E88E5), // Medical blue
+                    size: 18,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Select Date *',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: Color(0xff1E88E5), // Medical blue
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+              InkWell(
+                onTap: showCalander,
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.grey[200]!,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xff1E88E5), // Medical blue
+                              Color(0xff42A5F5), // Lighter medical blue
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.calendar_today,
+                          color: Colors.white,
+                          size: 16,
                         ),
                       ),
-                    ),
-                    Padding(
-                        padding: EdgeInsets.only(left: 0),
-                        child: Icon(
-                          Icons.expand_more,
-                          color: Colors.black,
-                          size: 30,
-                        ))
-                  ],
-                )),
-
-                decoration:
-                    BoxDecoration(border: Border.all(color: Colors.black)),
-              ),
-            )),
-        Padding(
-            padding: const EdgeInsets.only(left: 0.0, top: 20.0, right: 10),
-            child: InkWell(
-              onTap: () {
-                if (textval == "Select Date") {
-                  showLongToast("Please select date");
-                } else {
-                  _displayDialog(context);
-                }
-                // _showSelectionDialog(context);
-              },
-              child: Container(
-                padding: const EdgeInsets.only(left: 10.0, top: 0.0, right: 10),
-                margin: const EdgeInsets.only(left: 0.0, top: 0.0, right: 0),
-                // width: MediaQuery.of(context).size.width/1.5,
-
-                child: Center(
-                    child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      child: Text(
-                        textval1.length > 20
-                            ? textval1.substring(0, 20) + ".."
-                            : textval1,
-
-                        overflow: TextOverflow.fade,
-                        // maxLines: 2,
+                      SizedBox(width: 12),
+                      Text(
+                        displayDate,
                         style: TextStyle(
-                          fontSize: 12,
-                          color: GroceryAppColors.black,
+                          fontSize: 16,
+                          color: displayDate == "Select Date"
+                              ? Colors.grey[500]
+                              : Colors.black87,
                         ),
                       ),
-                    ),
-                    Padding(
-                        padding: EdgeInsets.only(left: 0),
-                        child: Icon(
-                          Icons.expand_more,
-                          color: Colors.black,
-                          size: 30,
-                        ))
-                  ],
-                )),
-
-                decoration:
-                    BoxDecoration(border: Border.all(color: Colors.black)),
+                    ],
+                  ),
+                ),
               ),
-            )),
-      ],
+            ],
+          ),
+
+          SizedBox(height: 20),
+
+          // Time title
+          Row(
+            children: [
+              Icon(
+                Icons.access_time,
+                color: Color(0xff1E88E5), // Medical blue
+                size: 18,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Select Time Slot *',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: Color(0xff1E88E5), // Medical blue
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 9),
+
+          // Duration on next line after selection
+          if (selectedTimeSlot != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Color(0xff1E88E5).withOpacity(0.1), // Medical blue
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.schedule,
+                    color: Color(0xff1E88E5), // Medical blue
+                    size: 16,
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _selectedDurationText(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xff1E88E5), // Medical blue
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (selectedTimeSlot != null) SizedBox(height: 12),
+
+          // Slots grid
+          hasDate
+              ? GridView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: slots.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 2.4,
+                  ),
+                  itemBuilder: (context, index) => _slotGridCell(slots[index]),
+                )
+              : Container(
+                  height: 50,
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Text(
+                    'Please select a date first',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+        ],
+      ),
     );
   }
 
@@ -1443,148 +1832,206 @@ class _CheckOutPageState extends State<CheckOutPage> {
   }
 
   checkoutItem() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
+        ],
       ),
-      child: ListView.separated(
-        separatorBuilder: (context, index) {
-          return SizedBox(
-            height: 5,
-          );
-        },
-        itemBuilder: (context, position) {
-          return checkoutListItem(position);
-        },
-        itemCount: WishlistState.prodctlist1!.length > 0
-            ? WishlistState.prodctlist1!.length
-            : 0,
-        shrinkWrap: true,
-        primary: false,
-        scrollDirection: Axis.vertical,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xff1E88E5), // Medical blue
+                      Color(0xff42A5F5), // Lighter medical blue
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.medical_services_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                "Service Items",
+                style: TextStyle(
+                  color: Color(0xff1E88E5), // Medical blue
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Spacer(),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Color(0xff1E88E5).withOpacity(0.1), // Medical blue
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "${prodctlist1.length} ${prodctlist1.length == 1 ? 'item' : 'items'}",
+                  style: TextStyle(
+                    color: Color(0xff1E88E5), // Medical blue
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 15),
+          ListView.separated(
+            separatorBuilder: (context, index) {
+              return Divider(
+                color: Colors.grey[200],
+                height: 20,
+              );
+            },
+            itemBuilder: (context, position) {
+              return checkoutListItem(position);
+            },
+            itemCount: prodctlist1.length > 0 ? prodctlist1.length : 0,
+            shrinkWrap: true,
+            primary: false,
+            scrollDirection: Axis.vertical,
+          ),
+        ],
       ),
     );
   }
 
   checkoutListItem(int position) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
         children: <Widget>[
           Container(
-            child: Text(
-              WishlistState.prodctlist1![position].pname == null
-                  ? ''
-                  : WishlistState.prodctlist1![position].pname ?? "",
-              maxLines: 2,
-              softWrap: true,
-              style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black)
-                  .copyWith(fontSize: 14),
-            ),
-          ),
-          Row(
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(right: 8, left: 0, top: 8, bottom: 8),
-                width: 50,
-                height: 60,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(14)),
-                    color: Colors.blue.shade200,
-                    image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: prodctlist1 != null
-                            ? prodctlist1.length > 0
-                                ? prodctlist1[position].pimage != null
-                                    ? NetworkImage(
-                                        GroceryAppConstant.Product_Imageurl +
-                                            WishlistState
-                                                .prodctlist1![position].pimage
-                                                .toString(),
-                                      )
-                                    : AssetImage("assets/images/plogo.png")
-                                        as ImageProvider
-                                : AssetImage("assets/images/plogo.png")
-                            : AssetImage("assets/images/plogo.png"))),
+            width: 60,
+            height: 70,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xff1E88E5).withOpacity(0.1), // Medical blue
+                  Color(0xff42A5F5).withOpacity(0.1), // Lighter medical blue
+                ],
               ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      //                      SizedBox(height: 6),
-                      Row(
-                        children: <Widget>[
-                          // WishlistState.prodctlist1[position].pcolor!=null?  Text(
-                          //   'COLOR: ${WishlistState.prodctlist1[position].pcolor}',
-                          //   style:TextStyle( fontWeight: FontWeight.w400, color: Colors.black)
-                          //       .copyWith(color: Colors.grey, fontSize: 14),
-                          // ):Row(),
-                          // WishlistState.prodctlist1[position].pcolor.length>0?   SizedBox(width: 20):Row(),
-
-                          WishlistState.prodctlist1![position].pQuantity != null
-                              ? Text(
-                                  'Quantity: ${WishlistState.prodctlist1![position].pQuantity}',
-                                  style: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.black)
-                                      .copyWith(
-                                          color: Colors.grey, fontSize: 14),
-                                )
-                              : Row(),
-                        ],
-                      ),
-
-                      SizedBox(height: 3),
-                      WishlistState.prodctlist1![position].varient != null
-                          ? Text(
-                              'Varient: ${WishlistState.prodctlist1![position].varient}',
-                              style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black)
-                                  .copyWith(color: Colors.grey, fontSize: 14),
-                            )
-                          : Row(),
-
-                      WishlistState.prodctlist1![position].shipping!.length > 0
-                          ? Text(
-                              'Shipping:  \u{20B9} ${WishlistState.prodctlist1![position].shipping}',
-                              style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black)
-                                  .copyWith(color: Colors.grey, fontSize: 14),
-                            )
-                          : Row(),
-                      Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(
-                              WishlistState.prodctlist1![position].pprice ==
-                                      null
-                                  ? '00.0'
-                                  : '\u{20B9} ${double.parse(WishlistState.prodctlist1![position].pprice ?? "").toStringAsFixed(2)}',
-                              style: TextStyle(
-                                color: Theme.of(context).secondaryHeaderColor,
-                                fontWeight: FontWeight.w700,
-                              ).copyWith(color: Colors.green),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+              image: prodctlist1.isNotEmpty
+                  ? (prodctlist1[position].pimage != null
+                      ? DecorationImage(
+                          fit: BoxFit.cover,
+                          image: NetworkImage(
+                            GroceryAppConstant.Product_Imageurl +
+                                (prodctlist1[position].pimage ?? ''),
+                          ),
+                        )
+                      : null)
+                  : null,
+            ),
+            child: prodctlist1[position].pimage == null
+                ? Icon(
+                    Icons.local_hospital_outlined,
+                    color: Color(0xff1E88E5), // Medical blue
+                    size: 30,
+                  )
+                : null,
+          ),
+          SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  prodctlist1[position].pname == null
+                      ? ''
+                      : prodctlist1[position].pname ?? "",
+                  maxLines: 2,
+                  softWrap: true,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
                   ),
                 ),
-                flex: 100,
-              )
-            ],
+                SizedBox(height: 6),
+                if (prodctlist1[position].pQuantity != null)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Color(0xff1E88E5).withOpacity(0.1), // Medical blue
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Quantity: ${prodctlist1[position].pQuantity}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff1E88E5), // Medical blue
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                SizedBox(height: 4),
+                if (prodctlist1[position].varient != null)
+                  Text(
+                    'Variant: ${prodctlist1[position].varient}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                SizedBox(height: 4),
+                if (prodctlist1[position].shipping != null &&
+                    prodctlist1[position].shipping!.length > 0)
+                  Text(
+                    'Shipping: \u{20B9} ${prodctlist1[position].shipping}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                SizedBox(height: 8),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xff42A5F5),
+                        Color(0xff42A5F5),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    prodctlist1[position].pprice == null
+                        ? '00.0'
+                        : '\u{20B9} ${double.parse(prodctlist1[position].pprice ?? "0").toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -1592,528 +2039,605 @@ class _CheckOutPageState extends State<CheckOutPage> {
   }
 
   priceSection() {
-    return Padding(
-      padding: const EdgeInsets.all(5.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          hideApplyButton
-              ? Container(
-                  height: 50,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: GroceryAppColors.sellp,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      child: Text(
-                        "Congratulations! you saved \u{20B9}${difference!.toStringAsFixed(1)} on this order.",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: GroceryAppColors.white,
-                            fontSize: 14),
-                      ),
-                    ),
-                  ),
-                )
-              : SizedBox(
-                  height: 120,
-                  width: MediaQuery.of(context).size.width,
-                  child: Card(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Card(
-                          elevation: 6,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            radius: 30,
-                            child: Center(
-                              child: Icon(
-                                Icons.discount_rounded,
-                                color: Colors.green,
-                                size: 35,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Flexible(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(right: 8.0),
-                                child: TextFormField(
-                                  controller: coupanController,
-                                  keyboardType: TextInputType.text,
-                                  validator: (String? value) {
-                                    if (value == null || value.isEmpty) {
-                                      return " Apply Coupon Code";
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                      contentPadding: EdgeInsets.only(left: 10),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      hintText: "Apply Coupon Code"),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 5,
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => CouponCodes(),
-                                  ));
-                                },
-                                child: Text(' View Coupon',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: GroceryAppColors.green,
-                                        fontSize: 16)),
-                              )
-                            ],
-                          ),
-                        ),
-                        applyButtonLoader
-                            ? CircularProgressIndicator()
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: GroceryAppColors.green,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0)),
-                                      textStyle: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    child: Text("Apply "),
-                                    onPressed: () {
-                                      setState(() {
-                                        applyButtonLoader = true;
-                                      });
-                                      _applycoupancode("1");
-                                    },
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text(' ',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: GroceryAppColors.green,
-                                          fontSize: 16))
-                                ],
-                              ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                      ],
+    return Column(
+      children: [
+        // Success message for coupon
+        if (hideApplyButton)
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xff42A5F5),
+                  Color(0xff42A5F5),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 15,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.celebration,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "Congratulations! You saved \u{20B9}${difference!.toStringAsFixed(1)} on this order.",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                      fontSize: 14,
                     ),
                   ),
                 ),
-          walletamt != "0" && double.parse(usableWAlletAmount ?? "") != 0
-              ? Container(
+              ],
+            ),
+          )
+        else
+          // Coupon section
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      gradient:
-                          LinearGradient(begin: Alignment.bottomRight, colors: [
-                        Colors.red[50]!.withOpacity(.9),
-                        Colors.red[50]!.withOpacity(.9),
-                      ])),
-                  width: double.infinity,
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.only(
-                    left: 4,
-                    right: 4,
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xff42A5F5),
+                        Color(0xff42A5F5),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Checkbox(
-                          activeColor: GroceryAppColors.tela,
-                          value: checkBoxValue,
-                          onChanged: (Value) {
-                            setState(() {
-                              checkBoxValue = Value!;
-                              if (Value) {
-                                print("count------->$count");
-                                if (double.parse(usableWAlletAmount!) >
-                                    finalamount!) {
-                                  print("first");
-                                  print(walletamt);
-                                  print(twltamount);
-                                  twltamount = finalamount;
-                                  wltamount = double.parse(walletamt!);
-                                  twltamt = wltamount! - twltamount!;
-                                  wltamount =
-                                      finalamount! - double.parse(walletamt!);
-                                  print("yhaan");
-                                  print(wltamount);
-                                  twltamount = 0;
-                                } else {
-                                  print("second");
-                                  twltamount = finalamount;
-                                  wltamount = wltamount;
-                                  twltamount = twltamount! -
-                                      int.parse(usableWAlletAmount!);
-                                  twltamt = 0;
-                                }
-                              } else {
-                                print("third");
-                                twltamount = finalamount;
-                                wltamount = double.parse(usableWAlletAmount!);
-                                twltamt = wltamount;
-                              }
-                            });
-                          }),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Pay using Wallet",
-                            maxLines: 2,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400, fontSize: 15),
+                  child: Icon(
+                    Icons.discount_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+                SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: TextFormField(
+                          controller: coupanController,
+                          keyboardType: TextInputType.text,
+                          style: TextStyle(fontSize: 14),
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[50],
+                            hintText: "Enter coupon code",
+                            hintStyle: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 14,
+                            ),
                           ),
-                          Text(
-                            "Wallet Points:   " +
-                                "${walletamt != null ? walletamt : "0"}",
-                            style: TextStyle(
-                                color: GroceryAppColors.tela, fontSize: 12),
-                          ),
-                          double.parse(walletamt!) >
-                                  double.parse(usableWAlletAmount!)
-                              ? Text(
-                                  "You can use $usableWAlletAmount points from your wallet ",
-                                  style: TextStyle(
-                                      color: GroceryAppColors.tela,
-                                      fontSize: 12),
-                                )
-                              : Container(),
-                          double.parse(walletamt!) <
-                                  double.parse(usableWAlletAmount!)
-                              ? Text(
-                                  "You can use \u{20B9}$walletamt from your wallet ",
-                                  style: TextStyle(
-                                      color: GroceryAppColors.tela,
-                                      fontSize: 12),
-                                )
-                              : Container(),
-                        ],
+                        ),
                       ),
+                      SizedBox(height: 8),
+                      InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => CouponCodes(),
+                          ));
+                        },
+                        child: Text(
+                          'View Available Coupons',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff42A5F5),
+                            fontSize: 12,
+                          ),
+                        ),
+                      )
                     ],
                   ),
-                )
-              : Container(),
-          SizedBox(
-            height: 10,
+                ),
+                SizedBox(width: 10),
+                applyButtonLoader
+                    ? Container(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Color(0xFF1B5E20)),
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Container(
+                        height: 40,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff42A5F5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: Text(
+                            "Apply",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              applyButtonLoader = true;
+                            });
+                            _applycoupancode("1");
+                          },
+                        ),
+                      ),
+              ],
+            ),
           ),
-          detailsPrice(),
-          SizedBox(
-            height: 10,
+
+        SizedBox(height: 15),
+
+        // Wallet section
+        if (walletamt != "0" && double.parse(usableWAlletAmount ?? "") != 0)
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.95),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    checkboxTheme: CheckboxThemeData(
+                      fillColor: WidgetStateProperty.resolveWith<Color?>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return Color(0xff42A5F5);
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                  child: Checkbox(
+                    activeColor: Color(0xff42A5F5),
+                    value: checkBoxValue,
+                    onChanged: (Value) {
+                      setState(() {
+                        checkBoxValue = Value!;
+                        if (Value) {
+                          print("count------->$count");
+                          if (double.parse(usableWAlletAmount!) >
+                              finalamount!) {
+                            print("first");
+                            print(walletamt);
+                            print(twltamount);
+                            twltamount = finalamount;
+                            wltamount = double.parse(walletamt!);
+                            twltamt = wltamount! - twltamount!;
+                            wltamount = finalamount! - double.parse(walletamt!);
+                            print("yhaan");
+                            print(wltamount);
+                            twltamount = 0;
+                          } else {
+                            print("second");
+                            twltamount = finalamount;
+                            wltamount = wltamount;
+                            twltamount =
+                                twltamount! - int.parse(usableWAlletAmount!);
+                            twltamt = 0;
+                          }
+                        } else {
+                          print("third");
+                          twltamount = finalamount;
+                          wltamount = double.parse(usableWAlletAmount!);
+                          twltamt = wltamount;
+                        }
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(width: 15),
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xff42A5F5),
+                        Color(0xff42A5F5),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.account_balance_wallet,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Pay using Wallet",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "Wallet Points: ${walletamt != null ? walletamt : "0"}",
+                        style: TextStyle(
+                          color: Color(0xff42A5F5),
+                          fontSize: 12,
+                        ),
+                      ),
+                      if (double.parse(walletamt!) >
+                          double.parse(usableWAlletAmount!))
+                        Text(
+                          "You can use $usableWAlletAmount points from your wallet",
+                          style: TextStyle(
+                            color: Color(0xff42A5F5),
+                            fontSize: 12,
+                          ),
+                        ),
+                      if (double.parse(walletamt!) <
+                          double.parse(usableWAlletAmount!))
+                        Text(
+                          "You can use \u{20B9}$walletamt from your wallet",
+                          style: TextStyle(
+                            color: Color(0xff42A5F5),
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Container(
+
+        SizedBox(height: 15),
+
+        // Price details
+        detailsPrice(),
+
+        SizedBox(height: 15),
+
+        // Order notes
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xff42A5F5),
+                          Color(0xff42A5F5),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.note_add,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    "Order Notes",
+                    style: TextStyle(
+                      color: Color(0xff42A5F5),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 15),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
                 child: TextFormField(
-                    maxLines: 2,
-                    keyboardType: TextInputType.text,
-                    // Use mobile input type for emails.
-                    controller: resignofcause,
-                    decoration: InputDecoration(
-                      hintText: 'Order Notes',
-                      labelText: 'Order Notes',
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                  maxLines: 3,
+                  keyboardType: TextInputType.text,
+                  controller: resignofcause,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Add special instructions for your service...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 14,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Colors.grey[200]!,
+                        width: 1,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey, width: .5),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Color(0xff42A5F5),
+                        width: 2,
                       ),
-                    ))),
+                    ),
+                    contentPadding: EdgeInsets.all(16),
+                  ),
+                ),
+              ),
+            ],
           ),
-          SizedBox(
-            height: 60,
+        ),
+      ],
+    );
+  }
+
+  Widget detailsPrice() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xff42A5F5),
+                      Color(0xff42A5F5),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.receipt_long,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                "PRICE DETAILS",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Color(0xff42A5F5),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          _buildPriceRow(
+              "Total MRP",
+              "\u{20B9} ${(calcutateAmount)!.toStringAsFixed(2)}",
+              Colors.black87),
+          _buildDivider(),
+          _buildPriceRow(
+              "Total Item", "${GroceryAppConstant.itemcount}", Colors.black87),
+          if (difference! > 1) _buildDivider(),
+          if (difference! > 1)
+            _buildPriceRow(
+                "Coupon Discount",
+                "-\u{20B9}${difference!.toStringAsFixed(2)}",
+                Color(0xff42A5F5)),
+          _buildDivider(),
+          _buildPriceRow(
+              "Delivery Charges (+)", "\u{20B9}${deliveryfee}", Colors.black87),
+          if (checkBoxValue &&
+              (double.parse(usableWAlletAmount!) < finalamount!))
+            _buildDivider(),
+          if (checkBoxValue &&
+              (double.parse(usableWAlletAmount!) < finalamount!))
+            _buildPriceRow(
+                "Wallet Points (-)",
+                "-\u{20B9}${double.parse(usableWAlletAmount!)}",
+                Color(0xff42A5F5)),
+          if (checkBoxValue &&
+              (double.parse(usableWAlletAmount!) > finalamount!))
+            _buildDivider(),
+          if (checkBoxValue &&
+              (double.parse(usableWAlletAmount!) > finalamount!))
+            _buildPriceRow("Wallet Amount (-)", "-\u{20B9}$finalamount",
+                Color(0xff42A5F5)),
+          if (checkBoxValue &&
+              (double.parse(usableWAlletAmount!) == finalamount))
+            _buildDivider(),
+          if (checkBoxValue &&
+              (double.parse(usableWAlletAmount!) == finalamount))
+            _buildPriceRow("Wallet Amount (-)", "-\u{20B9}$finalamount",
+                Color(0xff42A5F5)),
+          SizedBox(height: 15),
+          Container(
+            width: double.infinity,
+            height: 2,
+            margin: EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xff42A5F5),
+                  Color(0xff42A5F5),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+          SizedBox(height: 15),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xff42A5F5).withOpacity(0.1),
+                  Color(0xff42A5F5).withOpacity(0.1),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Total Amount",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff42A5F5),
+                  ),
+                ),
+                Text(
+                  checkBoxValue || discountval_flag
+                      ? "\u{20B9}${(twltamount! - difference!).round()}"
+                      : "\u{20B9}${finalamount!.round()}",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff42A5F5),
+                  ),
+                )
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget detailsPrice() {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+  Widget _buildPriceRow(String label, String value, Color valueColor) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              color: valueColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "PRICE DETAILS",
-              style: CustomTextStyle.textFormFieldMedium.copyWith(
-                  fontSize: 16,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 0),
-                    child: Text(
-                      "Total MRP",
-                      style: CustomTextStyle.textFormFieldSemiBold
-                          .copyWith(fontSize: 12, color: Colors.black54),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 0),
-                    child: Text(
-                      "\u{20B9} ${(calcutateAmount)!.toStringAsFixed(2)}",
-                      style: CustomTextStyle.textFormFieldSemiBold
-                          .copyWith(fontSize: 16, color: Colors.black),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Divider(
-              thickness: 1,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 0),
-                    child: Text(
-                      "Total Item",
-                      style: CustomTextStyle.textFormFieldSemiBold
-                          .copyWith(fontSize: 12, color: Colors.black54),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 0),
-                    child: Text(
-                      "${GroceryAppConstant.itemcount}",
-                      style: CustomTextStyle.textFormFieldSemiBold
-                          .copyWith(fontSize: 16, color: Colors.black),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            difference! > 1
-                ? Divider(
-                    thickness: 1,
-                  )
-                : SizedBox(),
-            difference! > 1
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                          child: Text(
-                            "Coupan discount",
-                            style: CustomTextStyle.textFormFieldSemiBold
-                                .copyWith(fontSize: 12, color: Colors.black54),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                          child: Text(
-                            "-$difference",
-                            style: CustomTextStyle.textFormFieldSemiBold
-                                .copyWith(fontSize: 16, color: Colors.green),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Row(),
-            Divider(
-              thickness: 1,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    "Delivery Charges (+)",
-                    style: CustomTextStyle.textFormFieldSemiBold
-                        .copyWith(fontSize: 12, color: Colors.black54),
-                  ),
-                  Text(
-                    deliveryfee != null ? deliveryfee : "00.00",
-                    style: CustomTextStyle.textFormFieldSemiBold
-                        .copyWith(fontSize: 16, color: Colors.black),
-                  ),
-                ],
-              ),
-            ),
-            checkBoxValue && (double.parse(usableWAlletAmount!) < finalamount!)
-                ? Divider(
-                    thickness: 1,
-                  )
-                : SizedBox(),
-            checkBoxValue && (double.parse(usableWAlletAmount!) < finalamount!)
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                          child: Text(
-                            "Wallet Points (-)",
-                            style: CustomTextStyle.textFormFieldSemiBold
-                                .copyWith(fontSize: 12, color: Colors.black54),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                          child: Text(
-                            "${double.parse(usableWAlletAmount!)}",
-                            // "\u{20B9} ${finalamountu}",
-                            style: CustomTextStyle.textFormFieldSemiBold
-                                .copyWith(fontSize: 16, color: Colors.black),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Container(),
-            checkBoxValue && (double.parse(usableWAlletAmount!) > finalamount!)
-                ? Divider(
-                    thickness: 1,
-                  )
-                : SizedBox(),
-            checkBoxValue && (double.parse(usableWAlletAmount!) > finalamount!)
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                          child: Text(
-                            "Wallet Amount (-)",
-                            style: CustomTextStyle.textFormFieldSemiBold
-                                .copyWith(fontSize: 12, color: Colors.black54),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                          child: Text(
-                            "\u{20B9} $finalamount",
-                            // "\u{20B9} ${finalamountu}",
-                            style: CustomTextStyle.textFormFieldSemiBold
-                                .copyWith(fontSize: 16, color: Colors.black),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Container(),
-            checkBoxValue && (double.parse(usableWAlletAmount!) == finalamount)
-                ? Divider(
-                    thickness: 1,
-                  )
-                : SizedBox(),
-            checkBoxValue && (double.parse(usableWAlletAmount!) == finalamount)
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                          child: Text(
-                            "Wallet Amount (-)",
-                            style: CustomTextStyle.textFormFieldSemiBold
-                                .copyWith(fontSize: 12, color: Colors.black54),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 0),
-                          child: Text(
-                            "\u{20B9} $finalamount",
-                            // "\u{20B9} ${finalamountu}",
-                            style: CustomTextStyle.textFormFieldSemiBold
-                                .copyWith(fontSize: 16, color: Colors.black),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Container(),
-            SizedBox(
-              height: 8,
-            ),
-            Container(
-              width: double.infinity,
-              height: 0.5,
-              margin: EdgeInsets.symmetric(vertical: 4),
-              color: Colors.grey.shade400,
-            ),
-            SizedBox(
-              height: 8,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "Total",
-                    style: CustomTextStyle.textFormFieldSemiBold
-                        .copyWith(color: Colors.black, fontSize: 12),
-                  ),
-                  Text(
-                    // "${twltamount.toStringAsFixed(2)}",
-                    checkBoxValue || discountval_flag
-                        ? "\u{20B9}${(twltamount! - difference!).round()}"
-                        : "\u{20B9}$finalamount",
-                    style: CustomTextStyle.textFormFieldSemiBold
-                        .copyWith(fontSize: 16, color: Colors.black),
-                  )
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      color: Colors.grey[300],
+      thickness: 1,
+      height: 20,
     );
   }
 
@@ -2310,77 +2834,69 @@ class _CheckOutPageState extends State<CheckOutPage> {
     return await showDialog(
       context: context,
       builder: (context) {
-        print('Value of phonepayOn: $phonepayOn');
-
-        print(
-            'Condition: ${phonepayOn == null || phonepayOn == "off" || phonepayOn.toString().isEmpty}');
         return Dialog(
           child: SizedBox(
-            height: 350,
+            height: 245,
             child: Stack(
               children: [
                 Column(
                   children: [
                     codp == 'yes'
-                   ?  ListTile(
-                    leading: Container(
-                      width: 60,
-                      height: 50,
-                      decoration: BoxDecoration(
-                          //color: Colors.green,
-                          image: DecorationImage(
-                              image:
-                                  AssetImage('assets/images/cod.png'))),
-                    ),
-                    trailing: Theme(
-                      data: Theme.of(context).copyWith(
-                          unselectedWidgetColor: Colors.black,
-                          disabledColor: Colors.blue),
-                      child: Radio(
-                        activeColor: FoodAppColors.black,
-                        fillColor: MaterialStateColor.resolveWith(
-                            (states) => Colors.blue),
-                        value: 'cod',
-                        groupValue: selectedPayment,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedPayment = value.toString();
-                            log('selectedPayment   ' +
-                                selectedPayment.toString());
-                            Navigator.pop(context);
-                            //paymentPopUp();
-                          });
-                        },
-                      ),
-                    ),
-                    title: Text('CASH ON DELIVERY',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: FoodAppColors.black,
-                            fontSize: 12)),
-                    )
-                    : ListTile(
-                    ),
-                    phonepayOn == null ||
-                            phonepayOn == "off" ||
-                            phonepayOn.toString().isEmpty
-                        ? disblePayment(
-                            'PHONEPAY', 'assets/images/phone_pay.png')
-                        : ListTile(
+                        ? ListTile(
                             leading: Container(
                               width: 60,
                               height: 50,
                               decoration: BoxDecoration(
                                   //color: Colors.green,
                                   image: DecorationImage(
+                                      image:
+                                          AssetImage('assets/images/cod.png'))),
+                            ),
+                            trailing: Theme(
+                              data: Theme.of(context).copyWith(
+                                  unselectedWidgetColor: Colors.black,
+                                  disabledColor: Colors.blue),
+                              child: Radio(
+                                activeColor: FoodAppColors.black,
+                                fillColor: WidgetStateColor.resolveWith(
+                                    (states) => Colors.blue),
+                                value: 'cod',
+                                groupValue: selectedPayment,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedPayment = value.toString();
+                                    log('selectedPayment   ' +
+                                        selectedPayment.toString());
+                                    Navigator.pop(context);
+                                    paymentPopUp();
+                                  });
+                                },
+                              ),
+                            ),
+                            title: Text('CASH ON DELIVERY',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: FoodAppColors.black,
+                                    fontSize: 12)),
+                          )
+                        : ListTile(),
+                    razorpay_key == null || razorpay_key == ""
+                        ? disblePayment('Card / Net Banking / UPI',
+                            'assets/images/razorpay.png')
+                        : ListTile(
+                            leading: Container(
+                              width: 60,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                  image: DecorationImage(
                                       image: AssetImage(
-                                          'assets/images/phone_pay.png'))),
+                                          'assets/images/razorpay.png'))),
                             ),
                             trailing: Radio(
                               activeColor: FoodAppColors.black,
-                              fillColor: MaterialStateColor.resolveWith(
+                              fillColor: WidgetStateColor.resolveWith(
                                   (states) => Colors.blue),
-                              value: 'phonepay',
+                              value: 'razorpay',
                               groupValue: selectedPayment,
                               onChanged: (value) {
                                 setState(() {
@@ -2392,12 +2908,14 @@ class _CheckOutPageState extends State<CheckOutPage> {
                                 });
                               },
                             ),
-                            title: Text('PHONEPAY',
+                            title: Text('Card / Net Banking / UPI',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: FoodAppColors.black,
                                     fontSize: 12)),
                           ),
+                    // PhonePe option hidden for now. Keep commented for future use.
+                    // disblePayment('PHONEPAY', 'assets/images/phone_pay.png'),
                   ],
                 ),
                 flag
@@ -2412,6 +2930,13 @@ class _CheckOutPageState extends State<CheckOutPage> {
                               onPressed: () {
                                 //  Navigator.pop(context);
                                 if (selectedPayment == 'cod') {
+                                  if (textval == "Select Date" ||
+                                      textval1 == "Select Time") {
+                                    showLongToast(
+                                        "Please select date & time...");
+                                    Navigator.pop(context);
+                                    return;
+                                  }
                                   showLongToast(
                                       "don't press back until payment gets completed or else payment will get cancelled.");
                                   showLoaderDialog(context);
@@ -2430,71 +2955,67 @@ class _CheckOutPageState extends State<CheckOutPage> {
                                   showLongToast(
                                       " ⚠ Don't Close App Or Press Back Button Until Payment Success Or Failure....... ");
                                   _getInvoiceinstamojo("ONLINE");
-                                } else if (selectedPayment == 'phonepay') {
-                                  // Navigator.pop(context);
-                                  showLongToast(
-                                      " ⚠ Don't Close App Or Press Back Button Until Payment Success Or Failure....... ");
-                                  // _getInvoiceinstamojo("ONLINE");
-                                  //   Navigator.pop(context);
-                                  snapshot
-                                      .initiatePhonePeTransaction(
-                                          amount: finalamount.toString())
-                                      .then((value) {
-                                    log("before condition");
-                                    if (value &&
-                                        snapshot.payUrl != '' &&
-                                        snapshot.merchantTransactionId != 0) {
-                                      log("after condition");
-                                      final email = GroceryAppConstant.email
-                                                  .contains("@gmai.com") ||
-                                              GroceryAppConstant.email
-                                                  .contains("@")
-                                          ? GroceryAppConstant.email
-                                          : 'support@tidyhome.biz';
-
-                                      Navigator.push(context,
-                                          MaterialPageRoute(builder: (context) {
-                                        return PhonepePaymentScreen(
-                                          paymentType: 'checkout',
-                                          paymentUrl: snapshot.payUrl,
-                                          amount: finalamount.toString(),
-                                          merchantTransactionId:
-                                              snapshot.merchantTransactionId!,
-                                          finalamt: finalamount.toString(),
-                                          usedWalletamt:
-                                              usableWAlletAmount.toString(),
-                                          username: user_name ?? '',
-                                          checkbox: checkBoxValue,
-                                          address: address1 ?? "",
-                                          city: city1 ?? "",
-                                          coupancode: coupancode ?? "",
-                                          deliveryfee: deliveryfee.toString(),
-                                          difference: difference.toString(),
-                                          onedayprice: Onedayprice.toString(),
-                                          pincode: pin1 ?? "",
-                                          prodctlist1: prodctlist1,
-                                          email: email,
-                                          mobile: GroceryAppConstant.username,
-                                          name: GroceryAppConstant.name,
-                                          shipping: deliveryfee.toString(),
-                                          mv: prodctlist1[0].mv.toString(),
-                                          lat: widget.address.lat.toString(),
-                                          long: widget.address.lng.toString(),
-                                          coupoun: coupancode != null
-                                              ? coupancode ?? ""
-                                              : "",
-                                          coupoun_amount: difference.toString(),
-                                          fast_price: Onedayprice != null
-                                              ? Onedayprice.toString()
-                                              : "0.0",
-                                          // invoice: user.Invoice ?? '',
-                                        );
-                                      }));
-                                    } else {
-                                      showLongToast('Payment request failed');
-                                    }
-                                  });
                                 }
+                                // else if (selectedPayment == 'phonepay') {
+                                //   showLongToast(
+                                //       " ⚠ Don't Close App Or Press Back Button Until Payment Success Or Failure....... ");
+                                //   snapshot
+                                //       .initiatePhonePeTransaction(
+                                //           amount: finalamount.toString())
+                                //       .then((value) {
+                                //     log("before condition");
+                                //     if (value &&
+                                //         snapshot.payUrl != '' &&
+                                //         snapshot.merchantTransactionId != 0) {
+                                //       log("after condition");
+                                //       final email = GroceryAppConstant.email
+                                //                   .contains("@gmai.com") ||
+                                //               GroceryAppConstant.email
+                                //                   .contains("@")
+                                //           ? GroceryAppConstant.email
+                                //           : 'support@tidyhome.biz';
+                                //       Navigator.push(context,
+                                //           MaterialPageRoute(builder: (context) {
+                                //         return PhonepePaymentScreen(
+                                //           paymentType: 'checkout',
+                                //           paymentUrl: snapshot.payUrl,
+                                //           amount: finalamount.toString(),
+                                //           merchantTransactionId:
+                                //               snapshot.merchantTransactionId!,
+                                //           finalamt: finalamount.toString(),
+                                //           usedWalletamt:
+                                //               usableWAlletAmount.toString(),
+                                //           username: user_name ?? '',
+                                //           checkbox: checkBoxValue,
+                                //           address: address1 ?? "",
+                                //           city: city1 ?? "",
+                                //           coupancode: coupancode ?? "",
+                                //           deliveryfee: deliveryfee.toString(),
+                                //           difference: difference.toString(),
+                                //           onedayprice: Onedayprice.toString(),
+                                //           pincode: pin1 ?? "",
+                                //           prodctlist1: prodctlist1,
+                                //           email: email,
+                                //           mobile: GroceryAppConstant.username,
+                                //           name: GroceryAppConstant.name,
+                                //           shipping: deliveryfee.toString(),
+                                //           mv: prodctlist1[0].mv.toString(),
+                                //           lat: widget.address.lat.toString(),
+                                //           long: widget.address.lng.toString(),
+                                //           coupoun: coupancode != null
+                                //               ? coupancode ?? ""
+                                //               : "",
+                                //           coupoun_amount: difference.toString(),
+                                //           fast_price: Onedayprice != null
+                                //               ? Onedayprice.toString()
+                                //               : "0.0",
+                                //         );
+                                //       }));
+                                //     } else {
+                                //       showLongToast('Payment request failed');
+                                //     }
+                                //   });
+                                // }
                                 //Navigator.pop(context);
                               },
                               child: Text('Confirm',
@@ -2670,7 +3191,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
     map['pincode'] = pin1;
     map['city'] = city1;
     map['invoice_total'] = (calcutateAmount! - difference!).toString();
-    map['notes'] = resignofcause.text != null ? resignofcause.text : "";
+    map['notes'] = "";
     map['shop_id'] = GroceryAppConstant.Shop_id.toString();
     map['PayMode'] = paymode;
     map['user_id'] = "user_id";
@@ -2680,6 +3201,19 @@ class _CheckOutPageState extends State<CheckOutPage> {
     map['lng'] = GroceryAppConstant.longitude.toString();
     map['coupon'] = coupancode != null ? coupancode : "";
     map['couponAmount'] = difference.toString();
+    // Ensure date and time are sent in invoice header as well
+    if (textval == "Select Date" || textval.toString().isEmpty) {
+      map['adate'] = '';
+    } else {
+      map['adate'] = (Jiffy.parse(textval, pattern: "dd/MM/yyyy")
+              .format(pattern: "yyyy-MM-dd"))
+          .toString();
+    }
+    if (textval1 == "Select Time" || textval1.isEmpty) {
+      map['atime'] = '';
+    } else {
+      map['atime'] = textval1;
+    }
 
     print(map.toString());
     final response = await http.post(
@@ -3062,9 +3596,10 @@ class _CheckOutPageState extends State<CheckOutPage> {
       map['product_id'] = prodctlist1[i].pid;
       map['product_name'] = prodctlist1[i].pname;
       map['quantity'] = prodctlist1[i].pQuantity.toString();
-      map['price'] = (int.parse(prodctlist1[i].costPrice.toString()) *
-              prodctlist1[i].pQuantity!)
-          .toString();
+      final String unitPriceStr = prodctlist1[i].costPrice.toString();
+      final double unitPrice = double.tryParse(unitPriceStr) ?? 0.0;
+      final int qty = prodctlist1[i].pQuantity ?? 1;
+      map['price'] = (unitPrice * qty).toStringAsFixed(2);
       map['user_per'] = prodctlist1[i].discount;
       map['user_dis'] = (double.parse(prodctlist1[i].discountValue.toString()) *
               prodctlist1[i].pQuantity!)
@@ -3075,9 +3610,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
       map['shop_id'] = GroceryAppConstant.Shop_id;
       map['cgst'] = prodctlist1[i].cgst;
       map['sgst'] = prodctlist1[i].sgst;
-      map['variant'] = prodctlist1[i].varient == null
-          ? " "
-          : WishlistState.prodctlist1![i].varient;
+      map['variant'] = prodctlist1[i].varient ?? " ";
       map['color'] = prodctlist1[i].pcolor == null ||
               prodctlist1[i].pcolor.toString().isEmpty
           ? ""
@@ -3089,11 +3622,24 @@ class _CheckOutPageState extends State<CheckOutPage> {
       map['refid'] = "0";
       map['image'] = prodctlist1[i].pimage;
       map['prime'] = "0";
-      map['mv'] = prodctlist1[i].mv.toString();
-      map['adate'] = textval == "Select Date" || textval.toString().isEmpty
-          ? ''
-          : (Jiffy.parse(textval, pattern: "dd/MM/yyyy").format(pattern: "yyyy-MM-dd")).toString();
-      //map['atime'] =textval1 == "Select Time" ||textval1.isEmpty ? '' : textval1;
+      map['mv'] = prodctlist1[i].mv?.toString() ?? "0";
+      // Set date and time separately
+      if (textval == "Select Date" || textval.toString().isEmpty) {
+        map['adate'] = '';
+      } else {
+        map['adate'] = (Jiffy.parse(textval, pattern: "dd/MM/yyyy")
+                .format(pattern: "yyyy-MM-dd"))
+            .toString();
+      }
+
+      // Set time slot
+      if (textval1 == "Select Time" || textval1.isEmpty) {
+        map['atime'] = '';
+      } else {
+        map['atime'] = textval1;
+      }
+
+      map['notes'] = "";
       final response = await http.post(
           Uri.parse(GroceryAppConstant.base_url + 'api/order.php'),
           body: map);

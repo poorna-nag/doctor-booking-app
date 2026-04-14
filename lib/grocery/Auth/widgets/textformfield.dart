@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/grocery/Auth/widgets/responsive_ui.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/Auth/widgets/responsive_ui.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? hint;
@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool? obscureText;
   final IconData? icon;
+  final bool? enabled;
   double? _width;
   double? _pixelRatio;
   bool? large;
@@ -19,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.icon,
     this.obscureText = false,
+    this.enabled,
   });
 
   @override
@@ -33,6 +35,8 @@ class CustomTextField extends StatelessWidget {
       child: TextFormField(
         controller: textEditingController,
         keyboardType: keyboardType,
+        obscureText: obscureText ?? false,
+        enabled: enabled ?? true,
         cursorColor: GroceryAppColors.boxColor1,
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: GroceryAppColors.boxColor1, size: 20),

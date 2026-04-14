@@ -22,6 +22,8 @@ class TrackInvoice {
     this.domain,
     this.shipping,
     this.deliveryDate,
+    this.adate,
+    this.atime,
     this.awbCode,
     this.subs,
     this.refid,
@@ -48,6 +50,8 @@ class TrackInvoice {
   String? domain;
   String? shipping;
   String? deliveryDate;
+  String? adate;  // Appointment date
+  String? atime;  // Appointment time
   String? awbCode;
   String? subs;
   String? refid;
@@ -76,6 +80,8 @@ class TrackInvoice {
       domain: json["domain"],
       shipping: json["shipping"],
       deliveryDate: json["delivery_date"],
+      adate: json["adate"],
+      atime: json["atime"],
       awbCode: json["awb_code"],
       subs: json["subs"],
       refid: json["refid"],
@@ -111,6 +117,8 @@ class TrackInvoice {
         "domain": domain,
         "shipping": shipping,
         "delivery_date": deliveryDate,
+        "adate": adate,
+        "atime": atime,
         "awb_code": awbCode,
         "subs": subs,
         "refid": refid,

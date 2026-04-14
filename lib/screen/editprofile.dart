@@ -1,14 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 
-import 'package:aladdinmart/model/AddressModel.dart';
-import 'package:aladdinmart/model/RegisterModel.dart';
-import 'package:aladdinmart/model/UserUpdateModel.dart';
+import 'package:ecoshine24/model/UserUpdateModel.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -354,6 +351,7 @@ class _HomePageState extends State<EditProfilePage> {
                                         if (value == null || value.isEmpty) {
                                           return " Please enter the name";
                                         }
+                                        return null;
                                       },
                                       decoration: InputDecoration(
                                         contentPadding:
@@ -401,6 +399,7 @@ class _HomePageState extends State<EditProfilePage> {
                                         if (value == null || value.isEmpty) {
                                           return " Please enter the email id";
                                         }
+                                        return null;
                                       },
                                       decoration: InputDecoration(
                                           contentPadding:
@@ -447,6 +446,7 @@ class _HomePageState extends State<EditProfilePage> {
                                         if (value == null || value.isEmpty) {
                                           return " Please enter the mobile No";
                                         }
+                                        return null;
                                       },
                                       decoration: InputDecoration(
                                           contentPadding:
@@ -512,6 +512,7 @@ class _HomePageState extends State<EditProfilePage> {
                                           if (value == null || value.isEmpty) {
                                             return " Please enter the pincode";
                                           }
+                                          return null;
                                         },
                                         decoration: InputDecoration(
                                             contentPadding:
@@ -533,6 +534,7 @@ class _HomePageState extends State<EditProfilePage> {
                                         if (value == null || value.isEmpty) {
                                           return " Please enter the state";
                                         }
+                                        return null;
                                       },
                                       decoration: InputDecoration(
                                           contentPadding:
@@ -594,6 +596,7 @@ class _HomePageState extends State<EditProfilePage> {
                                       if (value == null || value.isEmpty) {
                                         return " Please enter the city";
                                       }
+                                      return null;
                                     },
                                     decoration: InputDecoration(
                                         contentPadding:
@@ -963,41 +966,37 @@ class _HomePageState extends State<EditProfilePage> {
     imageshow1 = File(data!.path);
 
     String imagevalue1 = (imageshow1).toString();
-    if (imagevalue1 != null) {
-      imagevalue = imagevalue1 != null
-          ? imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
-          : imagevalue1;
+    imagevalue = imagevalue1 != null
+        ? imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
+        : imagevalue1;
 
 //    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-      setState(() {
-        base64Image = base64Encode(imageshow1!.readAsBytesSync());
-        _image = new File('$imagevalue');
-        print('Image Path $_image');
-        _ImageUpdate();
-      });
-    }
+    setState(() {
+      base64Image = base64Encode(imageshow1!.readAsBytesSync());
+      _image = new File('$imagevalue');
+      print('Image Path $_image');
+      _ImageUpdate();
+    });
   }
 
   getImageC(BuildContext context) async {
     final data = await ImagePicker().pickImage(source: ImageSource.camera);
     imageshow1 = File(data!.path);
     String imagevalue1 = (imageshow1).toString();
-    if (imagevalue1 != null) {
-      imagevalue1.length > 7
-          ? imagevalue =
-              imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
-          : imagevalue1;
+    imagevalue1.length > 7
+        ? imagevalue =
+            imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
+        : imagevalue1;
 
 //    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-      setState(() {
-        base64Image = base64Encode(imageshow1!.readAsBytesSync());
-        _image = new File('$imagevalue');
-        print('Image Path $_image');
-        _ImageUpdate();
-      });
-    }
+    setState(() {
+      base64Image = base64Encode(imageshow1!.readAsBytesSync());
+      _image = new File('$imagevalue');
+      print('Image Path $_image');
+      _ImageUpdate();
+    });
   }
 
   final picker = ImagePicker();

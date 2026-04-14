@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/model/AddressModel.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/model/AddressModel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -642,8 +640,7 @@ class _HomePageState extends State<UpDateAddress> {
     map['pincode'] = pincodeController.text;
     map['lat'] = pref.getString("lat") != null ? pref.getString("lat") : "";
     map['lng'] = pref.getString("lng") != null ? pref.getString("lng") : "";
-    String link =
-        FoodAppConstant.base_url + "manage/api/user_address/update";
+    String link = FoodAppConstant.base_url + "manage/api/user_address/update";
     print(link);
     final response = await http.post(Uri.parse(link), body: map);
 

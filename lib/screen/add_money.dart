@@ -1,17 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 import 'package:http/http.dart' as http;
-import 'package:aladdinmart/model/InvoiceModel.dart';
-import 'package:aladdinmart/model/OrderDliverycharge.dart';
-import 'package:aladdinmart/screen/transaction_successful.dart';
+import 'package:ecoshine24/model/InvoiceModel.dart';
+import 'package:ecoshine24/model/OrderDliverycharge.dart';
+import 'package:ecoshine24/screen/transaction_successful.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'finalScreen.dart';
 
 class AddMoney extends StatefulWidget {
   const AddMoney({Key? key}) : super(key: key);
@@ -130,8 +126,8 @@ class _AddMoneyState extends State<AddMoney> {
 
     print("mapppp--->${map}");
 
-    final response =
-        await http.post(Uri.parse(FoodAppConstant.base_url + 'api/order.php'), body: map);
+    final response = await http
+        .post(Uri.parse(FoodAppConstant.base_url + 'api/order.php'), body: map);
 
     print("API-Response--> ${response.statusCode}");
     print("API_Response--> ${response.body}");
@@ -145,7 +141,7 @@ class _AddMoneyState extends State<AddMoney> {
       if (user.success.toString() == "true") {
         print("12345" + user.Invoice.toString());
 
-        _uploadProducts(user.Invoice??"", paymode);
+        _uploadProducts(user.Invoice ?? "", paymode);
         setState(() {
           invoiceid = user.Invoice;
         });
@@ -199,8 +195,9 @@ class _AddMoneyState extends State<AddMoney> {
       map['sub_date'] = "";
       print(FoodAppConstant.base_url + 'api/order.php');
       print(map.toString());
-      final response = await http
-          .post(Uri.parse(FoodAppConstant.base_url + 'api/order.php'), body: map);
+      final response = await http.post(
+          Uri.parse(FoodAppConstant.base_url + 'api/order.php'),
+          body: map);
 
       try {
         // print(response);
@@ -221,7 +218,7 @@ class _AddMoneyState extends State<AddMoney> {
               //FoodAppConstant.itemcount = 0;
               //FoodAppConstant.carditemCount = 0;
               //cartItemcount(FoodAppConstant.carditemCount);
-              _afterPayment(orderid??"", signature??"", paymentId??"");
+              _afterPayment(orderid ?? "", signature ?? "", paymentId ?? "");
 
               // openCheckout();
 
@@ -263,7 +260,6 @@ class _AddMoneyState extends State<AddMoney> {
         }
 
       }*/
-
     }
   }
 
@@ -281,8 +277,9 @@ class _AddMoneyState extends State<AddMoney> {
     //map['purpose'] = invoiceid;
     map['wallet'] = "w_in";
     print("mymap---->${map}");
-    final response = await http
-        .post(Uri.parse(FoodAppConstant.base_url + 'verifyUserWallet.php'), body: map);
+    final response = await http.post(
+        Uri.parse(FoodAppConstant.base_url + 'verifyUserWallet.php'),
+        body: map);
     try {
       print("response------->${response.body}");
       if (response.statusCode == 200) {
@@ -415,7 +412,7 @@ class _AddMoneyState extends State<AddMoney> {
     showLongToast(
         "Don't press back until payment gets confirmed or else payment will get cancelled.");
     // _getInvoice1("ONLINE");
-    _afterPayment(orderid??"", signature??"", paymentId??"");
+    _afterPayment(orderid ?? "", signature ?? "", paymentId ?? "");
   }
 
   handlerErrorFailure() {

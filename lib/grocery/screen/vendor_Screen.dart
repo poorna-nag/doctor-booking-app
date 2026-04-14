@@ -1,21 +1,16 @@
-import 'dart:developer';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pagewise/flutter_pagewise.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:aladdinmart/constent/app_constent.dart';
-import 'package:aladdinmart/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
-import 'package:aladdinmart/grocery/screen/SubCategry.dart';
-import 'package:aladdinmart/grocery/screen/mv_products.dart';
-import 'package:aladdinmart/grocery/screen/vendor_product_categories.dart';
-import 'package:aladdinmart/model/ListModel.dart';
-import 'package:aladdinmart/utils/dimensions.dart';
-import 'package:aladdinmart/utils/styles.dart';
+import 'package:ecoshine24/constent/app_constent.dart';
+import 'package:ecoshine24/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/screen/mv_products.dart';
+import 'package:ecoshine24/model/ListModel.dart';
+import 'package:ecoshine24/utils/dimensions.dart';
+import 'package:ecoshine24/utils/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VendorList extends StatefulWidget {

@@ -8,14 +8,12 @@ class DbProductManager {
   Database? _database;
 
   Future openDb() async {
-    if (_database == null) {
-      _database = await openDatabase(join(await getDatabasesPath(), "ss5.db"),
+    _database ??= await openDatabase(join(await getDatabasesPath(), "ss5.db"),
           version: 1, onCreate: (Database db, int version) async {
         await db.execute(
           "CREATE TABLE products(id INTEGER PRIMARY KEY autoincrement, pname TEXT, pid TEXT, pimage TEXT, pprice TEXT, pQuantity INTEGER, pcolor TEXT, psize TEXT, pdiscription TEXT, sgst TEXT, cgst TEXT, discount TEXT, discountValue TEXT, adminper TEXT, adminpricevalue TEXT, costPrice TEXT,shipping TEXT,totalQuantity TEXT,varient TEXT,mv INT,moq TEXT,time1 TEXT,date1 TEXT)",
         );
       });
-    }
   }
 
   Future<int> insertStudent(ProductsCart products) async {

@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/model/UserUpdateModel.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/model/UserUpdateModel.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -383,43 +382,39 @@ class _HomePageState extends State<Uploadimage> {
     imageshow1 = File(data!.path);
 
     String imagevalue1 = (imageshow1).toString();
-    if (imagevalue1 != null) {
-      imagevalue = imagevalue1 != null
-          ? imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
-          : imagevalue1;
+    imagevalue = imagevalue1 != null
+        ? imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
+        : imagevalue1;
 
 //    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-      setState(() {
-        base64Image = base64Encode(imageshow1!.readAsBytesSync());
-        _image = File('$imagevalue');
-        print('Image Path $_image');
-        _ImageUpdate();
-        flag = true;
-      });
-    }
+    setState(() {
+      base64Image = base64Encode(imageshow1!.readAsBytesSync());
+      _image = File('$imagevalue');
+      print('Image Path $_image');
+      _ImageUpdate();
+      flag = true;
+    });
   }
 
   getImageC(BuildContext context) async {
     final data = await ImagePicker().pickImage(source: ImageSource.camera);
     imageshow1 = File(data!.path);
     String imagevalue1 = (imageshow1).toString();
-    if (imagevalue1 != null) {
-      imagevalue1.length > 7
-          ? imagevalue =
-              imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
-          : imagevalue1;
+    imagevalue1.length > 7
+        ? imagevalue =
+            imagevalue1.substring(7, (imagevalue1.lastIndexOf('') - 1)).trim()
+        : imagevalue1;
 
 //    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-      setState(() {
-        base64Image = base64Encode(imageshow1!.readAsBytesSync());
-        _image = File('$imagevalue');
-        print('Image Path $_image');
-        _ImageUpdate();
-        flag = true;
-      });
-    }
+    setState(() {
+      base64Image = base64Encode(imageshow1!.readAsBytesSync());
+      _image = File('$imagevalue');
+      print('Image Path $_image');
+      _ImageUpdate();
+      flag = true;
+    });
   }
 
   // final picker = ImagePicker();

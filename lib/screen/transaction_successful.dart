@@ -1,4 +1,4 @@
-import 'package:aladdinmart/grocery/General/Home.dart';
+import 'package:ecoshine24/grocery/General/Home.dart';
 import 'package:flutter/material.dart';
 
 class TransactionSuccessful extends StatefulWidget {
@@ -96,8 +96,7 @@ class _TransactionSuccessfulState extends State<TransactionSuccessful> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                GroceryApp()),
+                                            builder: (context) => GroceryApp()),
                                       );
                                     },
                                     child: Center(

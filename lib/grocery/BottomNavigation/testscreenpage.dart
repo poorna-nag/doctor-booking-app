@@ -5,23 +5,23 @@
 // import 'package:flutter/material.dart';
 // import 'package:geocoder/geocoder.dart';
 // import 'package:geolocator/geolocator.dart';
-// import 'package:aladdinmart/grocery/Auth/signin.dart';
-// import 'package:aladdinmart/grocery/General/AppConstant.dart';
-// import 'package:aladdinmart/grocery/General/Home.dart';
-// import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-// import 'package:aladdinmart/grocery/BottomNavigation/categories.dart';
+// import 'package:ecoshine24/grocery/Auth/signin.dart';
+// import 'package:ecoshine24/grocery/General/AppConstant.dart';
+// import 'package:ecoshine24/grocery/General/Home.dart';
+// import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+// import 'package:ecoshine24/grocery/BottomNavigation/categories.dart';
 
-// import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-// import 'package:aladdinmart/grocery/model/CategaryModal.dart';
-// import 'package:aladdinmart/grocery/model/Gallerymodel.dart';
-// import 'package:aladdinmart/grocery/model/productmodel.dart';
-// import 'package:aladdinmart/grocery/model/slidermodal.dart';
-// import 'package:aladdinmart/grocery/screen/SearchScreen.dart';
-// import 'package:aladdinmart/grocery/screen/SubCategry.dart';
-// import 'package:aladdinmart/grocery/screen/detailpage.dart';
-// import 'package:aladdinmart/grocery/screen/detailpage1.dart';
-// import 'package:aladdinmart/grocery/screen/productlist.dart';
-// import 'package:aladdinmart/grocery/screen/secondtabview.dart';
+// import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+// import 'package:ecoshine24/grocery/model/CategaryModal.dart';
+// import 'package:ecoshine24/grocery/model/Gallerymodel.dart';
+// import 'package:ecoshine24/grocery/model/productmodel.dart';
+// import 'package:ecoshine24/grocery/model/slidermodal.dart';
+// import 'package:ecoshine24/grocery/screen/SearchScreen.dart';
+// import 'package:ecoshine24/grocery/screen/SubCategry.dart';
+// import 'package:ecoshine24/grocery/screen/detailpage.dart';
+// import 'package:ecoshine24/grocery/screen/detailpage1.dart';
+// import 'package:ecoshine24/grocery/screen/productlist.dart';
+// import 'package:ecoshine24/grocery/screen/secondtabview.dart';
 // import 'package:new_version/new_version.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:url_launcher/url_launcher.dart';
@@ -1192,7 +1192,7 @@
 //                                                           image: NetworkImage(
 //                                                             products1[index].img != null
 //                                                                 ? GroceryAppConstant.Product_Imageurl + products1[index].img
-//                                                                 : "ttps://www.drawplanet.cz/wp-content/uploads/2019/10/dsc-0009-150x100.jpg",
+//                                                                 : "https://www.bigwelt.com/manage/uploads/gallery/no-img.png",
 //                                                           ))),
 //                                                 ),
 //                                                 Expanded(

@@ -1,19 +1,17 @@
 import 'dart:developer';
 
-import 'package:aladdinmart/constent/app_constent.dart';
-import 'package:aladdinmart/grocery/screen/ShowAddress.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ecoshine24/constent/app_constent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:aladdinmart/grocery/Auth/signin.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/CategaryModal.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
-import 'package:aladdinmart/grocery/screen/SearchScreen.dart';
-import 'package:aladdinmart/grocery/screen/detailpage.dart';
+import 'package:ecoshine24/grocery/Auth/signin.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/CategaryModal.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/screen/SearchScreen.dart';
+import 'package:ecoshine24/grocery/screen/detailpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Sbcategory extends StatefulWidget {
@@ -284,14 +282,9 @@ class _Sbcategory extends State<Sbcategory> {
                                             width: 1.5),
                                         image: DecorationImage(
                                           fit: BoxFit.fill,
-                                          image: item.img!.length > 0
-                                              ? NetworkImage(
-                                                  GroceryAppConstant.base_url +
-                                                      "manage/uploads/p_category/" +
-                                                      item.img.toString(),
-                                                ) as ImageProvider
-                                              : AssetImage(
-                                                  "assets/images/logo.png"),
+                                          image:
+                                              getGroceryCategoryImageProvider(
+                                                  item.img),
                                         )),
                                     margin: EdgeInsets.only(left: 5, right: 10),
                                     /*  child: CircleAvatar(
@@ -301,7 +294,7 @@ class _Sbcategory extends State<Sbcategory> {
                                       child: new SizedBox(
                                         width: 40.0,
                                         height: 40.0,
-                                        child:item.img.length>0?Image.network(Constant.base_url + "manage/uploads/p_category/" + item.img, fit: BoxFit.fill):Image.asset("assets/images/logo.png"),
+                                        child: getGroceryCategoryImageWidget(item.img, width: 40, height: 40),
                                       ),
                                     ),
                                   ),*/
@@ -795,7 +788,9 @@ class _Sbcategory extends State<Sbcategory> {
                                                                           InkWell(
                                                                         onTap:
                                                                             () async {
-                                                                          SharedPreferences pref = await SharedPreferences.getInstance();
+                                                                          SharedPreferences
+                                                                              pref =
+                                                                              await SharedPreferences.getInstance();
                                                                           if (GroceryAppConstant
                                                                               .isLogin) {
                                                                             if (num.parse(products1[index].quantityInStock ?? '0') >
@@ -815,7 +810,7 @@ class _Sbcategory extends State<Sbcategory> {
                                                                               //   backgroundColor: Colors.green,
                                                                               //   behavior: SnackBarBehavior.floating,
                                                                               // ));
-                                                                            await Navigator.push(
+                                                                              await Navigator.push(
                                                                                 context,
                                                                                 MaterialPageRoute(builder: (context) => WishList()),
                                                                               );

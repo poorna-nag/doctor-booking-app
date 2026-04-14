@@ -2,14 +2,14 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:aladdinmart/constent/app_constent.dart';
-import 'package:aladdinmart/grocery/Auth/signin.dart';
-import 'package:aladdinmart/grocery/General/AnimatedSplashScreen.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
-import 'package:aladdinmart/grocery/screen/detailpage.dart';
+import 'package:ecoshine24/constent/app_constent.dart';
+import 'package:ecoshine24/grocery/Auth/signin.dart';
+import 'package:ecoshine24/grocery/General/AnimatedSplashScreen.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/screen/detailpage.dart';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -118,7 +118,21 @@ class UserFilterDemoState extends State<UserFilterDemo> {
     getcartCount();
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: GroceryAppColors.tela,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xff1E88E5), // Medical blue from grocery home
+                Color(0xff42A5F5), // Lighter medical blue
+                Color(0xff64B5F6), // Even lighter medical blue
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: Padding(
             padding: EdgeInsets.only(left: 0.0),
             child: InkWell(
@@ -130,9 +144,9 @@ class UserFilterDemoState extends State<UserFilterDemo> {
                 }
               },
               child: Icon(
-                Icons.arrow_back,
-                size: 30,
-                color: Colors.white,
+                Icons.arrow_back_ios,
+                size: 24,
+                color: GroceryAppColors.white,
               ),
             )),
         title: Row(
@@ -147,35 +161,37 @@ class UserFilterDemoState extends State<UserFilterDemo> {
                   ),
               child: Container(
                 height: 45,
-                child: Material(
-                  color: Colors.white,
-                  elevation: 0.0,
-                  shape: RoundedRectangleBorder(
-                    // side: BorderSide(
-                    //   color: Colors.white,
-                    // ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
+                decoration: BoxDecoration(
+                  color: GroceryAppColors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  border: Border.all(
+                    color: Color(0xff1E88E5).withOpacity(0.2), // Medical blue
+                    width: 1,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xff1E88E5).withOpacity(0.1), // Medical blue
+                      blurRadius: 8,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
                       child: Padding(
                     padding: EdgeInsets.only(top: 5.0),
                     child: TextField(
                       onChanged: (string) {
-                        if (string != null) {
-                          DatabaseHelper.getAllProductSearch(
-                                  "", "10000000", string)
-                              .then((usersFromServe) {
-                            setState(() {
-                              users = usersFromServe!;
-                              if (users != null) {
-                                suggestionList = users;
-                              }
-                            });
+                        DatabaseHelper.getAllProductSearch(
+                                "", "10000000", string)
+                            .then((usersFromServe) {
+                          setState(() {
+                            users = usersFromServe!;
+                            suggestionList = users;
                           });
-                        }
+                        });
 
                         _debouncer.run(() {
                           setState(() {
@@ -187,14 +203,16 @@ class UserFilterDemoState extends State<UserFilterDemo> {
                           });
                         });
                       },
-                      style: TextStyle(color: Colors.green[900]),
+                      style:
+                          TextStyle(color: Color(0xff1E88E5)), // Medical blue
                       decoration: InputDecoration(
-                        hintText: 'Search Your Item',
-                        hintStyle:
-                            TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+                        hintText: 'Search Medical Services...',
+                        hintStyle: TextStyle(
+                            color: Color(0xff42A5F5)
+                                .withOpacity(0.7)), // Lighter medical blue
                         prefixIcon: Icon(
                           Icons.search,
-                          color: GroceryAppColors.tela,
+                          color: Color(0xff1E88E5), // Medical blue
                         ),
                       ),
                     ),
@@ -260,128 +278,155 @@ class UserFilterDemoState extends State<UserFilterDemo> {
         ),
       ),
       body: Container(
+        decoration: BoxDecoration(
+          color: Color(0xffF8FBFF), // Light medical blue background
+        ),
         child: Column(
           children: <Widget>[
             Expanded(
-              child: suggestionList != null
-                  ? ListView.builder(
-                      shrinkWrap: true,
-                      primary: false,
-                      scrollDirection: Axis.vertical,
-                      itemCount: suggestionList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Container(
-                          margin: EdgeInsets.only(
-                              left: 10, right: 10, top: 6, bottom: 6),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(16))),
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        ProductDetails(suggestionList[index])),
-                              );
-                            },
-                            child: Container(
-                              child: Row(
-                                children: <Widget>[
-                                  Container(
-                                    margin: EdgeInsets.only(
-                                        right: 8, left: 8, top: 8, bottom: 8),
-                                    width: 110,
-                                    height: 110,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: GroceryAppColors.tela),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(14)),
-                                        color: Colors.blue.shade200,
-                                        image: DecorationImage(
-                                            fit: BoxFit.cover,
-                                            image: NetworkImage(
-                                              GroceryAppConstant
-                                                      .Product_Imageurl +
-                                                  suggestionList[index].img!,
-                                            ))),
+              child: ListView.builder(
+                shrinkWrap: true,
+                primary: false,
+                scrollDirection: Axis.vertical,
+                itemCount: suggestionList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    margin:
+                        EdgeInsets.only(left: 10, right: 10, top: 6, bottom: 6),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            GroceryAppColors.white,
+                            Color(0xffF8FBFF)
+                          ], // Light medical blue
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                        border: Border.all(
+                          color: Color(0xff1E88E5)
+                              .withOpacity(0.2), // Medical blue
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xff1E88E5)
+                                .withOpacity(0.1), // Medical blue
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ]),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductDetails(suggestionList[index])),
+                        );
+                      },
+                      child: Container(
+                        child: Row(
+                          children: <Widget>[
+                            Container(
+                              margin: EdgeInsets.only(
+                                  right: 8, left: 8, top: 8, bottom: 8),
+                              width: 110,
+                              height: 110,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Color(0xff1E88E5) // Medical blue
+                                          .withOpacity(0.3),
+                                      width: 1),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(14)),
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xff1E88E5) // Medical blue
+                                          .withOpacity(0.1),
+                                      Color(0xff42A5F5) // Lighter medical blue
+                                          .withOpacity(0.1),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
                                   ),
-                                  Expanded(
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Container(
-                                            child: Text(
-                                              suggestionList[index]
-                                                          .productName ==
-                                                      null
-                                                  ? 'name'
-                                                  : suggestionList[index]
-                                                          .productName ??
-                                                      "",
-                                              overflow: TextOverflow.fade,
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(
+                                        GroceryAppConstant.Product_Imageurl +
+                                            suggestionList[index].img!,
+                                      ))),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Container(
+                                      child: Text(
+                                        suggestionList[index].productName ==
+                                                null
+                                            ? 'name'
+                                            : suggestionList[index]
+                                                    .productName ??
+                                                "",
+                                        overflow: TextOverflow.fade,
+                                        style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(
+                                                    0xff1E88E5)) // Medical blue
+                                            .copyWith(fontSize: 14),
+                                      ),
+                                    ),
+                                    SizedBox(height: 6),
+                                    Row(
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 2.0, bottom: 1),
+                                          child: Text(
+                                              '\u{20B9} ${calDiscount(suggestionList[index].buyPrice ?? "", suggestionList[index].discount ?? "")} ${suggestionList[index].unit_type != null ? suggestionList[index].unit_type : ""}',
                                               style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      color: Colors.black)
-                                                  .copyWith(fontSize: 14),
+                                                color: Color(
+                                                    0xff1E88E5), // Medical blue
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 16,
+                                              )),
+                                        ),
+                                        SizedBox(
+                                          width: 20,
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            '(\u{20B9} ${suggestionList[index].buyPrice})',
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 2,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontStyle: FontStyle.italic,
+                                                color: Color(
+                                                        0xff42A5F5) // Lighter medical blue
+                                                    .withOpacity(0.7),
+                                                decoration:
+                                                    TextDecoration.lineThrough),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    Container(
+                                      margin:
+                                          EdgeInsets.only(left: 0.0, right: 10),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: <Widget>[
+                                            SizedBox(
+                                              width: 0.0,
+                                              height: 10.0,
                                             ),
-                                          ),
-                                          SizedBox(height: 6),
-                                          Row(
-                                            children: <Widget>[
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    top: 2.0, bottom: 1),
-                                                child: Text(
-                                                    '\u{20B9} ${calDiscount(suggestionList[index].buyPrice ?? "", suggestionList[index].discount ?? "")} ${suggestionList[index].unit_type != null ? suggestionList[index].unit_type : ""}',
-                                                    style: TextStyle(
-                                                      color: GroceryAppColors
-                                                          .sellp,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                    )),
-                                              ),
-                                              SizedBox(
-                                                width: 20,
-                                              ),
-                                              Expanded(
-                                                child: Text(
-                                                  '(\u{20B9} ${suggestionList[index].buyPrice})',
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  maxLines: 2,
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      fontStyle:
-                                                          FontStyle.italic,
-                                                      color:
-                                                          GroceryAppColors.mrp,
-                                                      decoration: TextDecoration
-                                                          .lineThrough),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(
-                                                left: 0.0, right: 10),
-                                            child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: <Widget>[
-                                                  SizedBox(
-                                                    width: 0.0,
-                                                    height: 10.0,
-                                                  ),
 
 //                                                   Column(
 //                                                     children: <Widget>[
@@ -480,218 +525,234 @@ class UserFilterDemoState extends State<UserFilterDemo> {
 //                                                       )
 //                                                     ],
 //                                                   ),
-                                                  // SizedBox(width: 25,),
+                                            // SizedBox(width: 25,),
 
-                                                  Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    children: <Widget>[
-                                                      Material(
-                                                        color: GroceryAppColors
-                                                            .tela1,
-                                                        elevation: 0.0,
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                            Radius.circular(10),
-                                                          ),
-                                                        ),
-                                                        clipBehavior:
-                                                            Clip.antiAlias,
-                                                        child: InkWell(
-                                                          onTap: () async {
-                                                            if (GroceryAppConstant
-                                                                .isLogin) {
-                                                              SharedPreferences
-                                                                  pref =
-                                                                  await SharedPreferences
-                                                                      .getInstance();
-                                                              String mrp_price = calDiscount(
-                                                                  suggestionList[
+                                            Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: <Widget>[
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                      colors: [
+                                                        Color(
+                                                            0xff1E88E5), // Medical blue
+                                                        Color(
+                                                            0xff42A5F5), // Lighter medical blue
+                                                      ],
+                                                      begin: Alignment.topLeft,
+                                                      end:
+                                                          Alignment.bottomRight,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                10)),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Color(
+                                                                0xff1E88E5) // Medical blue
+                                                            .withOpacity(0.3),
+                                                        blurRadius: 4,
+                                                        offset: Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    clipBehavior:
+                                                        Clip.antiAlias,
+                                                    child: InkWell(
+                                                      onTap: () async {
+                                                        if (GroceryAppConstant
+                                                            .isLogin) {
+                                                          SharedPreferences
+                                                              pref =
+                                                              await SharedPreferences
+                                                                  .getInstance();
+                                                          String mrp_price = calDiscount(
+                                                              suggestionList[
+                                                                          index]
+                                                                      .buyPrice ??
+                                                                  "",
+                                                              suggestionList[
+                                                                          index]
+                                                                      .discount ??
+                                                                  "");
+                                                          totalmrp =
+                                                              double.parse(
+                                                                  mrp_price);
+
+                                                          double dicountValue =
+                                                              double.parse(suggestionList[
                                                                               index]
                                                                           .buyPrice ??
-                                                                      "",
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .discount ??
-                                                                      "");
-                                                              totalmrp =
-                                                                  double.parse(
-                                                                      mrp_price);
+                                                                      "") -
+                                                                  totalmrp!;
+                                                          String gst_sgst = calGst(
+                                                              mrp_price,
+                                                              suggestionList[
+                                                                          index]
+                                                                      .sgst ??
+                                                                  "");
+                                                          String gst_cgst = calGst(
+                                                              mrp_price,
+                                                              suggestionList[
+                                                                          index]
+                                                                      .cgst ??
+                                                                  "");
 
-                                                              double
-                                                                  dicountValue =
-                                                                  double.parse(
-                                                                          suggestionList[index].buyPrice ??
-                                                                              "") -
-                                                                      totalmrp!;
-                                                              String gst_sgst = calGst(
-                                                                  mrp_price,
-                                                                  suggestionList[
+                                                          String adiscount = calDiscount(
+                                                              suggestionList[
+                                                                          index]
+                                                                      .buyPrice ??
+                                                                  "",
+                                                              suggestionList[index]
+                                                                          .msrp !=
+                                                                      null
+                                                                  ? suggestionList[
                                                                               index]
-                                                                          .sgst ??
-                                                                      "");
-                                                              String gst_cgst = calGst(
-                                                                  mrp_price,
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .cgst ??
-                                                                      "");
+                                                                          .msrp ??
+                                                                      ""
+                                                                  : "0");
 
-                                                              String adiscount = calDiscount(
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .buyPrice ??
-                                                                      "",
-                                                                  suggestionList[index]
-                                                                              .msrp !=
-                                                                          null
-                                                                      ? suggestionList[index]
-                                                                              .msrp ??
-                                                                          ""
-                                                                      : "0");
-
-                                                              admindiscountprice = (double.parse(
+                                                          admindiscountprice =
+                                                              (double.parse(
                                                                       suggestionList[index]
                                                                               .buyPrice ??
                                                                           "") -
                                                                   double.parse(
                                                                       adiscount));
 
-                                                              String color = "";
-                                                              String size = "";
-                                                              _addToproducts(
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .productIs ??
-                                                                      "",
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .productName ??
-                                                                      "",
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .img ??
-                                                                      "",
-                                                                  int.parse(
+                                                          String color = "";
+                                                          String size = "";
+                                                          _addToproducts(
+                                                              suggestionList[index]
+                                                                      .productIs ??
+                                                                  "",
+                                                              suggestionList[
+                                                                          index]
+                                                                      .productName ??
+                                                                  "",
+                                                              suggestionList[
+                                                                          index]
+                                                                      .img ??
+                                                                  "",
+                                                              int
+                                                                  .parse(
                                                                       mrp_price),
-                                                                  int.parse(
+                                                              int
+                                                                  .parse(
                                                                       suggestionList[
                                                                                   index]
                                                                               .count ??
                                                                           ""),
-                                                                  color,
-                                                                  size,
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .productDescription ??
-                                                                      "",
-                                                                  gst_sgst,
-                                                                  gst_cgst,
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .discount ??
-                                                                      "",
-                                                                  dicountValue
-                                                                      .toString(),
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .APMC ??
-                                                                      "",
-                                                                  admindiscountprice
-                                                                      .toString(),
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .buyPrice ??
-                                                                      "",
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .shipping ??
-                                                                      "",
-                                                                  suggestionList[
-                                                                              index]
-                                                                          .quantityInStock ??
-                                                                      "");
+                                                              color,
+                                                              size,
+                                                              suggestionList[
+                                                                          index]
+                                                                      .productDescription ??
+                                                                  "",
+                                                              gst_sgst,
+                                                              gst_cgst,
+                                                              suggestionList[
+                                                                          index]
+                                                                      .discount ??
+                                                                  "",
+                                                              dicountValue
+                                                                  .toString(),
+                                                              suggestionList[
+                                                                          index]
+                                                                      .APMC ??
+                                                                  "",
+                                                              admindiscountprice
+                                                                  .toString(),
+                                                              suggestionList[
+                                                                          index]
+                                                                      .buyPrice ??
+                                                                  "",
+                                                              suggestionList[
+                                                                          index]
+                                                                      .shipping ??
+                                                                  "",
+                                                              suggestionList[
+                                                                          index]
+                                                                      .quantityInStock ??
+                                                                  "");
 
-                                                              setState(() {
+                                                          setState(() {
+                                                            GroceryAppConstant
+                                                                .carditemCount++;
+                                                            cartItemcount(
                                                                 GroceryAppConstant
-                                                                    .carditemCount++;
-                                                                cartItemcount(
-                                                                    GroceryAppConstant
-                                                                        .carditemCount);
-                                                                AppConstent
-                                                                    .cc++;
+                                                                    .carditemCount);
+                                                            AppConstent.cc++;
 
-                                                                pref.setInt(
-                                                                    "cc",
-                                                                    AppConstent
-                                                                        .cc);
-                                                              });
-                                                              // Navigator.of(
-                                                              //         context)
-                                                              //     .pushAndRemoveUntil(
-                                                              //         MaterialPageRoute(
-                                                              //           builder: (context) => GroceryApp(),
-                                                              //         ),
-                                                              //         (route) =>
-                                                              //             false);
-                                                            } else {
-                                                              Navigator.push(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder:
-                                                                        (context) =>
-                                                                            SignInPage()),
-                                                              );
-                                                            }
-                                                          },
-                                                          child: Center(
-                                                            child: Padding(
-                                                                padding: EdgeInsets
-                                                                    .only(
-                                                                        left:
-                                                                            20,
-                                                                        top: 8,
-                                                                        bottom:
-                                                                            8,
-                                                                        right:
-                                                                            20),
-                                                                child: Center(
-                                                                  child: Text(
-                                                                    "Book",
-                                                                    style: TextStyle(
-                                                                        color: GroceryAppColors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            12,
-                                                                        fontWeight:
-                                                                            FontWeight.bold),
-                                                                  ),
-                                                                  // Icon(Icons.add_shopping_cart,color: Colors.white,),
-                                                                )),
-                                                          ),
-                                                        ),
+                                                            pref.setInt("cc",
+                                                                AppConstent.cc);
+                                                          });
+                                                          // Navigator.of(
+                                                          //         context)
+                                                          //     .pushAndRemoveUntil(
+                                                          //         MaterialPageRoute(
+                                                          //           builder: (context) => GroceryApp(),
+                                                          //         ),
+                                                          //         (route) =>
+                                                          //             false);
+                                                        } else {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        SignInPage()),
+                                                          );
+                                                        }
+                                                      },
+                                                      child: Center(
+                                                        child: Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 20,
+                                                                    top: 8,
+                                                                    bottom: 8,
+                                                                    right: 20),
+                                                            child: Center(
+                                                              child: Text(
+                                                                "Book",
+                                                                style: TextStyle(
+                                                                    color: GroceryAppColors
+                                                                        .white,
+                                                                    fontSize:
+                                                                        12,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                              ),
+                                                              // Icon(Icons.add_shopping_cart,color: Colors.white,),
+                                                            )),
                                                       ),
-                                                    ],
+                                                    ),
                                                   ),
-                                                ]),
-                                          ),
-                                        ],
-                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ]),
                                     ),
-                                  )
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                        // double.parse(suggestionList[index].discount) > 0 ? showSticker(index, suggestionList) : Row()
-                      },
-                    )
-                  : Center(child: CircularProgressIndicator()),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                  // double.parse(suggestionList[index].discount) > 0 ? showSticker(index, suggestionList) : Row()
+                },
+              ),
             ),
           ],
         ),
@@ -736,7 +797,6 @@ class UserFilterDemoState extends State<UserFilterDemo> {
       String cost_price,
       String shippingcharge,
       String totalQun) {
-    if (suggestionList != null) {
 //      print(pID+"......");
 //      print(p_name);
 //      print(image);
@@ -752,29 +812,28 @@ class UserFilterDemoState extends State<UserFilterDemo> {
 //      print(adminper);
 //      print(adminper_val);
 //      print(cost_price);
-      ProductsCart st = new ProductsCart(
-          pid: pID,
-          pname: p_name,
-          pimage: image,
-          pprice: (price * quantity).toString(),
-          pQuantity: quantity,
-          pcolor: c_val,
-          psize: p_size,
-          pdiscription: p_disc,
-          sgst: sgst,
-          cgst: cgst,
-          discount: discount,
-          discountValue: dis_val,
-          adminper: adminper,
-          adminpricevalue: adminper_val,
-          costPrice: cost_price,
-          shipping: shippingcharge,
-          totalQuantity: totalQun);
-      dbmanager.insertStudent(st).then((id) => {
-            showLongToast(" Services  is added to cart "),
-            print(' Added to Db ${id}')
-          });
-    }
+    ProductsCart st = new ProductsCart(
+        pid: pID,
+        pname: p_name,
+        pimage: image,
+        pprice: (price * quantity).toString(),
+        pQuantity: quantity,
+        pcolor: c_val,
+        psize: p_size,
+        pdiscription: p_disc,
+        sgst: sgst,
+        cgst: cgst,
+        discount: discount,
+        discountValue: dis_val,
+        adminper: adminper,
+        adminpricevalue: adminper_val,
+        costPrice: cost_price,
+        shipping: shippingcharge,
+        totalQuantity: totalQun);
+    dbmanager.insertStudent(st).then((id) => {
+          showLongToast(" Services  is added to cart "),
+          print(' Added to Db ${id}')
+        });
   }
 
   String calGst(String byprice, String sgst) {

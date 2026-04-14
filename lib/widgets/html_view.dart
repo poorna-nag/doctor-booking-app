@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class HtmlViewWidget extends StatelessWidget {
   const HtmlViewWidget({
@@ -11,26 +10,21 @@ class HtmlViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final plainText = discription
+        .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+        .replaceAll(RegExp(r'<[^>]*>'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
     return Padding(
       padding: const EdgeInsets.all(12.0),
-      child: HtmlWidget(
-        discription,
-        onErrorBuilder: (context, element, error) =>
-            Text('$element error: $error'),
-        onLoadingBuilder: (context, element, loadingProgress) => SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: CircularProgressIndicator(),
+      child: SelectableText(
+        plainText.isEmpty ? discription : plainText,
+        style: const TextStyle(
+          fontSize: 14,
+          height: 1.4,
+          color: Colors.black87,
         ),
-
-        onTapUrl: (url) {
-          // launchUrl(Uri.parse(url));
-          return true;
-        },
-
-        renderMode: RenderMode.column,
-
-        // set the default styling for text
-        textStyle: const TextStyle(fontSize: 14),
       ),
     );
   }

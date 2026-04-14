@@ -1,22 +1,21 @@
 import 'dart:convert';
-
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jiffy/jiffy.dart';
-import 'package:aladdinmart/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/StyleDecoration/styleDecoration.dart';
-import 'package:aladdinmart/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/model/AddressModel.dart';
-import 'package:aladdinmart/model/CoupanModel.dart';
-import 'package:aladdinmart/model/CustmerModel.dart';
-import 'package:aladdinmart/model/InvoiceModel.dart';
-import 'package:aladdinmart/model/OrderDliverycharge.dart';
-import 'package:aladdinmart/model/TrackInvoiceModel.dart';
-import 'package:aladdinmart/model/usable_wallet_amount.dart';
+import 'package:ecoshine24/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/StyleDecoration/styleDecoration.dart';
+import 'package:ecoshine24/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/model/AddressModel.dart';
+import 'package:ecoshine24/model/CoupanModel.dart';
+import 'package:ecoshine24/model/CustmerModel.dart';
+import 'package:ecoshine24/model/InvoiceModel.dart';
+import 'package:ecoshine24/model/OrderDliverycharge.dart';
+import 'package:ecoshine24/model/TrackInvoiceModel.dart';
+import 'package:ecoshine24/model/usable_wallet_amount.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -1195,6 +1194,7 @@ class _CheckOutPageState extends State<CheckOutPage> {
                                 if (value == null || value.isEmpty) {
                                   return " Apply Coupon Code";
                                 }
+                                return null;
                               },
                               decoration: const InputDecoration(
                                   hintText: "Apply Coupon Code"),
@@ -1761,9 +1761,10 @@ class _CheckOutPageState extends State<CheckOutPage> {
       map['product_id'] = prodctlist1[i].pid;
       map['product_name'] = prodctlist1[i].pname;
       map['quantity'] = prodctlist1[i].pQuantity.toString();
-      map['price'] = (int.parse(prodctlist1[i].costPrice ?? "") *
-              prodctlist1[i].pQuantity!)
-          .toString();
+      final String unitPriceStr = prodctlist1[i].costPrice ?? "0";
+      final double unitPrice = double.tryParse(unitPriceStr) ?? 0.0;
+      final int qty = prodctlist1[i].pQuantity ?? 1;
+      map['price'] = (unitPrice * qty).toStringAsFixed(2);
       map['user_per'] = prodctlist1[i].discount;
       map['user_dis'] = (double.parse(prodctlist1[i].discountValue ?? "") *
               prodctlist1[i].pQuantity!)
@@ -1789,10 +1790,29 @@ class _CheckOutPageState extends State<CheckOutPage> {
       map['image'] = prodctlist1[i].pimage;
       map['prime'] = "0";
       map['mv'] = prodctlist1[i].mv.toString();
-      map['adate'] = textval == "Select Date" || textval.isEmpty
-          ? ''
-          : (Jiffy(textval, "dd/MM/yyyy").format("yyyy-MM-dd")).toString();
-      //map['atime'] =textval1 == "Select Time" ||textval1.isEmpty ? '' : textval1;
+      // Set date and time separately
+      if (textval == "Select Date" || textval.isEmpty) {
+        map['adate'] = '';
+      } else {
+        map['adate'] = (Jiffy.parse(textval, pattern: "dd/MM/yyyy")
+                .format(pattern: "yyyy-MM-dd"))
+            .toString();
+      }
+
+      // Set time slot
+      if (textval1 == "Select Time" || textval1.isEmpty) {
+        map['atime'] = '';
+      } else {
+        map['atime'] = textval1;
+      }
+
+      // Set car number in notes field (if car number controller exists)
+      // Note: This file might not have car number field, so we'll keep existing notes logic
+      if (map.containsKey('notes')) {
+        // Keep existing notes if any
+      } else {
+        map['notes'] = "";
+      }
       final response = await http.post(
           Uri.parse(FoodAppConstant.base_url + 'api/order.php'),
           body: map);

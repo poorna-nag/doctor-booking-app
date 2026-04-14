@@ -3,7 +3,7 @@
 // import 'dart:developer';
 // import 'dart:io';
 
-// import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
+// import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
 // import 'package:crypto/crypto.dart';
 // import 'package:http/http.dart' as http;
 // import 'package:flutter/material.dart';
@@ -589,18 +589,14 @@
 // }
 
 import 'dart:convert';
-import 'package:aladdinmart/constent/app_constent.dart';
-import 'package:aladdinmart/grocery/Web/BlogShow.dart';
-import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/model/InvoiceModel.dart';
-import 'package:aladdinmart/grocery/model/RegisterModel.dart';
-import 'package:aladdinmart/grocery/screen/checkout.dart';
-import 'package:aladdinmart/grocery/screen/finalScreen.dart';
+import 'package:ecoshine24/constent/app_constent.dart';
+import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/model/InvoiceModel.dart';
+import 'package:ecoshine24/grocery/screen/finalScreen.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -678,8 +674,7 @@ class _PhonepePaymentScreenState extends State<PhonepePaymentScreen> {
   String saltKey = "e8bb2e87-39bc-445f-b343-e38191b6ba53";
   String saltindex = "1";
   // String callbckUrl = "https://citychoice.w4u.in/phonepe/verify_payment.php";
-  String callbckUrl =
-      "https://www.customercare247.in/phonepe/verify_payment.php";
+  String callbckUrl = "https://ecoshine24.w4u.in/phonepe/verify_payment.php";
   String body = "";
   Object? result;
   String apiEndPoint = "/pg/v1/pay";

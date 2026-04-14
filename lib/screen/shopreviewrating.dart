@@ -1,18 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/dbhelper/database_helper.dart';
-import 'package:aladdinmart/model/ListModel.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/dbhelper/database_helper.dart';
+import 'package:ecoshine24/model/ListModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'ShowAddress.dart';
 
 class shopreviewrating extends StatefulWidget {
   String mv;
@@ -492,6 +489,7 @@ class _HomePageState extends State<shopreviewrating> {
           if (value == null || value.isEmpty) {
             return " Please enter the label";
           }
+          return null;
         },
         decoration: const InputDecoration(hintText: "Enter Label"),
       ),

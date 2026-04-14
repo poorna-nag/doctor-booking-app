@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/AddressModel.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/AddressModel.dart';
 import 'package:http/http.dart' as http;
-import 'package:aladdinmart/grocery/model/RegisterModel.dart';
-import 'package:aladdinmart/grocery/screen/checkout.dart';
+import 'package:ecoshine24/grocery/model/RegisterModel.dart';
+import 'package:ecoshine24/grocery/screen/checkout.dart';
+import 'package:ecoshine24/grocery/General/Home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'AddAddress.dart';
@@ -29,7 +30,6 @@ class _ShowAddressState extends State<ShowAddress> {
 //
 //    }
 //  }
-  bool _status = false;
   @override
   void initState() {
     super.initState();
@@ -45,355 +45,928 @@ class _ShowAddressState extends State<ShowAddress> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        elevation: 10,
-        backgroundColor: GroceryAppColors.tela,
-        child: Center(
-          child: Icon(
-            Icons.add,
+      backgroundColor: Color(0xffF8FBFF),
+      floatingActionButton: Container(
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? 16 : 0,
+        ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xff1E88E5),
+              Color(0xff42A5F5),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xff1E88E5).withOpacity(0.3),
+              blurRadius: 15,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddAddress(widget.valu)),
+            );
+          },
+          icon: Icon(
+            Icons.add_location_alt_rounded,
             color: Colors.white,
-            size: 32,
+            size: 24,
+          ),
+          label: Flexible(
+            child: Text(
+              'Add Address',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
           ),
         ),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddAddress(widget.valu)),
-          );
-        },
       ),
-      appBar: AppBar(
-        backgroundColor: GroceryAppColors.tela,
-        leading: IconButton(
-            color: Colors.white,
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            }),
-        title: Text(
-          "My Address",
-          maxLines: 2,
-          style: TextStyle(color: Colors.white, fontSize: 15),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(120),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xff1E88E5),
+                Color(0xff42A5F5),
+                Color(0xff64B5F6),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(30),
+              bottomRight: Radius.circular(30),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0xff1E88E5).withOpacity(0.3),
+                blurRadius: 15,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: true,
+            leading: Container(
+              margin: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => GroceryApp()),
+                    (route) => false,
+                  );
+                },
+              ),
+            ),
+            title: Column(
+              children: [
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.local_hospital_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "HealthCare Plus",
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            "Medical Addresses",
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      body:
-          // _status?screen():
-          Container(
-        child: isloading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : add.isEmpty
-                ? Center(
-                    child: Text('No Address Found!....'),
-                  )
-                : add.length > 0
-                    ? ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        itemCount: add.length <= 0 ? 0 : add.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return InkWell(
-                            onTap: () {
-                              if (widget.valu == "0") {
+      body: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xffF8FBFF),
+                Colors.white,
+              ],
+            ),
+          ),
+          child: isloading
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xff1E88E5).withOpacity(0.1),
+                              Color(0xff42A5F5).withOpacity(0.1),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Color(0xff1E88E5)),
+                          strokeWidth: 3,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Loading Medical Addresses...',
+                        style: TextStyle(
+                          color: Color(0xff1E88E5),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : add.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(40),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xff1E88E5).withOpacity(0.1),
+                                  Color(0xff42A5F5).withOpacity(0.1),
+                                ],
+                              ),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0xff1E88E5).withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.location_city_rounded,
+                              size: 80,
+                              color: Color(0xff1E88E5),
+                            ),
+                          ),
+                          SizedBox(height: 30),
+                          Text(
+                            'No Medical Addresses Found',
+                            style: TextStyle(
+                              color: Color(0xff1E88E5),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 12),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 40),
+                            child: Text(
+                              'Add your medical faciliiity addresses for faster appointment booking and seamless healthcare services',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 30),
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Color(0xff1E88E5), Color(0xff42A5F5)],
+                              ),
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0xff1E88E5).withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                elevation: 0,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 30, vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                              ),
+                              onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => UpDateAddress(
-                                          add[index], widget.valu)),
+                                      builder: (context) =>
+                                          AddAddress(widget.valu)),
                                 );
-                              } else {}
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(top: 10),
-                              width: MediaQuery.of(context).size.width,
-                              child: Card(
-                                elevation: 5.0,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    add[index].label != null
-                                        ? Padding(
-                                            padding: EdgeInsets.only(
-                                                left: 10, top: 6, right: 10),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: <Widget>[
-                                                add[index].fullName != null
-                                                    ? Text(
-                                                        add[index].fullName !=
-                                                                null
-                                                            ? add[index]
-                                                                .fullName!
-                                                            : "",
-                                                        style: TextStyle(
-                                                            fontSize: 14,
-                                                            color: Colors.black,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w800),
-                                                      )
-                                                    : SizedBox(),
-                                                Text(
-                                                  add[index].label != null
-                                                      ? add[index].label ?? ""
-                                                      : "",
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.black,
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        : SizedBox(),
-
-                                    add[index].address1!.length > 1
-                                        ? Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: <Widget>[
-                                              Expanded(
-                                                child: Padding(
-                                                  padding: EdgeInsets.only(
-                                                      left: 10, top: 5),
-                                                  child: Text(
-                                                    add[index].address1 != null
-                                                        ? add[index].address1 ??
-                                                            ""
-                                                        : "",
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : Container(
-                                            height: 0,
-                                          ),
-
-                                    add[index].mobile!.length > 1
-                                        ? Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: <Widget>[
-                                              Padding(
-                                                padding: EdgeInsets.only(
-                                                    left: 10, top: 5),
-                                                child: Text(
-                                                  add[index].mobile != null
-                                                      ? add[index]
-                                                              .mobile
-                                                              .toString() +
-                                                          ',' +
-                                                          add[index]
-                                                              .email
-                                                              .toString()
-                                                      : "",
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : Row(),
-
-//                             add[index].city != null
-//                                 ? Row(
-//                                     mainAxisAlignment: MainAxisAlignment.start,
-//                                     children: <Widget>[
-//                                       Expanded(
-//                                         child: Padding(
-//                                           padding:
-//                                               EdgeInsets.only(left: 10, top: 5),
-//                                           child: Text(
-//                                             add[index].city != null
-//                                                 ? add[index].city.toString() +
-//                                                     ", " +
-//                                                     add[index]
-//                                                         .state
-//                                                         .toString() +
-//                                                     ", " +
-//                                                     add[index]
-//                                                         .pincode
-//                                                         .toString()
-//                                                 : "",
-//                                             style: TextStyle(
-//                                               fontSize: 14,
-//                                               color: Colors.black,
-//                                             ),
-//                                           ),
-//                                         ),
-//                                       ),
-//                                     ],
-//                                   )
-//                                 : Row(),
-
-// //                  setContainer("Name",add[index].fullName),
-//                             setContainer("Mobile No", add[index].mobile ?? ""),
-//                             setContainer("Email Id", add[index].email ?? ""),
-
-                                    Container(
-                                      margin: EdgeInsets.only(
-                                          left: 10, top: 2, right: 10),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Row(
-                                            children: [
-                                              Padding(
-                                                  padding: EdgeInsets.all(2.0),
-                                                  child: ElevatedButton(
-                                                      style: ElevatedButton
-                                                          .styleFrom(
-                                                        elevation: 0,
-                                                        backgroundColor:
-                                                            GroceryAppColors
-                                                                .white,
-                                                        shape:
-                                                            RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20.0),
-                                                        ),
-                                                      ),
-                                                      onPressed: () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  UpDateAddress(
-                                                                      add[
-                                                                          index],
-                                                                      widget
-                                                                          .valu)),
-                                                        );
-                                                      },
-//              splashColor: AppColors.tela,
-
-                                                      child: Icon(Icons.edit)
-
-                                                      //  Text(
-                                                      //   "Update",
-                                                      //   style: TextStyle(
-                                                      //     fontSize: 12,
-                                                      //     color: Colors.white,
-                                                      //   ),
-                                                      // ),
-                                                      )),
-                                              Padding(
-                                                padding: EdgeInsets.all(2.0),
-                                                child: ElevatedButton(
-                                                    style: ElevatedButton
-                                                        .styleFrom(
-                                                      elevation: 0,
-                                                      backgroundColor:
-                                                          Colors.white,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20.0)),
-                                                    ),
-                                                    onPressed: () {
-                                                      print("Delete");
-                                                      showDilogueReviw(
-                                                          context, index);
-                                                    },
-                                                    child: Icon(
-                                                      Icons.delete,
-                                                      color: Colors.red,
-                                                    )
-                                                    //  Text(
-                                                    //   "Delete",
-                                                    //   style: TextStyle(
-                                                    //     fontSize: 12,
-                                                    //     color: Colors.white,
-                                                    //   ),
-                                                    // ),
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                          Padding(
-                                              padding: EdgeInsets.all(2.0),
-                                              child: ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                  elevation: 0,
-                                                  backgroundColor:
-                                                      GroceryAppColors.tela,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20.0),
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  if (GroceryAppConstant
-                                                              .latitude <=
-                                                          0 ||
-                                                      GroceryAppConstant
-                                                              .longitude <=
-                                                          0 ||
-                                                      GroceryAppConstant
-                                                          .latitude
-                                                          .toString()
-                                                          .startsWith('0') ||
-                                                      GroceryAppConstant
-                                                          .longitude
-                                                          .toString()
-                                                          .startsWith('0')) {
-                                                    showLongToast(
-                                                        'Please Select Currect Address');
-                                                  } else {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              CheckOutPage(
-                                                                  add[index])),
-                                                    );
-                                                 }
-                                                },
-                                                child: Text(
-                                                  'Continue this address >>',
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                ),
-
-                                                //  Text(
-                                                //   "Next",
-                                                //   style: TextStyle(
-                                                //     fontSize: 12,
-                                                //     color: Colors.white,
-                                                //   ),
-                                                // ),
-                                              )),
-                                        ],
-                                      ),
-                                    )
-//                  getAction(context,index),
-//                  setContainer("City",add[index].city),
-//                  setContainer("State",add[index].state),
-//                  setContainer("Pin",add[index].pincode),
-                                  ],
+                              },
+                              icon: Icon(Icons.add_location_alt_rounded,
+                                  color: Colors.white),
+                              label: Text(
+                                'Add Medical Address',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
-                          );
-                        })
-                    : Center(child: CircularProgressIndicator()),
+                          ),
+                        ],
+                      ),
+                    )
+                  : add.length > 0
+                      ? Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal:
+                                MediaQuery.of(context).size.width * 0.04,
+                            vertical: 16,
+                          ),
+                          child: Column(
+                            children: [
+                              // Header card with stats
+                              Container(
+                                margin: EdgeInsets.only(bottom: 20),
+                                padding: EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xff1E88E5).withOpacity(0.1),
+                                      Color(0xff42A5F5).withOpacity(0.05),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Color(0xff1E88E5).withOpacity(0.2),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Color(0xff1E88E5),
+                                            Color(0xff42A5F5)
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Icon(
+                                        Icons.location_on_rounded,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Saved Medical Addresses',
+                                            style: TextStyle(
+                                              color: Color(0xff1E88E5),
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            '${add.length} address${add.length > 1 ? 'es' : ''} available for appointments',
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Address list
+                              Expanded(
+                                child: ListView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: add.length <= 0 ? 0 : add.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Container(
+                                      margin: EdgeInsets.only(bottom: 16),
+                                      child: InkWell(
+                                        onTap: () {
+                                          if (widget.valu == "0") {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      UpDateAddress(add[index],
+                                                          widget.valu)),
+                                            );
+                                          }
+                                        },
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.white,
+                                                Color(0xffF8FBFF),
+                                              ],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: Color(0xff1E88E5)
+                                                  .withOpacity(0.15),
+                                              width: 1.5,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Color(0xff1E88E5)
+                                                    .withOpacity(0.1),
+                                                blurRadius: 15,
+                                                offset: Offset(0, 8),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              // Header with name and label
+                                              Container(
+                                                padding: EdgeInsets.all(20),
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      Color(0xff1E88E5)
+                                                          .withOpacity(0.05),
+                                                      Color(0xff42A5F5)
+                                                          .withOpacity(0.02),
+                                                    ],
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(20),
+                                                    topRight:
+                                                        Radius.circular(20),
+                                                  ),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Container(
+                                                      padding:
+                                                          EdgeInsets.all(10),
+                                                      decoration: BoxDecoration(
+                                                        gradient:
+                                                            LinearGradient(
+                                                          colors: [
+                                                            Color(0xff1E88E5),
+                                                            Color(0xff42A5F5)
+                                                          ],
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                      ),
+                                                      child: Icon(
+                                                        Icons
+                                                            .person_pin_circle_rounded,
+                                                        color: Colors.white,
+                                                        size: 20,
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          if (add[index]
+                                                                  .fullName !=
+                                                              null)
+                                                            Text(
+                                                              add[index]
+                                                                      .fullName ??
+                                                                  "",
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              maxLines: 1,
+                                                              style: TextStyle(
+                                                                fontSize: 18,
+                                                                color: Color(
+                                                                    0xff1E88E5),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
+                                                          if (add[index]
+                                                                  .label !=
+                                                              null)
+                                                            Container(
+                                                              margin: EdgeInsets
+                                                                  .only(top: 4),
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      horizontal:
+                                                                          8,
+                                                                      vertical:
+                                                                          4),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Color(
+                                                                        0xff42A5F5)
+                                                                    .withOpacity(
+                                                                        0.2),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                              ),
+                                                              child: Text(
+                                                                add[index]
+                                                                        .label ??
+                                                                    "",
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                maxLines: 1,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Color(
+                                                                      0xff1E88E5),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+
+                                              // Address details
+                                              Padding(
+                                                padding: EdgeInsets.all(20),
+                                                child: Column(
+                                                  children: [
+                                                    if (add[index]
+                                                            .address1!
+                                                            .length >
+                                                        1)
+                                                      Container(
+                                                        padding:
+                                                            EdgeInsets.all(12),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              Colors.grey[50],
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                          border: Border.all(
+                                                            color: Color(
+                                                                    0xff1E88E5)
+                                                                .withOpacity(
+                                                                    0.1),
+                                                          ),
+                                                        ),
+                                                        child: Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .location_on_outlined,
+                                                              color: Color(
+                                                                  0xff1E88E5),
+                                                              size: 20,
+                                                            ),
+                                                            SizedBox(width: 8),
+                                                            Expanded(
+                                                              child: Text(
+                                                                add[index]
+                                                                        .address1 ??
+                                                                    "",
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                maxLines: 3,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 14,
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      700],
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+
+                                                    if (add[index]
+                                                            .mobile!
+                                                            .length >
+                                                        1)
+                                                      Container(
+                                                        margin: EdgeInsets.only(
+                                                            top: 12),
+                                                        padding:
+                                                            EdgeInsets.all(12),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              Colors.grey[50],
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                          border: Border.all(
+                                                            color: Color(
+                                                                    0xff1E88E5)
+                                                                .withOpacity(
+                                                                    0.1),
+                                                          ),
+                                                        ),
+                                                        child: Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .contact_phone_rounded,
+                                                              color: Color(
+                                                                  0xff1E88E5),
+                                                              size: 20,
+                                                            ),
+                                                            SizedBox(width: 8),
+                                                            Expanded(
+                                                              child: Text(
+                                                                '${add[index].mobile}, ${add[index].email}',
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                maxLines: 2,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 14,
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      700],
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+
+                                                    // Action buttons
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          top: 16),
+                                                      child: Column(
+                                                        children: [
+                                                          // First row: Edit and Delete buttons
+                                                          Row(
+                                                            children: [
+                                                              // Edit button
+                                                              Expanded(
+                                                                child:
+                                                                    Container(
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Color(
+                                                                            0xff1E88E5)
+                                                                        .withOpacity(
+                                                                            0.1),
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            12),
+                                                                  ),
+                                                                  child:
+                                                                      ElevatedButton
+                                                                          .icon(
+                                                                    style: ElevatedButton
+                                                                        .styleFrom(
+                                                                      backgroundColor:
+                                                                          Colors
+                                                                              .transparent,
+                                                                      elevation:
+                                                                          0,
+                                                                      padding: EdgeInsets.symmetric(
+                                                                          vertical:
+                                                                              12),
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12),
+                                                                      ),
+                                                                    ),
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator
+                                                                          .push(
+                                                                        context,
+                                                                        MaterialPageRoute(
+                                                                          builder: (context) => UpDateAddress(
+                                                                              add[index],
+                                                                              widget.valu),
+                                                                        ),
+                                                                      );
+                                                                    },
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .edit_rounded,
+                                                                      color: Color(
+                                                                          0xff1E88E5),
+                                                                      size: 18,
+                                                                    ),
+                                                                    label: Text(
+                                                                      'Edit',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Color(
+                                                                            0xff1E88E5),
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+
+                                                              SizedBox(
+                                                                  width: 12),
+
+                                                              // Delete button
+                                                              Expanded(
+                                                                child:
+                                                                    Container(
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .red
+                                                                        .shade50,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            12),
+                                                                  ),
+                                                                  child:
+                                                                      ElevatedButton
+                                                                          .icon(
+                                                                    style: ElevatedButton
+                                                                        .styleFrom(
+                                                                      backgroundColor:
+                                                                          Colors
+                                                                              .transparent,
+                                                                      elevation:
+                                                                          0,
+                                                                      padding: EdgeInsets.symmetric(
+                                                                          vertical:
+                                                                              12),
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12),
+                                                                      ),
+                                                                    ),
+                                                                    onPressed:
+                                                                        () {
+                                                                      showDilogueReviw(
+                                                                          context,
+                                                                          index);
+                                                                    },
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .delete_rounded,
+                                                                      color: Colors
+                                                                          .red
+                                                                          .shade600,
+                                                                      size: 18,
+                                                                    ),
+                                                                    label: Text(
+                                                                      'Delete',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .red
+                                                                            .shade600,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+
+                                                          SizedBox(height: 12),
+
+                                                          // Second row: Select button (full width)
+                                                          Container(
+                                                            width:
+                                                                double.infinity,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              gradient:
+                                                                  LinearGradient(
+                                                                colors: [
+                                                                  Color(
+                                                                      0xff1E88E5),
+                                                                  Color(
+                                                                      0xff42A5F5)
+                                                                ],
+                                                              ),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12),
+                                                              boxShadow: [
+                                                                BoxShadow(
+                                                                  color: Color(
+                                                                          0xff1E88E5)
+                                                                      .withOpacity(
+                                                                          0.3),
+                                                                  blurRadius: 8,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0, 4),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            child:
+                                                                ElevatedButton
+                                                                    .icon(
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .transparent,
+                                                                elevation: 0,
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        vertical:
+                                                                            15),
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12),
+                                                                ),
+                                                              ),
+                                                              onPressed: () {
+                                                                final selected =
+                                                                    add[index];
+                                                                final selectedLat =
+                                                                    double.tryParse(
+                                                                        selected.lat ??
+                                                                            '');
+                                                                final selectedLng =
+                                                                    double.tryParse(
+                                                                        selected.lng ??
+                                                                            '');
+
+                                                                if (selectedLat !=
+                                                                        null &&
+                                                                    selectedLng !=
+                                                                        null) {
+                                                                  GroceryAppConstant
+                                                                          .latitude =
+                                                                      selectedLat;
+                                                                  GroceryAppConstant
+                                                                          .longitude =
+                                                                      selectedLng;
+                                                                }
+
+                                                                Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                    builder: (context) =>
+                                                                        CheckOutPage(
+                                                                            selected),
+                                                                  ),
+                                                                );
+                                                              },
+                                                              icon: Icon(
+                                                                Icons
+                                                                    .check_circle_rounded,
+                                                                color: Colors
+                                                                    .white,
+                                                                size: 20,
+                                                              ),
+                                                              label: Text(
+                                                                'Select Address for Appointment',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontSize: 16,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Center(child: CircularProgressIndicator()),
+        ),
       ),
     );
   }
@@ -408,10 +981,13 @@ class _ShowAddressState extends State<ShowAddress> {
               padding: EdgeInsets.all(2.0),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: GroceryAppColors.teladep,
+                  backgroundColor: Color(0xff1E88E5), // Medical blue
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: BorderRadius.circular(25.0),
                   ),
+                  elevation: 4,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 ),
 
                 onPressed: () {
@@ -428,8 +1004,9 @@ class _ShowAddressState extends State<ShowAddress> {
                 child: Text(
                   "Update",
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               )),
@@ -437,9 +1014,12 @@ class _ShowAddressState extends State<ShowAddress> {
             padding: EdgeInsets.all(2.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.red.shade600,
+                foregroundColor: GroceryAppColors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0)),
+                    borderRadius: BorderRadius.circular(25.0)),
+                elevation: 4,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
               onPressed: () {
 //                _deleteAdderss(add[index].addId);
@@ -449,8 +1029,9 @@ class _ShowAddressState extends State<ShowAddress> {
               child: Text(
                 "Delete",
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   color: Colors.white,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -469,17 +1050,17 @@ class _ShowAddressState extends State<ShowAddress> {
           Padding(
             padding: EdgeInsets.all(2.0),
             child: Text(
-              title != null ? title + ':' : "",
+              title + ':',
               style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold),
+                  fontSize: 13,
+                  color: Color(0xff1E88E5), // Medical blue
+                  fontWeight: FontWeight.w600),
             ),
           ),
           Padding(
             padding: EdgeInsets.all(2.0),
             child: Text(
-              value != null ? value : "",
+              value,
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.black,
@@ -523,46 +1104,144 @@ class _ShowAddressState extends State<ShowAddress> {
 
   showDilogueReviw(BuildContext context, int index) {
     Dialog errorDialog = Dialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0)), //this right here
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
+      backgroundColor: Colors.transparent,
       child: Container(
-        height: 130.0,
-        width: 200.0,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Do you want to delete!'),
-            SizedBox(
-              height: 40,
+        padding: EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Color(0xffF8FBFF)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(25.0),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xff1E88E5).withOpacity(0.2),
+              blurRadius: 20,
+              offset: Offset(0, 10),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'Cancel !',
-                      style: TextStyle(color: Colors.red, fontSize: 18.0),
-                    )),
-                SizedBox(
-                  height: 20,
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.red.shade400,
+                    Colors.red.shade600,
+                  ],
                 ),
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-
-                      _deleteAdderss(add[index].addId ?? "", index);
-
-//                  Navigator.push(context,
-//                    MaterialPageRoute(builder: (context) => ShowAddress()),);
-                    },
-                    child: Text(
-                      'ok !',
-                      style: TextStyle(
-                          color: GroceryAppColors.success, fontSize: 18.0),
-                    )),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.warning_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Remove Medical Address',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff1E88E5),
+              ),
+            ),
+            SizedBox(height: 12),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Are you sure you want to remove this medical address from your saved locations? This action cannot be undone.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  height: 1.4,
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[300]!),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red.shade500, Colors.red.shade700],
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _deleteAdderss(add[index].addId ?? "", index);
+                      },
+                      child: Text(
+                        'Remove',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
@@ -599,29 +1278,20 @@ class _ShowAddressState extends State<ShowAddress> {
                 ),
               ),
             ),
-//            Text("No address found  ",style: TextStyle(fontSize: 20, color: Colors.black,fontWeight: FontWeight.bold)),
-            Container(
-              margin: EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: GroceryAppColors.telamoredeep,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddAddress(widget.valu)),
-                  );
-                },
-                child: Text(
-                  "Add Address",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                  ),
-                ),
+            Text(
+              "Add Meedical Address",
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xff1E88E5), // Medical blue
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Add your first medical facility address",
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
               ),
             ),
           ],

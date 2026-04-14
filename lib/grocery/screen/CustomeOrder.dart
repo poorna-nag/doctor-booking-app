@@ -1,16 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/model/RegisterModel.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/model/RegisterModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'ShowAddress.dart';
 
 class CustomeOrder extends StatefulWidget {
   @override
@@ -189,6 +186,7 @@ class _HomePageState extends State<CustomeOrder> {
                                         if (value == null || value.isEmpty) {
                                           return " Please enter the name";
                                         }
+                                        return null;
                                       },
                                       decoration: const InputDecoration(
                                         hintText: "Enter Your Name",
@@ -230,6 +228,7 @@ class _HomePageState extends State<CustomeOrder> {
                                         if (value == null || value.isEmpty) {
                                           return " Please enter the email id";
                                         }
+                                        return null;
                                       },
                                       decoration: const InputDecoration(
                                           hintText: "Enter Email ID"),
@@ -323,6 +322,7 @@ class _HomePageState extends State<CustomeOrder> {
                                               value.isEmpty && value == 10) {
                                             return " Please enter the mobile No";
                                           }
+                                          return null;
                                         },
                                         decoration: const InputDecoration(
                                             hintText: "Enter Mobile No"),
@@ -533,9 +533,10 @@ class _HomePageState extends State<CustomeOrder> {
       child: TextFormField(
         controller: labelController,
         validator: (String? value) {
-                                        if (value==null|| value.isEmpty) {
+          if (value == null || value.isEmpty) {
             return " Please enter the label";
           }
+          return null;
         },
         decoration: const InputDecoration(hintText: "Enter Label"),
       ),

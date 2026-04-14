@@ -1,11 +1,11 @@
-import 'package:aladdinmart/grocery/Web/videoPlay.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/BlogModel.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/Web/videoPlay.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/BlogModel.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-// import 'package:aladdinmart/grocery/screen/SearcBlogs.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+// import 'package:ecoshine24/grocery/screen/SearcBlogs.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'WebviewTermandCondition.dart';

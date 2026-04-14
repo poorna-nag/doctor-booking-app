@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -105,7 +105,6 @@ class _TrackingState extends State<Tracking> {
                 .where('name', isEqualTo: widget.id)
                 .snapshots(),
             builder: (BuildContext ctx, AsyncSnapshot<QuerySnapshot> snapshot) {
-           
               if (snapshot.connectionState == ConnectionState.waiting) {
                 Center(
                   child: CircularProgressIndicator(),

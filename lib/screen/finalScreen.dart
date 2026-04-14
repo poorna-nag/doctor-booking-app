@@ -1,6 +1,6 @@
-import 'package:aladdinmart/grocery/General/Home.dart';
+import 'package:ecoshine24/grocery/General/Home.dart';
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 
 class ShowInVoiceId extends StatefulWidget {
   final String invoice;
@@ -11,7 +11,7 @@ class ShowInVoiceId extends StatefulWidget {
 }
 
 class _ShowInVoiceIdState extends State<ShowInVoiceId> {
- _onBackPressed() {
+  _onBackPressed() {
     return showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -144,7 +144,8 @@ class _ShowInVoiceIdState extends State<ShowInVoiceId> {
                                       Navigator.pushAndRemoveUntil(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => GroceryApp()),
+                                              builder: (context) =>
+                                                  GroceryApp()),
                                           (route) => false);
                                     },
                                     child: Container(
@@ -156,7 +157,7 @@ class _ShowInVoiceIdState extends State<ShowInVoiceId> {
                                               color: FoodAppColors.tela)),
                                       child: Center(
                                         child: Text(
-                                          "Continue Shopping?",
+                                          "Continue Shoppinng?",
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontSize: 15,

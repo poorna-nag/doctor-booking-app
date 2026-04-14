@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:aladdinmart/Auth/widgets/responsive_ui.dart';
-import 'package:aladdinmart/Auth/widgets/textformfield.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/model/RegisterModel.dart';
+import 'package:ecoshine24/Auth/widgets/responsive_ui.dart';
+import 'package:ecoshine24/Auth/widgets/textformfield.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/model/RegisterModel.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -54,25 +54,31 @@ class _SignInScreenState extends State<SignInScreen> {
     map['shop_id'] = FoodAppConstant.Shop_id;
     map['name'] = namelController.text;
     map['mobile'] = phoneController.text;
-    final response =
-        await http.post(Uri.parse(FoodAppConstant.base_url + 'api/step1.php'), body: map);
+    final response = await http
+        .post(Uri.parse(FoodAppConstant.base_url + 'api/step1.php'), body: map);
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);
       User user = User.fromJson(jsonDecode(response.body));
-      if (user.message.toString() == "OTP Sent Successfully") {
+
+      // Check if success is true before proceeding
+      if (user.success == "true") {
         _showLongToast(user.message.toString());
-        pref.setString("name", namelController.text);
-        pref.setString("mobile", phoneController.text);
+        pref.setString("temp_name",
+            namelController.text); // Use temp key for registration flow
+        pref.setString("temp_mobile",
+            phoneController.text); // Use temp key for registration flow
 
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => OtpVerify()),
         );
       } else {
+        // Show error message from API
         _showLongToast(user.message.toString());
       }
-    } else
-      throw Exception("Unable to get Employee list");
+    } else {
+      _showLongToast("Network error. Please try again.");
+    }
   }
 
   @override

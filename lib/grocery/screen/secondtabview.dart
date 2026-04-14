@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:aladdinmart/grocery/Auth/signin.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/Auth/signin.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
 import 'package:flutter_pagewise/flutter_pagewise.dart';
 
-import 'package:aladdinmart/grocery/screen/SearchScreen.dart';
-import 'package:aladdinmart/grocery/screen/detailpage.dart';
+import 'package:ecoshine24/grocery/screen/SearchScreen.dart';
+import 'package:ecoshine24/grocery/screen/detailpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Screen2 extends StatefulWidget {
@@ -76,43 +76,7 @@ class _ScreenState extends State<Screen2> {
               ),
             ),
           ),
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => WishList()),
-              );
-            },
-            child: Stack(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: 13, right: 30),
-                  child: Icon(
-                    Icons.add_shopping_cart,
-                    color: Colors.white,
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 15, bottom: 18),
-                    child: Container(
-                      padding: const EdgeInsets.all(5.0),
-                      decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: GroceryAppColors.telamoredeep,
-                        // color: Colors.blue,
-                      ),
-                      child: Text(
-                          '${GroceryAppConstant.groceryAppCartItemCount}',
-                          style:
-                              TextStyle(color: Colors.white, fontSize: 15.0)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
+          // Cart icon removed from AppBar as per client requirement
         ],
         title: Text(widget.title!.isEmpty ? " " : widget.title!,
             style: TextStyle(

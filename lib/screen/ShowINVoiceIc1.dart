@@ -1,6 +1,6 @@
-import 'package:aladdinmart/grocery/General/Home.dart';
+import 'package:ecoshine24/grocery/General/Home.dart';
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 
 class ShowInVoiceId1 extends StatefulWidget {
   final String invoice;

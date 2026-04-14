@@ -1,11 +1,10 @@
-import 'package:aladdinmart/grocery/screen/detailpage1.dart';
+import 'package:ecoshine24/grocery/screen/detailpage1.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/StyleDecoration/styleDecoration.dart';
-import 'package:aladdinmart/dbhelper/database_helper.dart';
-import 'package:aladdinmart/model/MyReviewModel.dart';
-import 'package:aladdinmart/screen/detailpage1.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/StyleDecoration/styleDecoration.dart';
+import 'package:ecoshine24/dbhelper/database_helper.dart';
+import 'package:ecoshine24/model/MyReviewModel.dart';
 import 'package:readmore/readmore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -1,13 +1,9 @@
 import 'dart:async';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/grocery_app_home_screen.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
-import 'package:aladdinmart/grocery/screen/SelectCity.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/grocery_app_home_screen.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'AppConstant.dart';
 import 'Home.dart';
 
@@ -128,29 +124,40 @@ class SplashScreenState extends State<AnimatedSplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GroceryAppColors.white,
-      body: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          new Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+      backgroundColor: Colors.black,
+      body: Container(
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            new Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
 //              Padding(padding: EdgeInsets.only(bottom: 30.0),child:new Image.asset('assets/images/powered_by.png',height: 25.0,fit: BoxFit.scaleDown,))
-            ],
-          ),
-          new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new Image.asset(
-                "assets/images/ssplash.gif",
-                fit: BoxFit.fill,
-                width: MediaQuery.of(context).size.width - 0,
-                height: MediaQuery.of(context).size.height - 0,
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            new Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Image.asset(
+                  "assets/images/ssplash.gif",
+                  fit: BoxFit.fill,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Fallback to logo if GIF fails to load
+                    return Image.asset(
+                      "assets/icon/app_logo.png",
+                      width: 200,
+                      height: 200,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

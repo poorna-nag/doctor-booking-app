@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:aladdinmart/grocery/Auth/widgets/responsive_ui.dart';
-import 'package:aladdinmart/grocery/Auth/widgets/textformfield.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/model/RegisterModel.dart';
+import 'package:ecoshine24/grocery/Auth/widgets/responsive_ui.dart';
+import 'package:ecoshine24/grocery/Auth/widgets/textformfield.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/model/RegisterModel.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -60,7 +60,9 @@ class _SignInScreenState extends State<SignInScreen> {
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);
       User user = User.fromJson(jsonDecode(response.body));
-      if (user.message.toString() == "OTP Sent Successfully") {
+
+      // Check if success is true before proceeding
+      if (user.success == "true") {
         _showLongToast(user.message.toString());
         pref.setString("name", namelController.text);
         pref.setString("mobile", phoneController.text);
@@ -70,10 +72,12 @@ class _SignInScreenState extends State<SignInScreen> {
           MaterialPageRoute(builder: (context) => OtpVerify()),
         );
       } else {
+        // Show error message from API
         _showLongToast(user.message.toString());
       }
-    } else
-      throw Exception("Unable to get Employee list");
+    } else {
+      _showLongToast("Network error. Please try again.");
+    }
   }
 
   @override

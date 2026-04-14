@@ -167,10 +167,11 @@ class WishlistState extends State<WishList> {
                                                         item.pimage.toString(),
                                                   )
                                                 : AssetImage(
-                                                        'assets/images/logo.png')
+                                                        'assets/images/eco-shine-logo.png')
                                                     as ImageProvider)),
                                   ),
                                   Expanded(
+                                    flex: 100,
                                     child: Container(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Column(
@@ -201,8 +202,9 @@ class WishlistState extends State<WishList> {
                                                 ? '100'
                                                 : '\u{20B9} ${double.parse(item.pprice ?? "").toStringAsFixed(2)}',
                                             style: TextStyle(
-                                              color:
-                                                  Theme.of(context).colorScheme.secondary,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary,
                                               fontWeight: FontWeight.w700,
                                               fontSize: 12,
                                             ).copyWith(color: Colors.green),
@@ -306,7 +308,7 @@ class WishlistState extends State<WishList> {
                                                             .grey.shade200,
                                                         padding:
                                                             const EdgeInsets
-                                                                    .only(
+                                                                .only(
                                                                 bottom: 2,
                                                                 right: 12,
                                                                 left: 12),
@@ -369,7 +371,6 @@ class WishlistState extends State<WishList> {
                                         ],
                                       ),
                                     ),
-                                    flex: 100,
                                   )
                                 ],
                               ),
@@ -382,6 +383,10 @@ class WishlistState extends State<WishList> {
                               height: 24,
                               alignment: Alignment.center,
                               margin: EdgeInsets.only(right: 10, top: 8),
+                              decoration: BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(4)),
+                                  color: Colors.red),
                               child: InkWell(
                                 onTap: () {
                                   dbmanager.deleteProducts(item.id!);
@@ -406,10 +411,6 @@ class WishlistState extends State<WishList> {
                                   size: 20,
                                 ),
                               ),
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(4)),
-                                  color: Colors.red),
                             ),
                           )
                         ],
@@ -426,6 +427,7 @@ class WishlistState extends State<WishList> {
 
   footer(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(top: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
@@ -483,31 +485,30 @@ class WishlistState extends State<WishList> {
           SizedBox(height: 8),
         ],
       ),
-      margin: EdgeInsets.only(top: 16),
     );
   }
 
   createHeader() {
     return Container(
       alignment: Alignment.topLeft,
+      margin: EdgeInsets.only(left: 12, top: 25),
       child: Text(
         "SHOPPING CART",
         style: CustomTextStyle.textFormFieldBold
             .copyWith(fontSize: 16, color: Colors.black),
       ),
-      margin: EdgeInsets.only(left: 12, top: 25),
     );
   }
 
   createSubTitle() {
     return Container(
       alignment: Alignment.topLeft,
+      margin: EdgeInsets.only(left: 12, top: 4),
       child: Text(
         'Total (${FoodAppConstant.itemcount}) Items',
         style: CustomTextStyle.textFormFieldBold
             .copyWith(fontSize: 12, color: Colors.grey),
       ),
-      margin: EdgeInsets.only(left: 12, top: 4),
     );
   }
 

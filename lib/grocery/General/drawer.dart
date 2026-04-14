@@ -1,23 +1,16 @@
 import 'dart:io';
 
-import 'package:aladdinmart/model/ShopDModel.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:ecoshine24/model/ShopDModel.dart';
 import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:aladdinmart/Auth/signin.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/categories.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/profile.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/profiledraw.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/General/Home.dart';
-import 'package:aladdinmart/grocery/Web/WebviewTermandCondition.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/screen/CustomeOrder.dart';
-import 'package:aladdinmart/grocery/screen/ShowAddress.dart';
-import 'package:aladdinmart/grocery/screen/myorder.dart';
-import 'package:aladdinmart/grocery/screen/newWishlist.dart';
-import 'package:aladdinmart/grocery/screen/productlist.dart';
-import 'package:aladdinmart/screen/wallecttransation.dart';
+import 'package:ecoshine24/Auth/signin.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/profiledraw.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/General/Home.dart';
+import 'package:ecoshine24/grocery/Web/WebviewTermandCondition.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/screen/ShowAddress.dart';
+import 'package:ecoshine24/grocery/screen/myorder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:share_plus/share_plus.dart';
@@ -44,17 +37,12 @@ class _AppDrawerState extends State<AppDrawer> {
     image = pref!.getString("pp");
     cityname = pref!.getString("city");
     mobile = pref!.getString("mobile");
-    if (islogin == null) {
-      islogin = false;
-    }
 
     // print(islogin);
     setState(() {
       GroceryAppConstant.name = name ?? "";
       GroceryAppConstant.email = email ?? "";
-      islogin == null
-          ? GroceryAppConstant.isLogin = false
-          : GroceryAppConstant.isLogin = islogin;
+      GroceryAppConstant.isLogin = islogin;
       GroceryAppConstant.image = image ?? "";
       print(GroceryAppConstant.image);
       GroceryAppConstant.citname = cityname ?? "";
@@ -72,7 +60,13 @@ class _AppDrawerState extends State<AppDrawer> {
         builder: (context) {
           return AlertDialog(
             scrollable: true,
-            title: Text('Select City'),
+            title: Text(
+              'Select Area',
+              style: TextStyle(
+                color: Color(0xff1E88E5),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             content: Container(
               width: double.maxFinite,
               height: 400,
@@ -162,12 +156,13 @@ class _AppDrawerState extends State<AppDrawer> {
               new TextButton(
                 child: Text(
                   'CANCEL',
-                  style: TextStyle(color: check ? Colors.green : Colors.grey),
+                  style:
+                      TextStyle(color: check ? Color(0xff1E88E5) : Colors.grey),
                 ),
                 onPressed: () {
                   check
                       ? Navigator.of(context).pop()
-                      : showLongToast("Please Select city");
+                      : showLongToast("Please Select area");
                 },
               )
             ],
@@ -195,12 +190,21 @@ class _AppDrawerState extends State<AppDrawer> {
       child: Column(
         children: <Widget>[
           Container(
-            color: GroceryAppColors.tela,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xff1E88E5), // Medical blue
+                  Color(0xff42A5F5), // Lighter medical blue
+                  Color(0xff64B5F6), // Lightest medical blue
+                ],
+              ),
+            ),
             child: Padding(
               padding: const EdgeInsets.only(top: 32),
               child: Container(
                 height: 68,
-                color: GroceryAppColors.tela,
                 child: Center(
                   child: Row(
                     children: [
@@ -216,21 +220,24 @@ class _AppDrawerState extends State<AppDrawer> {
                           },
                           icon: Icon(
                             Icons.arrow_back_ios,
-                            color: GroceryAppColors.white,
+                            color: Colors.white,
                             size: 25,
                           ),
                         ),
                       ),
                       Expanded(
                         child: Text(
-                          "Menu",
+                          "HealthCare Plus",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: GroceryAppColors.white,
+                            color: Colors.white,
+                            fontSize: 20,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ),
-                      Expanded(
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16),
                         child: IconButton(
                           onPressed: () {
                             if (GroceryAppConstant.isLogin) {
@@ -247,10 +254,17 @@ class _AppDrawerState extends State<AppDrawer> {
                               );
                             }
                           },
-                          icon: Icon(
-                            Icons.shopping_bag,
-                            color: GroceryAppColors.white,
-                            size: 25,
+                          icon: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.medical_services_outlined,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
                         ),
                       ),
@@ -326,13 +340,17 @@ class _AppDrawerState extends State<AppDrawer> {
             accountEmail: Text(islogin?Constant.email:" ",style: TextStyle(color: Colors.black),),
           ),*/
           Container(
+            decoration: BoxDecoration(
+              color: Color(0xffF8FBFF), // Medical light background
+            ),
             child: ListView(
               physics: ScrollPhysics(),
               shrinkWrap: true,
               children: <Widget>[
-                ListTile(
-                  leading: Icon(Icons.home, color: GroceryAppColors.tela),
-                  title: Text('Home'),
+                _buildModernListTile(
+                  icon: Icons.home_outlined,
+                  title: 'Home',
+                  color: Color(0xff1E88E5), // Medical blue
                   onTap: () {
                     Navigator.push(
                       context,
@@ -340,449 +358,200 @@ class _AppDrawerState extends State<AppDrawer> {
                     );
                   },
                 ),
-                Divider(),
-                ExpansionTile(
-                  title: Text(
-                    'My Account',
-                  ),
-                  leading: Icon(Icons.person, color: GroceryAppColors.tela),
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(left: 50),
-                      child: ListTile(
-                          leading: Icon(
-                            Icons.person,
-                            color: GroceryAppColors.tela,
-                          ),
-                          title: Text("My Profile"),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ProfileViewdraw()),
-                            );
-                          }),
+                _buildModernExpansionTile(
+                  title: 'My Account',
+                  icon: Icons.person_outline,
+                  color: Color(0xff42A5F5), // Medical blue lighter
+                  children: [
+                    _buildModernSubListTile(
+                      icon: Icons.person_outline,
+                      title: "My Profile",
+                      color: Color(0xff1E88E5), // Medical blue
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ProfileViewdraw()),
+                        );
+                      },
                     ),
-                    Divider(),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 50),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.shopping_bag,
-                          color: GroceryAppColors.tela,
-                        ),
-                        title: Text("My Bookings"),
-                        onTap: () {
-                          if (GroceryAppConstant.isLogin) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TrackOrder()),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SignInPage()),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    Divider(),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 50),
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.add_road,
-                          color: GroceryAppColors.tela,
-                        ),
-                        title: Text("My Addresses"),
-                        onTap: () {
-                          if (GroceryAppConstant.isLogin) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ShowAddress("1")),
-                            );
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SignInPage()),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                Divider(),
-                /*   ListTile(
-                  leading: Icon(Icons.list_alt,
-                      color: AppColors.tela),
-                  title: Text('Shop By Categories'),
-                  trailing: Text('',
-                      style: TextStyle(color: Theme.of(context).primaryColor)),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => Cgategorywise("0")),);
-                  },
-                ), */
-
-                /* ListTile(
-                  leading: Icon(Icons.offline_bolt_rounded,
-                      color: AppColors.tela),
-                  title: Text('Deals of the Day'),
-                  trailing: Text('New',
-                      style: TextStyle(color: Colors.red)),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProductList("day","DEALS OF THE DAY")),
-                    );
-                  },
-                ),*/
-
-                /* ListTile(
-                  leading: Icon(Icons.stacked_line_chart,
-                      color: AppColors.tela),
-                  title: Text('Top Products'),
-                  trailing: Text('',
-                      style: TextStyle(color: Theme.of(context).primaryColor)),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProductList("top","TOP PRODUCTS")),
-                    );
-                  },
-                ),*/
-
-                /* ListTile(
-                  leading: Icon(Icons.traffic,
-                      color: AppColors.tela),
-                  title: Text('New Arrival'),
-                  trailing: Text('',
-                      style: TextStyle(color: Theme.of(context).primaryColor)),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) =>
-                          ProductList("day",
-                              Constant.AProduct_type_Name2)),);
-                  },
-                ),*/
-//                  ListTile(
-//                   leading:
-//                   Icon(Icons.favorite, color: GroceryAppColors.tela),
-//                   title: Text('My Wishlist'),
-//                   /* trailing: Container(
-//                     padding: const EdgeInsets.all(10.0),
-//                     decoration: new BoxDecoration(
-//                       shape: BoxShape.circle,
-//                       color: Theme.of(context).primaryColor,
-//                     ),
-//                     child: Text(wcount!=null?wcount.toString():'0',
-//                         style: TextStyle(color: Colors.white, fontSize: 15.0)),
-//                   ),*/
-//                   onTap: () {
-//                     Navigator.of(context).pop();
-
-//                     Navigator.push(
-//                         context,
-//                         MaterialPageRoute(builder: (context) => NewWishList())
-// //                        NewWishList()),
-// //                      Cat_Product
-//                     );
-//                   },
-//                 ),
-
-                /*  ListTile(
-                  leading: Icon(Icons.star_border,
-                      color: AppColors.tela),
-                  title: Text('Rate US',),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    String os = Platform.operatingSystem; //in your code
-                    if (os == 'android') {
-                      final InAppReview inAppReview = InAppReview.instance;
-                      inAppReview.requestReview();
-                    }
-                  },
-                ),*/
-                // ListTile(
-                //   leading: Icon(Icons.analytics_rounded,
-                //       color: AppColors.tela),
-                //   title: Text('Blog'),
-                //   trailing: Text('',
-                //       style: TextStyle(color: Theme.of(context).primaryColor)),
-                //   onTap: () {
-                //     Navigator.of(context).pop();
-                //
-                //     Navigator.push(context, MaterialPageRoute(
-                //         builder: (context) => BlogScreen()),
-                //     );
-                //   },
-                // ),
-                // ListTile(
-                //   leading: Icon(
-                //     Icons.account_balance_wallet_rounded,
-                //     color: GroceryAppColors.tela,
-                //   ),
-                //   title: Text('My Wallet'),
-                //   onTap: () {
-                //     Navigator.of(context).pop();
-                //     if (GroceryAppConstant.isLogin) {
-                //       Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //           builder: (context) => WalltReport(),
-                //         ),
-                //       );
-                //     } else {
-                //       Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //           builder: (context) => SignInPage(),
-                //         ),
-                //       );
-                //     }
-                //   },
-                // ),
-                // Divider(),
-                // ListTile(
-                //   leading: Icon(
-                //     Icons.money_sharp,
-                //     color: GroceryAppColors.tela,
-                //   ),
-                //   title: Text('My Earnings'),
-                //   onTap: () {
-                //     Navigator.of(context).pop();
-                //     if (GroceryAppConstant.isLogin) {
-                //       Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //           builder: (context) => WebViewClass(
-                //             "My Earnings",
-                //             "${GroceryAppConstant.base_url}Api_earnings.php?username=$mobile&shop_id=${GroceryAppConstant.Shop_id}",
-                //           ),
-                //         ),
-                //       );
-                //     } else {
-                //       Navigator.push(
-                //         context,
-                //         MaterialPageRoute(
-                //           builder: (context) => SignInPage(),
-                //         ),
-                //       );
-                //     }
-                //   },
-                // ),
-                // Divider(),
-                ListTile(
-                  leading: Icon(Icons.phone, color: GroceryAppColors.tela),
-                  title: Text('Contact Us'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WebViewClass(
-                                "Contact Us",
-                                ""
-                                    "${GroceryAppConstant.base_url}contact"))
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => RateMyAppTestApp())
-//                        NewWishList()),
-//                      Cat_Product
-                        );
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  leading:
-                      Icon(Icons.privacy_tip, color: GroceryAppColors.tela),
-                  title: Text('Privacy Policy'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WebViewClass(
-                                "Privacy Policy",
-                                ""
-                                    "${GroceryAppConstant.base_url}pp"))
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => RateMyAppTestApp())
-//                        NewWishList()),
-//                      Cat_Product
-                        );
-                  },
-                ),
-                 Divider(),
-                ListTile(
-                  leading:
-                      Icon(Icons.privacy_tip, color: GroceryAppColors.tela),
-                  title: Text('Shipping Policy'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WebViewClass(
-                                "Shipping Policy",
-                                ""
-                                    "http://www.oho.w4u.in/cr"))
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => RateMyAppTestApp())
-//                        NewWishList()),
-//                      Cat_Product
-                        );
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  leading: Icon(Icons.info, color: GroceryAppColors.tela),
-                  title: Text('About Us'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WebViewClass(
-                                "About Us",
-                                ""
-                                    "${GroceryAppConstant.base_url}about"))
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => RateMyAppTestApp())
-//                        NewWishList()),
-//                      Cat_Product
-                        );
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  leading: Icon(Icons.file_copy, color: GroceryAppColors.tela),
-                  title: Text('Terms & Conditions'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WebViewClass(
-                                "Terms & Conditions",
-                                ""
-                                    "${GroceryAppConstant.base_url}tc"))
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => RateMyAppTestApp())
-//                        NewWishList()),
-//                      Cat_Product
-                        );
-                  },
-                ),
-                Divider(),
-                /* ListTile(
-                  leading:
-                  Icon(Icons.file_copy, color: AppColors.tela),
-                  title: Text('Terms & Conditions'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => WebViewClass("Terms & Conditions","https://www.freshatdoorstep.com/tc"))
-                    // Navigator.push(context, MaterialPageRoute(builder: (context) => RateMyAppTestApp())
-//                        NewWishList()),
-//                      Cat_Product
-                    );
-                  },
-                ),*/
-                /* ListTile(
-                  leading:
-                  Icon(Icons.question_answer, color: AppColors.tela),
-                  title: Text('FAQ'),
-                  onTap: () {
-                    Navigator.of(context).pop();
-
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => WebViewClass("FAQ","https://www.freshatdoorstep.com/faq"))
-                    // Navigator.push(context, MaterialPageRoute(builder: (context) => RateMyAppTestApp())
-//                        NewWishList()),
-//                      Cat_Product
-                    );
-                  },
-                ),*/
-                ListTile(
-                  leading: Icon(Icons.mobile_screen_share,
-                      color: GroceryAppColors.tela),
-                  title: Text('Share'),
-                  onTap: () {
-                    _shairApp();
-                  },
-                ),
-                Divider(),
-
-                GroceryAppConstant.isLogin
-                    ? new Container()
-                    : ListTile(
-                        leading: Icon(Icons.lock, color: GroceryAppColors.tela),
-                        title: Text('Login'),
-                        onTap: () {
-                          Navigator.of(context).pop();
-
+                    _buildModernSubListTile(
+                      icon: Icons.calendar_today_outlined,
+                      title: "My Appointments",
+                      color: Color(0xff42A5F5), // Medical blue lighter
+                      onTap: () {
+                        if (GroceryAppConstant.isLogin) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => TrackOrder()),
+                          );
+                        } else {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => SignInPage()),
                           );
-                        },
-                      ),
-                // Divider(),
-//              ListTile(
-//                leading:
-//                    Icon(Icons.settings, color: AppColors.tela),
-//                title: Text('Settings'),
-//                onTap: () {
-//
-//                },
-//              ),
-                /* Constant.isLogin? ListTile(
-                  leading: Icon(Icons.exit_to_app,
-                      color: AppColors.tela),
-                  title: Text('Logout'),
-                  onTap: () async {
-                    _callLogoutData();
+                        }
+                      },
+                    ),
+                    _buildModernSubListTile(
+                      icon: Icons.location_on_outlined,
+                      title: "My Addresses",
+                      color: Color(0xff64B5F6), // Medical blue lightest
+                      onTap: () {
+                        if (GroceryAppConstant.isLogin) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ShowAddress("1")),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SignInPage()),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                _buildModernListTile(
+                  icon: Icons.phone_outlined,
+                  title: 'Contact Us',
+                  color: Color(0xff1E88E5), // Medical blue
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => WebViewClass("Contact Us",
+                                "${GroceryAppConstant.base_url}contact")));
                   },
-                ):new Container()*/
+                ),
+                _buildModernListTile(
+                  icon: Icons.privacy_tip_outlined,
+                  title: 'Privacy Policy',
+                  color: Color(0xff42A5F5), // Medical blue lighter
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => WebViewClass("Privacy Policy",
+                                "${GroceryAppConstant.base_url}pp")));
+                  },
+                ),
+                _buildModernListTile(
+                  icon: Icons.local_shipping_outlined,
+                  title: 'Service Policy',
+                  color: Color(0xff64B5F6), // Medical blue lightest
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => WebViewClass("Service Policy",
+                                "https://ecoshine24.w4u.in/cr")));
+                  },
+                ),
+                _buildModernListTile(
+                  icon: Icons.info_outline,
+                  title: 'About Us',
+                  color: Color(0xff1E88E5), // Medical blue
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => WebViewClass("About Us",
+                                "${GroceryAppConstant.base_url}about")));
+                  },
+                ),
+                _buildModernListTile(
+                  icon: Icons.description_outlined,
+                  title: 'Terms & Conditions',
+                  color: Color(0xff42A5F5), // Medical blue lighter
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => WebViewClass(
+                                "Terms & Conditions",
+                                "${GroceryAppConstant.base_url}tc")));
+                  },
+                ),
+                _buildModernListTile(
+                  icon: Icons.share_outlined,
+                  title: 'Share',
+                  color: Color(0xff64B5F6), // Medical blue lightest
+                  onTap: () {
+                    _shairApp();
+                  },
+                ),
+                if (!GroceryAppConstant.isLogin)
+                  _buildModernListTile(
+                    icon: Icons.login_outlined,
+                    title: 'Login',
+                    color: Color(0xff1E88E5), // Medical blue
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignInPage()),
+                      );
+                    },
+                  ),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                  child: Container(
-                    height: 130,
-                    width: 150,
-                    decoration: BoxDecoration(
-                        //  color: Colors.red,
-                        image: DecorationImage(
-                            image: AssetImage(
-                              'assets/images/logo.png',
-                            ),
-                            fit: BoxFit.cover)),
-                    // child: Image.asset(
-                    //   'assets/images/logo.png',
-                    //   //   width: 80,
-                    // ),
+                // Medical Logo Section
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xff1E88E5).withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.local_hospital,
+                          size: 40,
+                          color: Color(0xff1E88E5),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          "HealthCare Plus",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xff1E88E5),
+                          ),
+                        ),
+                        Text(
+                          "Your Health, Our Priority",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
-                SizedBox(
-                  height: 15,
-                ),
-                shopDetails != null ? socialMedia(context) : Row(),
+                SizedBox(height: 15),
+                shopDetails != null ? socialMedia(context) : SizedBox.shrink(),
               ],
             ),
           )
@@ -956,5 +725,213 @@ class _AppDrawerState extends State<AppDrawer> {
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not launch $url');
     }
+  }
+
+  // Helper method to build modern list tiles
+  Widget _buildModernListTile({
+    required IconData icon,
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        color.withOpacity(0.15),
+                        color.withOpacity(0.05)
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: color.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 20,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: color,
+                    size: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build modern expansion tiles
+  Widget _buildModernExpansionTile({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required List<Widget> children,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: color.withOpacity(0.2),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 20,
+            ),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          iconColor: color,
+          collapsedIconColor: color,
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build modern sub list tiles
+  Widget _buildModernSubListTile({
+    required IconData icon,
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(left: 56, right: 16, bottom: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: color.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 16,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: color.withOpacity(0.7),
+                  size: 12,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

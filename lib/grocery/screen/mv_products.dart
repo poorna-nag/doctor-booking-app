@@ -1,23 +1,16 @@
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:aladdinmart/constent/app_constent.dart';
-import 'package:aladdinmart/grocery/Auth/signin.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/CategaryModal.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
-import 'package:aladdinmart/grocery/model/slidermodal.dart';
-import 'package:aladdinmart/grocery/screen/SearchScreen.dart';
-import 'package:aladdinmart/grocery/screen/detailpage.dart';
-import 'package:page_indicator/page_indicator.dart';
-import 'package:aladdinmart/grocery/screen/vendor_product_details.dart';
+import 'package:ecoshine24/constent/app_constent.dart';
+import 'package:ecoshine24/grocery/Auth/signin.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/CategaryModal.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/model/slidermodal.dart';
+import 'package:ecoshine24/grocery/screen/vendor_product_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MvProducts extends StatefulWidget {
@@ -636,7 +629,7 @@ class _Sbcategory extends State<MvProducts> {
                                                         Padding(
                                                           padding:
                                                               const EdgeInsets
-                                                                      .only(
+                                                                  .only(
                                                                   top: 2.0,
                                                                   bottom: 1),
                                                           child: Text(
@@ -687,7 +680,7 @@ class _Sbcategory extends State<MvProducts> {
                                                         : Padding(
                                                             padding:
                                                                 const EdgeInsets
-                                                                        .only(
+                                                                    .only(
                                                                     left: 0.0,
                                                                     top: 8.0),
                                                             child: InkWell(
@@ -986,7 +979,7 @@ class _Sbcategory extends State<MvProducts> {
                                                                 products1[index]
                                                                     .img
                                                                     .toString()
-                                                            : "https://www.drawplanet.cz/wp-content/uploads/2019/10/dsc-0009-150x100.jpg",
+                                                            : "https://www.bigwelt.com/manage/uploads/gallery/no-img.png",
                                                       ),
                                                     ),
                                                   ),
@@ -1605,7 +1598,7 @@ class _Sbcategory extends State<MvProducts> {
                             products1[index].img != null
                                 ? GroceryAppConstant.Base_Imageurl +
                                     products1[index].img.toString()
-                                : "ttps://www.drawplanet.cz/wp-content/uploads/2019/10/dsc-0009-150x100.jpg",
+                                : "https://www.bigwelt.com/manage/uploads/gallery/no-img.png",
                           ))),
                 ),
                 Container(

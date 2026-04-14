@@ -1,24 +1,21 @@
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:aladdinmart/grocery/model/CategaryModal.dart';
-import 'package:aladdinmart/grocery/model/productmodel.dart';
+import 'package:ecoshine24/grocery/model/CategaryModal.dart';
+import 'package:ecoshine24/grocery/model/productmodel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:html/parser.dart';
 
 class GroceryAppConstant {
   // static const String base_url = "http://www.comelyindia.w4u.in/";
-  static String appname = "OHO";
-  static const String packageName = "com.ohouserapp";
+  static String appname = "Doctor Booking App";
+  static const String packageName = "com.doctorbookingbigweltdemoapp";
   static const String iosAppLink = "";
-  static const String base_url = "http://www.oho.w4u.in/";
+  static const String base_url = "https://bookyourdoctor.w4u.in/";
   static const String mainurl = base_url;
 
-  static const String API_KEY = "A4EXVM96WD5F7N8RUKPJBLGYS2TCQHZ3";
-  static const String Shop_id = "35458";
-  static const Google_Api_Key = "AIzaSyCpGA70wtaYTZfOxCHNKfdfrbb83gGe__I";
+  static const String API_KEY = "842K3EYZQ65UN7SMD9XPFRATJHVCBLWG";
+  static const String Shop_id = "2892";
+  static const Google_Api_Key = "AIzaSyA-HxLg6FiYIysPv-iZtslRlt0CSny5awI";
   static const String registration = "user.php";
   static const String post = "post.php";
   static const String Subscription = "subscription.php";
@@ -82,10 +79,11 @@ class GroceryAppColors {
   static const Appname = Color(0xFFFFFFFF);
 
   //static const tela = Color(0xff008000);
-  static const tela = Color(0xff0f0a70);
+  static const tela = Color(0xffFF6B35); // Vibrant orange - primary color
   static const bg = Color.fromARGB(255, 247, 251, 253);
-  static const tela1 = Color(0xff0f0bfa);
-   // static const tela1 = Color(0xff008000);
+  static const lightBlueBg = Color(0xffFFF8F0); // Light orange background
+  static const tela1 = Color(0xffFF8A50); // Light orange - secondary color
+  // static const tela1 = Color(0xff008000);
   static const teladep = Color(0xFF222222);
   static const telamoredeep = Color(0xFF40C4FF);
   static const onselectedBottomicon = Color(0xFFFF8F00);
@@ -206,4 +204,70 @@ String parseHtmlString(String htmlString) {
   final String parsedString = parse(document.body!.text).documentElement!.text;
 
   return parsedString;
+}
+
+// Helper function to get category image widget with fallback for grocery app
+Widget getGroceryCategoryImageWidget(String? imageUrl,
+    {BoxFit fit = BoxFit.fill, double? width, double? height}) {
+  if (imageUrl != null && imageUrl.isNotEmpty) {
+    return Image.network(
+      GroceryAppConstant.base_url + "manage/uploads/p_category/" + imageUrl,
+      fit: fit,
+      width: width,
+      height: height,
+      errorBuilder: (context, error, stackTrace) {
+        return _getGroceryNoImageWidget(width: width, height: height);
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return _getGroceryNoImageWidget(width: width, height: height);
+      },
+    );
+  } else {
+    return _getGroceryNoImageWidget(width: width, height: height);
+  }
+}
+
+// Helper function for no image widget in grocery app
+Widget _getGroceryNoImageWidget({double? width, double? height}) {
+  return Container(
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: GroceryAppColors.lightGray.withOpacity(0.3),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.category,
+          size: (width != null && width < 60) ? 20 : 40,
+          color: GroceryAppColors.darkGray,
+        ),
+        if (width == null || width >= 60)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              "No Image",
+              style: TextStyle(
+                fontSize: 10,
+                color: GroceryAppColors.darkGray,
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+// Helper function to get ImageProvider for DecorationImage
+ImageProvider getGroceryCategoryImageProvider(String? imageUrl) {
+  if (imageUrl != null && imageUrl.isNotEmpty) {
+    return NetworkImage(
+      GroceryAppConstant.base_url + "manage/uploads/p_category/" + imageUrl,
+    );
+  } else {
+    return AssetImage("assets/icon/app_logo.png"); // Use app icon as fallback
+  }
 }

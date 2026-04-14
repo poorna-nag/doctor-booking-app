@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 
 import '../signup.dart';
 
@@ -14,7 +14,8 @@ class CustomAppBar2 extends StatelessWidget {
         width: width,
         padding: EdgeInsets.only(left: 15, top: 25),
         decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [FoodAppColors.boxColor1, FoodAppColors.boxColor2]),
+          gradient: LinearGradient(
+              colors: [FoodAppColors.boxColor1, FoodAppColors.boxColor2]),
         ),
         child: Row(
           children: <Widget>[

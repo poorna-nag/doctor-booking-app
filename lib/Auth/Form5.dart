@@ -389,11 +389,10 @@ class _Form4State extends State<Form4> {
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'package:aladdinmart/Auth/signup.dart';
-import 'package:aladdinmart/Auth/widgets/CustomeAppbar2.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/model/RegisterModel.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:ecoshine24/Auth/signup.dart';
+import 'package:ecoshine24/Auth/widgets/CustomeAppbar2.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/model/RegisterModel.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';

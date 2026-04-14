@@ -64,4 +64,5 @@
 -keep class * implements com.google.gson.JsonDeserializer
 
 # Keep all model classes (adjust package name as needed)
--keep class com.ohouserapp.model.** { *; }
+# Combined package + class pattern. If your app's package is different, update the package prefix below.
+-keep class com.doctorbookingbigweltdemoapp.app.model.** { *; }

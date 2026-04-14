@@ -1,23 +1,19 @@
-import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:aladdinmart/constent/app_constent.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/categories.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/profile.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/grocery_app_home_screen.dart';
-import 'package:aladdinmart/grocery/BottomNavigation/wishlist.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/CategaryModal.dart';
-import 'package:http/http.dart' as http;
-import 'package:aladdinmart/grocery/screen/SearchScreen.dart';
-import 'package:aladdinmart/grocery/screen/custom_order.dart';
+import 'package:ecoshine24/constent/app_constent.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/categories.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/profile.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/grocery_app_home_screen.dart';
+import 'package:ecoshine24/grocery/BottomNavigation/wishlist.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/screen/custom_order.dart';
+import 'package:ecoshine24/grocery/screen/myorder.dart';
+import 'package:ecoshine24/grocery/widgets/category_selection_modal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'drawer.dart';
-import 'my_app_bar.dart';
 
 class GroceryApp extends StatefulWidget {
   @override
@@ -28,6 +24,7 @@ class GroceryAppState extends State<GroceryApp> {
   static int countval = 0;
   int cc = 0;
   SharedPreferences? pref;
+  String selectedCategoryId = "0"; // Store selected category ID
 
   void getcartCount() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -91,16 +88,11 @@ class GroceryAppState extends State<GroceryApp> {
 
   Position? position;
   getAddress(double lat, double long) async {
-    var addresses = await placemarkFromCoordinates(lat!, long!);
+    var addresses = await placemarkFromCoordinates(lat, long);
     var first = addresses.first;
     setState(() {
-      var address = first.subLocality.toString() +
-          " " +
-          first.subAdministrativeArea.toString() +
-          " " +
-          first.subThoroughfare.toString() +
-          " " +
-          first.thoroughfare.toString();
+      var address =
+          "${first.subLocality} ${first.subAdministrativeArea} ${first.subThoroughfare} ${first.thoroughfare}";
       print('Rahul ${address}');
       pref!.setString("lat", lat.toString());
       pref!.setString("lat", lat.toString());
@@ -128,20 +120,83 @@ class GroceryAppState extends State<GroceryApp> {
     _getCurrentLocation();
     super.initState();
     gatinfoCount();
+    _showPage = _screen; // Initialize with home screen
+    // _checkFirstLaunchAndShowCategoryModal();
   }
+
+  // Check if it's first launch and show category selection modal
+  // void _checkFirstLaunchAndShowCategoryModal() async {
+  //   WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //     SharedPreferences pref = await SharedPreferences.getInstance();
+  //     String? savedCategoryId = pref.getString("selectedCategoryId");
+  //     bool? isFirstLaunch = pref.getBool("isFirstCategorySelection");
+  //     bool? skipCategorySelection = pref.getBool("skipCategorySelection");
+
+  //     // If user tapped SKIP button, don't show modal
+  //     if (skipCategorySelection == true) {
+  //       // Clear the skip flag for next time
+  //       await pref.setBool("skipCategorySelection", false);
+  //       return;
+  //     }
+
+  //     if (isFirstLaunch == null ||
+  //         isFirstLaunch == true ||
+  //         savedCategoryId == null) {
+  //       _showCategorySelectionModal();
+  //     } else {
+  //       setState(() {
+  //         selectedCategoryId = savedCategoryId;
+  //       });
+  //     }
+  //   });
+  // }
+
+  // // Show category selection modal
+  // void _showCategorySelectionModal() async {
+  //   try {
+  //     await showModalBottomSheet<String>(
+  //       context: context,
+  //       isScrollControlled: true,
+  //       backgroundColor: Colors.transparent,
+  //       builder: (context) => CategorySelectionModal(
+  //         onCategorySelected: (String categoryId) async {
+  //           SharedPreferences pref = await SharedPreferences.getInstance();
+  //           await pref.setString("selectedCategoryId", categoryId);
+  //           await pref.setBool("isFirstCategorySelection", false);
+
+  //           // Wait a moment for modal to close properly
+  //           await Future.delayed(Duration(milliseconds: 200));
+
+  //           if (mounted) {
+  //             setState(() {
+  //               selectedCategoryId = categoryId;
+  //               // Reset to home tab to show the updated screen
+  //               _selectedIndex = 0;
+  //             });
+  //           }
+  //         },
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     print("Error in category selection: $e");
+  //   }
+  // }
 
   String? lngval;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final GroceryAppHomeScreen _screen = GroceryAppHomeScreen();
+  GroceryAppHomeScreen get _screen =>
+      GroceryAppHomeScreen(categoryId: selectedCategoryId);
   final Cgategorywise _categories = Cgategorywise("", false);
   //final My_Cat _categories = My_Cat();
   final WishList _cartitem = WishList();
   final ProfileView _profilePage = ProfileView();
   final CustomOrder _customOrder = CustomOrder();
+  final TrackOrder _myBookings = TrackOrder();
   int _current = 0;
   int _selectedIndex = 0;
-  Widget _showPage = GroceryAppHomeScreen();
+  Widget? _showPage;
+
   Widget _PageChooser(int page) {
     switch (page) {
       case 0:
@@ -150,12 +205,8 @@ class GroceryAppState extends State<GroceryApp> {
         break;
       case 1:
         _onItemTapped(1);
-        return _categories;
+        return _myBookings;
         break;
-      // case 2:
-      //   _onItemTapped(2);
-      //   return _customOrder;
-      //   break;
       case 2:
         _onItemTapped(2);
         return _cartitem;
@@ -184,7 +235,13 @@ class GroceryAppState extends State<GroceryApp> {
         builder: (context) {
           return AlertDialog(
             scrollable: true,
-            title: Text('Select City'),
+            title: Text(
+              'Select Area',
+              style: TextStyle(
+                color: Color(0xff1E88E5), // Medical blue
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             content: Container(
               width: double.maxFinite,
               height: 400,
@@ -259,13 +316,16 @@ class GroceryAppState extends State<GroceryApp> {
               TextButton(
                 child: Text(
                   'CANCEL',
-                  style: TextStyle(color: check ? Colors.green : Colors.grey),
+                  style: TextStyle(
+                      color: check
+                          ? Color(0xff1E88E5) // Medical blue when active
+                          : Colors.grey),
                 ),
                 onPressed: () {
                   // Navigator.of(context).pop();
                   check
                       ? Navigator.of(context).pop()
-                      : showLongToast("Please Select city");
+                      : showLongToast("Please Select area");
                 },
               )
             ],
@@ -283,17 +343,26 @@ class GroceryAppState extends State<GroceryApp> {
     await showDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(
-              title: Text('Please Confirm'),
+              title: Text(
+                'Please Confirm',
+                style: TextStyle(color: Color(0xff1E88E5)), // Medical blue
+              ),
               content: Text('Do you really want to exit'),
               actions: [
                 TextButton(
-                  child: Text('Yes'),
+                  child: Text(
+                    'Yes',
+                    style: TextStyle(color: Color(0xff1E88E5)), // Medical blue
+                  ),
                   onPressed: () => {
                     exit(0),
                   },
                 ),
                 TextButton(
-                  child: Text('No'),
+                  child: Text(
+                    'No',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                   onPressed: () => Navigator.pop(c, false),
                 ),
               ],
@@ -317,241 +386,229 @@ class GroceryAppState extends State<GroceryApp> {
     return WillPopScope(
       onWillPop: () async {
         return exitApp();
-        //}
-        // we can now close the app.
-        //return true;
       },
       child: Scaffold(
         key: _scaffoldKey,
-
         drawer: Drawer(
           child: AppDrawer(),
         ),
         appBar: AppBar(
           title: Center(
-            child: Text(
-              GroceryAppConstant.appname,
-              overflow: TextOverflow.visible,
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ),
-
-          // search box commented
-          /*Container(
-      margin: EdgeInsets.only(top: 10,bottom: 0),
-
-        height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-
-                width: MediaQuery.of(context).size.width/1.5-40,
-                margin: EdgeInsets.only(top: 10,bottom: 15),
-                child: Material(
-
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.local_hospital,
                   color: Colors.white,
-                  elevation: 0.0,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
+                  size: 20,
+                ),
+                SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    "HealthCare Plus",
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(20),
+                      fontSize: 16,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => UserFilterDemo()),
-                      );
-                    },
-
-                      child:Padding(padding: EdgeInsets.only(top:5.0),
-                        child:
-                        TextField(
-
-                          enabled: false,
-                          obscureText: false,
-                          decoration: InputDecoration(
-                              hintText: "Search Product",
-                              hintStyle: TextStyle(
-                                  fontSize: 14.0, color: Colors.grey),
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: AppColors.tela,
-                              )),
-
-
-                        ),)),
                 ),
-              ),
-
-            ],
-          ),
-        ),*/
-          /* Container(
-            height: 40,
-            margin: EdgeInsets.only(top: 5,bottom: 5),
-            child: Center(
-              // padding: EdgeInsets.only(top: 3),
-              child: Text('${getTranslated(context, 'appname')}',
-              // child: Text('${lng_trans("JAI KISAN",lngval)!=null?lng_trans("JAI KISAN",lngval):Constant.appname}',
-                textAlign: TextAlign.start,
-                style: TextStyle(fontSize: 18,color: Colors.white),),
-            )),*/
-          elevation: 0.0,
-          backgroundColor: GroceryAppColors.tela,
-//                backgroundColor: Colors.blue,
-          leading: IconButton(
-            onPressed: () {
-              _scaffoldKey.currentState?.openDrawer();
-            },
-            icon: Icon(
-              Icons.menu,
-              color: GroceryAppColors.white,
+              ],
             ),
           ),
-
-          actions: <Widget>[
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => WishList()),
-                );
-              },
-              child: Stack(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 20, right: 15),
-                    child: Icon(
-                      Icons.shopping_cart,
-                      color: GroceryAppColors.white,
-                      size: 22,
-                    ),
-                  ),
-
-                  ///-----------------------------------CART NUMBER---------------------------------------------------------
-                  // Align(
-                  //   alignment: Alignment.center,
-                  //   child: Padding(
-                  //     padding: EdgeInsets.only(left: 15, bottom: 20, top: 0),
-                  //     child: Container(
-                  //       padding: const EdgeInsets.all(5.0),
-                  //       decoration: BoxDecoration(
-                  //         shape: BoxShape.circle,
-                  //         color: GroceryAppColors.tela1,
-                  //       ),
-                  //       child: Text('$cc',
-                  //           style: TextStyle(
-                  //               color: GroceryAppColors.white, fontSize: 15.0)),
-                  //     ),
-                  //   ),
-                  // ),
-
-                  ///-------------------------------------------------------------------------------------------------------
-                  // ScreenState.showCircle(),
+          elevation: 0.0,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xff1E88E5), // Medical blue
+                  Color(0xff1E88E5), // Lighter medical blue
+                  Color(0xff1E88E5), // Lightest medical blue
                 ],
               ),
             ),
-            InkWell(
-              onTap: () {
-                _displayDialog(context);
+          ),
+          leading: Container(
+            margin: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: IconButton(
+              onPressed: () {
+                _scaffoldKey.currentState?.openDrawer();
               },
-              child: Padding(
-                padding: EdgeInsets.only(top: 0, right: 10),
-                child: Icon(
-                  Icons.location_on,
-                  color: GroceryAppColors.white,
-                  size: 25,
+              icon: Icon(
+                Icons.menu,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+        ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Color(0xffF8FBFF), // Medical light background
+            boxShadow: [
+              BoxShadow(
+                color:
+                    Color(0xff1E88E5).withOpacity(0.1), // Medical blue shadow
+                blurRadius: 20,
+                offset: Offset(0, -5),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            items: [
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 0
+                        ? Color(0xff1E88E5)
+                            .withOpacity(0.1) // Medical blue background
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.home_outlined,
+                    color: _selectedIndex == 0
+                        ? Color(0xff1E88E5) // Medical blue when selected
+                        : Colors.grey[600],
+                    size: 24,
+                  ),
                 ),
+                label: 'Home',
               ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 1
+                        ? Color(0xff1E88E5)
+                            .withOpacity(0.1) // Medical blue background
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.calendar_today_outlined,
+                    color: _selectedIndex == 1
+                        ? Color(0xff1E88E5) // Medical blue when selected
+                        : Colors.grey[600],
+                    size: 24,
+                  ),
+                ),
+                label: 'Appointments',
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 2
+                        ? Color(0xff1E88E5)
+                            .withOpacity(0.1) // Medical blue background
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Stack(
+                    children: [
+                      Icon(
+                        Icons.medical_services_outlined,
+                        color: _selectedIndex == 2
+                            ? Color(0xff1E88E5) // Medical blue when selected
+                            : Colors.grey[600],
+                        size: 24,
+                      ),
+                      if (cc > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Color(0xff1E88E5), // Medical blue
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            constraints: BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              '$cc',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                label: 'Services',
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 3
+                        ? Color(0xff1E88E5)
+                            .withOpacity(0.1) // Medical blue background
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.person_outline,
+                    color: _selectedIndex == 3
+                        ? Color(0xff1E88E5) // Medical blue when selected
+                        : Colors.grey[600],
+                    size: 24,
+                  ),
+                ),
+                label: 'Profile',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: Color(0xff1E88E5), // Medical blue when selected
+            unselectedItemColor: Colors.grey[600],
+            backgroundColor: Colors.white,
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
             ),
-          ],
+            unselectedLabelStyle: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 11,
+            ),
+            onTap: (int index) {
+              setState(() {
+                _showPage = _PageChooser(index);
+              });
+            },
+          ),
         ),
-//              MyAppBar(
-//                scaffoldKey: _scaffoldKey,
-//              ),
-        bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-              icon:
-
-                  /* Image.asset("assets/images/home.png",
-                color: _selectedIndex == 0 ? AppColors.tela : AppColors.homeiconcolor,
-                height: 28,width: 28,fit:BoxFit.fill), */
-
-                  Icon(
-                Icons.home_outlined,
-                color: _selectedIndex == 0
-                    ? GroceryAppColors.homeiconcolor
-                    : GroceryAppColors.tela,
-                size: 25,
-              ),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.category_rounded,
-                color: _selectedIndex == 1
-                    ? GroceryAppColors.homeiconcolor
-                    : GroceryAppColors.tela,
-                size: 25,
-              ),
-              label: 'Categories',
-            ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(
-            //     Icons.add,
-            //     color: _selectedIndex == 2
-            //         ? GroceryAppColors.homeiconcolor
-            //         : GroceryAppColors.tela,
-            //     size: 25,
-            //   ),
-            //   title: Text('Upload List', style: TextStyle(fontSize: 12)),
-            // ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.shopping_cart_sharp,
-                color: _selectedIndex == 2
-                    ? GroceryAppColors.homeiconcolor
-                    : GroceryAppColors.tela,
-                size: 25,
-              ),
-              label: 'My cart',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.perm_identity,
-                color: _selectedIndex == 3
-                    ? GroceryAppColors.homeiconcolor
-                    : GroceryAppColors.tela,
-                size: 25,
-              ),
-              label: 'Account',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: GroceryAppColors.onselectedBottomicon,
-          backgroundColor: Colors.white,
-          type: BottomNavigationBarType.fixed,
-          onTap: (int index) {
-//          debugPrint("Current Index is $index");
-            setState(() {
-              _showPage = _PageChooser(index);
-            });
-          },
-        ),
-
         body: Container(
-            color: GroceryAppColors.tela,
-//    margin: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10),
-            child: _showPage),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xff1E88E5), // Medical blue
+                Color(0xff42A5F5), // Lighter medical blue
+                Color(0xffF8FBFF), // Medical light background
+              ],
+              stops: [0.0, 0.3, 1.0],
+            ),
+          ),
+          child: _showPage ?? _screen,
+        ),
       ),
     );
   }

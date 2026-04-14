@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/CancleandRefundmodel.dart';
-import 'package:aladdinmart/grocery/model/InvoiceTrackmodel.dart';
-import 'package:aladdinmart/grocery/screen/detailpage1.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/CancleandRefundmodel.dart';
+import 'package:ecoshine24/grocery/model/InvoiceTrackmodel.dart';
+import 'package:ecoshine24/grocery/screen/detailpage1.dart';
 import 'package:http/http.dart' as http;
-import 'package:aladdinmart/grocery/screen/myorder.dart';
+import 'package:ecoshine24/grocery/screen/myorder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FinalOrderTracker extends StatelessWidget {
@@ -36,350 +36,637 @@ class FinalOrderTracker extends StatelessWidget {
   Widget build(BuildContext context) {
     getSuvstring();
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: GroceryAppColors.tela,
-        leading: IconButton(
-            color: Colors.white,
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context);
-            }),
-        title: Text(
-          "My Bookings",
-          style: TextStyle(color: Colors.white, fontSize: 20),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xff1E88E5), // Medical blue from grocery home
+              Color(0xff42A5F5), // Lighter medical blue
+              Color(0xff42A5F5), // Even lighter medical blue
+            ],
+          ),
         ),
-      ),
-      body: Column(
-        children: <Widget>[
-//          createHeader(),
-//        createSubTitle(),
-          Expanded(
-              child: FutureBuilder(
-                  future: trackInvoiceOrder(invoiceno ?? ""),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return ListView.builder(
-                        itemCount: snapshot.data?.length == null
-                            ? 0
-                            : snapshot.data?.length,
-                        shrinkWrap: true,
-                        primary: false,
-                        scrollDirection: Axis.vertical,
-                        itemBuilder: (BuildContext context, int index) {
-                          InvoiceInvoice item = snapshot.data![index];
-                          return Stack(
-                            children: <Widget>[
-//                              Expanded(
-////              padding: EdgeInsets.only(right: 8, top: 4),
-//                                child: Container(
-//                                  margin: EdgeInsets.only(left: 10,right: 10),
-//                                  child: Text(item.productName==null? 'name':item.productName,
-//                                    maxLines: 2,
-//                                    softWrap: true,
-//                                    style:TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: Colors.black)
-//                                        .copyWith(fontSize: 14),
-//                                  ),
-//                                ),
-//                              ),
-
-                              InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ProductDetails1(
-                                            item.productId ?? "")),
-                                  );
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.only(
-                                      left: 10, right: 16, top: 16),
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16))),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Container(
-                                        margin: EdgeInsets.only(
-                                            right: 8,
-                                            left: 0,
-                                            top: 8,
-                                            bottom: 8),
-                                        width: 90,
-                                        height: 100,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: GroceryAppColors.tela),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(14)),
-                                            color: Colors.blue.shade200,
-                                            image: DecorationImage(
-                                                fit: BoxFit.fill,
-                                                image: NetworkImage(
-                                                  GroceryAppConstant
-                                                          .Product_Imageurl1 +
-                                                      item.image.toString(),
-                                                ))),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.max,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: <Widget>[
-                                              Row(
-                                                children: <Widget>[
-                                                  Container(
-                                                    child: Expanded(
-                                                      child: Text(
-                                                        item.productName == null
-                                                            ? 'name'
-                                                            : item.productName ??
-                                                                "",
-                                                        maxLines: 2,
-                                                        softWrap: true,
-                                                        style: TextStyle(
-                                                                fontSize: 18,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w400,
-                                                                color: Colors
-                                                                    .black)
-                                                            .copyWith(
-                                                                fontSize: 14),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom App Bar
+              Container(
+                padding: EdgeInsets.all(20),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.arrow_back_ios,
+                            color: Color(0xff1E88E5), // Medical blue
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Text(
+                            "My Appointments",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(width: 36), // For symmetry
+                    ],
+                  ),
+                ),
+              ),
+              // Body Content
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(
+                    children: <Widget>[
+                      Expanded(
+                          child: FutureBuilder(
+                              future: trackInvoiceOrder(invoiceno ?? ""),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return ListView.builder(
+                                    itemCount: snapshot.data?.length ?? 0,
+                                    shrinkWrap: true,
+                                    primary: false,
+                                    scrollDirection: Axis.vertical,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      InvoiceInvoice item =
+                                          snapshot.data![index];
+                                      return Container(
+                                        margin: EdgeInsets.only(bottom: 16),
+                                        child: Card(
+                                          elevation: 8,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                                colors: [
+                                                  Colors.white,
+                                                  Color(0xff1E88E5) // Medical blue
+                                                      .withOpacity(0.02),
+                                                ],
+                                              ),
+                                            ),
+                                            child: InkWell(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              onTap: () {
+                                                // Check if productId is valid before navigation
+                                                // if (item.productId != null &&
+                                                //     item.productId!
+                                                //         .isNotEmpty) {
+                                                //   Navigator.push(
+                                                //     context,
+                                                //     MaterialPageRoute(
+                                                //         builder: (context) =>
+                                                //             ProductDetails1(item
+                                                //                 .productId!)),
+                                                //   );
+                                                // } else {
+                                                //   // Show error message if productId is invalid
+                                                //   ScaffoldMessenger.of(context)
+                                                //       .showSnackBar(
+                                                //     SnackBar(
+                                                //       content: Text(
+                                                //           "Product details not available"),
+                                                //       backgroundColor:
+                                                //           const Color.fromARGB(
+                                                //               255,
+                                                //               39,
+                                                //               118,
+                                                //               209),
+                                                //       duration:
+                                                //           Duration(seconds: 2),
+                                                //     ),
+                                                //   );
+                                                // }
+                                              },
+                                              child: Container(
+                                                padding: EdgeInsets.all(16),
+                                                child: Row(
+                                                  children: [
+                                                    // Product Image
+                                                    Container(
+                                                      width: 90,
+                                                      height: 100,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15),
+                                                        gradient:
+                                                            LinearGradient(
+                                                          begin:
+                                                              Alignment.topLeft,
+                                                          end: Alignment
+                                                              .bottomRight,
+                                                          colors: [
+                                                            Color(0xff1E88E5) // Medical blue
+                                                                .withOpacity(0.1),
+                                                            Color(
+                                                                    0xff42A5F5) // Lighter medical blue
+                                                                .withOpacity(
+                                                                    0.05),
+                                                          ],
+                                                        ),
+                                                        border: Border.all(
+                                                          color: Color(
+                                                                  0xff1E88E5) // Medical blue
+                                                              .withOpacity(0.2),
+                                                          width: 1,
+                                                        ),
+                                                      ),
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(14),
+                                                        child: Image.network(
+                                                          GroceryAppConstant
+                                                                  .Product_Imageurl1 +
+                                                              item.image
+                                                                  .toString(),
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder:
+                                                              (context, error,
+                                                                  stackTrace) {
+                                                            return Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Color(
+                                                                        0xff1E88E5) // Medical blue
+                                                                    .withOpacity(
+                                                                        0.1),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            14),
+                                                              ),
+                                                              child: Icon(
+                                                                Icons
+                                                                    .medical_services_outlined, // Medical icon
+                                                                color: Color(
+                                                                    0xff1E88E5), // Medical blue
+                                                                size: 40,
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-
-                                              SizedBox(height: 6),
-                                              Row(
-                                                children: <Widget>[
-                                                  item.color != null
-                                                      ? item.color!.length > 0
-                                                          ? Text(
-                                                              'COLOR: ${item.color}',
-                                                              style: TextStyle(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w400,
-                                                                      color: Colors
-                                                                          .black)
-                                                                  .copyWith(
-                                                                      color: Colors
-                                                                          .grey,
-                                                                      fontSize:
-                                                                          14),
-                                                            )
-                                                          : Row()
-                                                      : Row(),
-                                                  SizedBox(width: 20),
-                                                ],
-                                              ),
-
-                                              item.quantity != null
-                                                  ? Text(
-                                                      'Quantity: ${item.quantity}',
-                                                      style: TextStyle(
+                                                    SizedBox(width: 16),
+                                                    // Product Details
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          // Product Name
+                                                          Text(
+                                                            item.productName ==
+                                                                    null
+                                                                ? 'Product Name'
+                                                                : item.productName ??
+                                                                    "",
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                              fontSize: 16,
                                                               fontWeight:
                                                                   FontWeight
-                                                                      .w400,
-                                                              color:
-                                                                  Colors.black)
-                                                          .copyWith(
-                                                              color:
-                                                                  Colors.grey,
-                                                              fontSize: 14),
-                                                    )
-                                                  : Row(),
-//                      SizedBox(height: 3),
-                                              item.size != null
-                                                  ? item.size!.length > 0
-                                                      ? Text(
-                                                          'Size: ${item.size}',
-                                                          style: TextStyle(
+                                                                      .w600,
+                                                              color: Color(
+                                                                  0xff1E88E5), // Medical blue
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 8),
+                                                          SizedBox(height: 8),
+                                                          // Product Details Row
+                                                          Row(
+                                                            children: [
+                                                              if (item.color !=
+                                                                      null &&
+                                                                  item.color!
+                                                                      .isNotEmpty)
+                                                                Container(
+                                                                  padding: EdgeInsets
+                                                                      .symmetric(
+                                                                          horizontal:
+                                                                              8,
+                                                                          vertical:
+                                                                              4),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Color(
+                                                                            0xff1E88E5) // Medical blue
+                                                                        .withOpacity(
+                                                                            0.1),
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(8),
+                                                                  ),
+                                                                  child: Text(
+                                                                    'COLOR: ${item.color}',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          12,
+                                                                      color: Color(
+                                                                          0xff1E88E5), // Medical blue
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              if (item.color !=
+                                                                      null &&
+                                                                  item.color!
+                                                                      .isNotEmpty)
+                                                                SizedBox(
+                                                                    width: 8),
+                                                            ],
+                                                          ),
+                                                          SizedBox(height: 6),
+                                                          // Quantity
+                                                          if (item.quantity !=
+                                                              null)
+                                                            Container(
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      horizontal:
+                                                                          8,
+                                                                      vertical:
+                                                                          4),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Color(
+                                                                        0xff42A5F5) // Lighter medical blue
+                                                                    .withOpacity(
+                                                                        0.1),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                              ),
+                                                              child: Text(
+                                                                'Quantity: ${item.quantity}',
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Color(
+                                                                      0xff1E88E5), // Medical blue
                                                                   fontWeight:
                                                                       FontWeight
-                                                                          .w400,
-                                                                  color: Colors
-                                                                      .black)
-                                                              .copyWith(
-                                                                  color: Colors
-                                                                      .grey,
-                                                                  fontSize: 14),
-                                                        )
-                                                      : Row()
-                                                  : Row(),
-                                              Container(
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: <Widget>[
-                                                    Text(
-                                                      item.price == null
-                                                          ? '100'
-                                                          : '\u{20B9} ${calDiscount(item.price ?? "", item.userPer ?? "")}',
-                                                      style: TextStyle(
-                                                        color: Theme.of(context)
-                                                            .colorScheme.secondary,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ).copyWith(
-                                                          color: Colors.green),
-                                                    ),
-                                                    status == "Delivered"
-                                                        ? ElevatedButton(
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              backgroundColor:
-                                                                  GroceryAppColors
-                                                                      .red,
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          SizedBox(height: 6),
+                                                          // Size
+                                                          if (item.size !=
+                                                                  null &&
+                                                              item.size!
+                                                                  .isNotEmpty)
+                                                            Container(
                                                               padding: EdgeInsets
-                                                                  .only(
-                                                                      left: 10,
-                                                                      right:
-                                                                          10),
-                                                              shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              24))),
+                                                                  .symmetric(
+                                                                      horizontal:
+                                                                          8,
+                                                                      vertical:
+                                                                          4),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Color(
+                                                                        0xff64B5F6) // Even lighter medical blue
+                                                                    .withOpacity(
+                                                                        0.1),
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            8),
+                                                              ),
+                                                              child: Text(
+                                                                'Size: ${item.size}',
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Color(
+                                                                      0xff1E88E5), // Medical blue
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
                                                             ),
-                                                            onPressed: () {
-                                                              showDilogueReviw(
-                                                                  context,
-                                                                  item.productId ??
-                                                                      "");
-                                                            },
-                                                            child: Text(
-                                                              "Review",
-                                                              style: TextStyle(
-                                                                  color: Colors
-                                                                      .black),
-                                                            ),
-                                                          )
-                                                        : Row(),
-
-                                                    //Add review Button
+                                                          SizedBox(height: 12),
+                                                          // Price and Review Button Row
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Text(
+                                                                item.price ==
+                                                                        null
+                                                                    ? '₹100'
+                                                                    : '₹${calDiscount(item.price ?? "", item.userPer ?? "")}',
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Color(
+                                                                      0xff1E88E5), // Medical blue
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontSize: 18,
+                                                                ),
+                                                              ),
+                                                              if (status ==
+                                                                  "Delivered")
+                                                                Container(
+                                                                  height: 35,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    gradient:
+                                                                        LinearGradient(
+                                                                      colors: [
+                                                                        Color(
+                                                                            0xff1E88E5), // Medical blue
+                                                                        Color(
+                                                                            0xff42A5F5), // Lighter medical blue
+                                                                      ],
+                                                                    ),
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            18),
+                                                                    boxShadow: [
+                                                                      BoxShadow(
+                                                                        color: Color(0xff1E88E5) // Medical blue
+                                                                            .withOpacity(0.3),
+                                                                        spreadRadius:
+                                                                            1,
+                                                                        blurRadius:
+                                                                            4,
+                                                                        offset: Offset(
+                                                                            0,
+                                                                            2),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  child:
+                                                                      ElevatedButton(
+                                                                    style: ElevatedButton
+                                                                        .styleFrom(
+                                                                      backgroundColor:
+                                                                          Colors
+                                                                              .transparent,
+                                                                      shadowColor:
+                                                                          Colors
+                                                                              .transparent,
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(18),
+                                                                      ),
+                                                                      padding: EdgeInsets.symmetric(
+                                                                          horizontal:
+                                                                              16),
+                                                                    ),
+                                                                    onPressed:
+                                                                        () {
+                                                                      showDilogueReviw(
+                                                                          context,
+                                                                          item.productId ??
+                                                                              "");
+                                                                    },
+                                                                    child: Text(
+                                                                      "Review",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
                                         ),
-                                        flex: 100,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  })),
-          footer(context),
-        ],
+                                      );
+                                    },
+                                  );
+                                } else {
+                                  return Center(
+                                    child: Container(
+                                      padding: EdgeInsets.all(20),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 3,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              })),
+                      footer(context),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   footer(BuildContext context) {
     return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              daliverydate == 00
-                  ? ((status != 'Cancelled')
-                      ? ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.amberAccent,
-                            padding: EdgeInsets.only(
-                                top: 12, left: 60, right: 60, bottom: 12),
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(24))),
-                          ),
-                          onPressed: () {
-                            showDilogue(context);
-                            val = "can";
-                          },
-                          child: Text(
-                            "Cancel",
-                          ),
-                        )
-                      : Row())
-                  : Row(),
-              SizedBox(
-                width: 15.0,
-              ),
-              daliverydate != 00
-                  ? ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        padding: EdgeInsets.only(
-                            top: 12, left: 60, right: 60, bottom: 12),
-                        shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(24))),
-                        textStyle: TextStyle(
+      padding: EdgeInsets.all(20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Cancel Button
+          if (daliverydate == 00 && status != 'Cancelled')
+            Expanded(
+              child: Container(
+                height: 50,
+                margin: EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color.fromARGB(255, 26, 129, 202),
+                      const Color.fromARGB(255, 35, 136, 194),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(255, 28, 133, 208)
+                          .withOpacity(0.3),
+                      spreadRadius: 1,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: () {
+                    showDilogue(context);
+                    val = "can";
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.cancel_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        "Cancel",
+                        style: TextStyle(
                           color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
-                      onPressed: () {
-                        showDilogue(context);
-                        val = "rep";
-                      },
-                      child: Text(
-                        "Return",
-                        style: TextStyle(color: Colors.white),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          // Refund Button
+          if (daliverydate != 00)
+            Expanded(
+              child: Container(
+                height: 50,
+                margin: EdgeInsets.only(
+                    left: daliverydate == 00 && status != 'Cancelled' ? 8 : 0),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xff1E88E5), // Medical blue
+                      Color(0xff42A5F5), // Lighter medical blue
+                      Color(0xff64B5F6), // Even lighter medical blue
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xff1E88E5).withOpacity(0.3), // Medical blue
+                      spreadRadius: 1,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: () {
+                    showDilogue(context);
+                    val = "ref";
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.refresh,
+                        color: Colors.white,
+                        size: 20,
                       ),
-                    )
-                  : Row(),
-            ],
-          ),
-          SizedBox(height: 8),
-//          RaisedButton(
-//            onPressed: () {
-//
-//
-//            },
-//            color: Colors.amberAccent,
-//            padding: EdgeInsets.only(top: 12, left: 60, right: 60, bottom: 12),
-//            shape: RoundedRectangleBorder(
-//                borderRadius: BorderRadius.all(Radius.circular(24))),
-//            child: Text(
-//              "Buy Now",
-//
-//            ),
-//          ),
-          SizedBox(height: 8),
+                      SizedBox(width: 8),
+                      Text(
+                        "Refund",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
-      margin: EdgeInsets.only(top: 16),
     );
   }
 
   createHeader() {
     return Container(
       alignment: Alignment.topLeft,
+      margin: EdgeInsets.only(left: 12, top: 12),
       child: Text(
         "SHOPPING CART",
       ),
-      margin: EdgeInsets.only(left: 12, top: 12),
     );
   }
 
@@ -427,6 +714,7 @@ class FinalOrderTracker extends StatelessWidget {
                             value.isEmpty && value.length > 10) {
                           return " Please enter the  resion";
                         }
+                        return null;
                       },
                       decoration: new InputDecoration(
                         hintText: 'Resion',
@@ -545,6 +833,7 @@ class FinalOrderTracker extends StatelessWidget {
                             value.isEmpty && value.length > 10) {
                           return " Please enter the  review";
                         }
+                        return null;
                       },
                       decoration: new InputDecoration(
                         hintText: 'Review',

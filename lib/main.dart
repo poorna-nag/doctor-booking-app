@@ -1,6 +1,6 @@
-import 'package:aladdinmart/Utils.dart';
+import 'package:ecoshine24/Utils.dart';
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/General/AnimatedSplashScreen.dart';
+import 'package:ecoshine24/General/AnimatedSplashScreen.dart';
 import 'General/AppConstant.dart';
 import 'package:provider/provider.dart';
 import 'controller/phonepay_controller.dart';

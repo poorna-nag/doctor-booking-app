@@ -1,9 +1,9 @@
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MapClass extends StatefulWidget {
@@ -88,6 +88,7 @@ class _MapClassState extends State<MapClass> {
             'images/destination_map_marker.png')
         .then((d) {
       customIcon = d;
+      return null;
     });
   }
 
@@ -105,11 +106,23 @@ class _MapClassState extends State<MapClass> {
       appBar: AppBar(
         title: Text(
           "Get Location",
-          style: TextStyle(color: FoodAppColors.white),
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: FoodAppColors.tela,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xff1E88E5), // Medical blue from grocery home
+                Color(0xff42A5F5), // Lighter medical blue
+                Color(0xff64B5F6), // Even lighter medical blue
+              ],
+            ),
+          ),
+        ),
         elevation: 0.0,
-        iconTheme: IconThemeData(color: FoodAppColors.white),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -183,7 +196,8 @@ class _MapClassState extends State<MapClass> {
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.only(top: 12, left: 10, right: 10, bottom: 12),
-            backgroundColor: FoodAppColors.tela,
+            backgroundColor:
+                Color(0xff1E88E5), // Medical blue from grocery home
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(24))),
           ),

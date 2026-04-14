@@ -1,13 +1,13 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:aladdinmart/Auth/signin.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/dbhelper/CarrtDbhelper.dart';
-import 'package:aladdinmart/grocery/dbhelper/database_helper.dart';
-import 'package:aladdinmart/grocery/model/CategaryModal.dart';
-import 'package:aladdinmart/grocery/screen/SearchScreen.dart';
-import 'package:aladdinmart/grocery/screen/detailpage.dart';
-import 'package:aladdinmart/grocery/screen/secondtabview.dart';
+import 'package:ecoshine24/Auth/signin.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/dbhelper/CarrtDbhelper.dart';
+import 'package:ecoshine24/grocery/dbhelper/database_helper.dart';
+import 'package:ecoshine24/grocery/model/CategaryModal.dart';
+import 'package:ecoshine24/grocery/screen/SearchScreen.dart';
+import 'package:ecoshine24/grocery/screen/detailpage.dart';
+import 'package:ecoshine24/grocery/screen/secondtabview.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -74,19 +74,79 @@ class _CgategorywiseState extends State<Cgategorywise> {
     return Scaffold(
       appBar: widget.appbar
           ? AppBar(
-              backgroundColor: GroceryAppColors.tela,
-              title: Text('Categories'),
+              elevation: 0,
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Color(0xFF1B5E20), // Dark green
+                      Color(0xFF2E7D32), // Medium dark green
+                      Color(0xFF388E3C), // Slightly lighter green
+                    ],
+                  ),
+                ),
+              ),
+              leading: Container(
+                margin: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon:
+                      Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              title: Text(
+                'Categories',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              actions: [
+                Container(
+                  margin: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    icon: Icon(Icons.search, color: Colors.white),
+                    onPressed: () {
+                      // Add search functionality if needed
+                    },
+                  ),
+                ),
+              ],
             )
           : null,
-      backgroundColor: GroceryAppColors.white,
+      backgroundColor: Color(0xFFF8F9FA),
       body: Container(
         margin: EdgeInsets.only(top: 5),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 90,
-              color: Color.fromARGB(255, 255, 255, 255),
+              width: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: Offset(2, 0),
+                  ),
+                ],
+              ),
               height: MediaQuery.of(context).size.height,
               child: FutureBuilder(
                   future: getData("0"),
@@ -120,96 +180,77 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                 }
                               },
                               child: Container(
+                                margin: EdgeInsets.symmetric(
+                                    vertical: 4, horizontal: 8),
                                 decoration: BoxDecoration(
                                   color: _selectedIndex == index
-                                      ? Colors.white
-                                      : Colors.white,
+                                      ? Color(0xFF1B5E20).withOpacity(0.1)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: _selectedIndex == index
+                                      ? Border.all(
+                                          color: Color(0xFF1B5E20), width: 2)
+                                      : null,
                                 ),
-                                padding: EdgeInsets.only(left: 5),
-                                margin: EdgeInsets.only(left: 3),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                        width: 75,
-                                        child: Column(
-                                          children: [
-                                            Stack(children: [
-                                              Container(
-                                                margin:
-                                                    EdgeInsets.only(top: 15),
-                                                decoration: BoxDecoration(
-                                                  // border: Border.all(
-                                                  //     color: GroceryAppColors.tela,
-                                                  //     width: 2),
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                child: new SizedBox(
-                                                  width: 40.0,
-                                                  height: 40.0,
-                                                  child: item.img!.length > 0
-                                                      ? Image.network(
-                                                          GroceryAppConstant
-                                                                  .base_url +
-                                                              "manage/uploads/p_category/" +
-                                                              item.img!,
-                                                          fit: BoxFit.fill)
-                                                      : Image.asset(
-                                                          "assets/images/logo.png"),
-                                                ),
-                                              ),
-                                              // Container(
-                                              //   margin:
-                                              //       EdgeInsets.only(top: 5),
-                                              //   decoration: BoxDecoration(
-                                              //     borderRadius:
-                                              //         BorderRadius.circular(
-                                              //             20),
-                                              //   ),
-                                              //   child: CircleAvatar(
-                                              //     radius: 25,
-                                              //     backgroundColor:
-                                              //         GroceryAppColors
-                                              //             .white
-                                              //             .withOpacity(0.0),
-                                              //   ),
-                                              // ),
-                                            ]),
-                                            Container(
-                                                alignment: Alignment.center,
-                                                height: 50,
-                                                child: Text(
-                                                  item.pCats!,
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontWeight:
-                                                          _selectedIndex ==
-                                                                  index
-                                                              ? FontWeight.bold
-                                                              : FontWeight
-                                                                  .normal,
-                                                      fontSize: 13),
-                                                )),
-                                          ],
-                                        )),
-                                    _selectedIndex == index
-                                        ? Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(10),
-                                                  bottomLeft:
-                                                      Radius.circular(10)),
-                                              color: GroceryAppColors.tela,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 8),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: _selectedIndex == index
+                                              ? Color(0xFF1B5E20)
+                                              : Colors.grey.withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.1),
+                                              blurRadius: 8,
+                                              offset: Offset(0, 2),
                                             ),
-                                            height: 100,
-                                            width: 6,
-                                          )
-                                        : Row()
-                                  ],
+                                          ],
+                                        ),
+                                        padding: EdgeInsets.all(12),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: SizedBox(
+                                            width: 40.0,
+                                            height: 40.0,
+                                            child:
+                                                getGroceryCategoryImageWidget(
+                                              item.img,
+                                              width: 40.0,
+                                              height: 40.0,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Container(
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          item.pCats!,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            color: _selectedIndex == index
+                                                ? Color(0xFF1B5E20)
+                                                : Colors.black87,
+                                            fontWeight: _selectedIndex == index
+                                                ? FontWeight.bold
+                                                : FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -221,69 +262,43 @@ class _CgategorywiseState extends State<Cgategorywise> {
                       );
                     }
                     return Container(
-                      color: Color(0xfff3f5f5),
+                      color: Colors.white,
                       child: ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
                         itemBuilder: (context, index) {
                           return Container(
-                            height: 85,
+                            height: 100,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
                             decoration: BoxDecoration(
-                              color: _selectedIndex == index
-                                  ? Colors.white
-                                  : Colors.white,
+                              color: Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            padding: EdgeInsets.only(left: 5),
-                            margin: EdgeInsets.only(left: 3),
-                            child: Row(
-                              children: [
-                                Container(
-                                    width: 75,
-                                    child: Column(
-                                      children: [
-                                        Stack(children: [
-                                          Container(
-                                            margin: EdgeInsets.only(top: 5),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: ClipOval(
-                                              child: new SizedBox(
-                                                width: 40.0,
-                                                height: 40.0,
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(top: 5),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: CircleAvatar(
-                                              radius: 25,
-                                              backgroundColor: GroceryAppColors
-                                                  .tela
-                                                  .withOpacity(0.24),
-                                            ),
-                                          ),
-                                        ]),
-                                      ],
-                                    )),
-                                _selectedIndex == index
-                                    ? Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(10),
-                                              bottomLeft: Radius.circular(10)),
-                                          color: GroceryAppColors.tela,
-                                        ),
-                                        height: 100,
-                                        width: 6,
-                                      )
-                                    : Row()
-                              ],
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 8),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: 40.0,
+                                    height: 40.0,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Container(
+                                    height: 12,
+                                    width: 60,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -298,9 +313,9 @@ class _CgategorywiseState extends State<Cgategorywise> {
                     child: Container(
                         color: Color(0xfff3f5f5),
                         child: FutureBuilder(
-                            future: catby_productData(id!, "0"),
+                            future: catby_productData(id, "0"),
                             builder: (context, snapshot) {
-                              print(id! + "pcatid");
+                              print(id + "pcatid");
                               var datanew = snapshot.data;
                               if (snapshot.hasData) {
                                 return snapshot.data == null
@@ -379,7 +394,7 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                                         .fill,
                                                                     imageUrl: GroceryAppConstant
                                                                             .Product_Imageurl +
-                                                                        data.img!!,
+                                                                        data.img!,
                                                                     placeholder: (context,
                                                                             url) =>
                                                                         Center(
@@ -422,16 +437,15 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                                   crossAxisAlignment:
                                                                       CrossAxisAlignment
                                                                           .start,
-                                                                  children: <
-                                                                      Widget>[
+                                                                  children: <Widget>[
                                                                     Padding(
                                                                       padding: const EdgeInsets
-                                                                              .only(
+                                                                          .only(
                                                                           top:
                                                                               8.0),
                                                                       child:
                                                                           Text(
-                                                                        data.productName!!,
+                                                                        data.productName!,
                                                                         overflow:
                                                                             TextOverflow.ellipsis,
                                                                         maxLines:
@@ -471,8 +485,9 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                                               .start,
                                                                       children: [
                                                                         Padding(
-                                                                          padding:
-                                                                              const EdgeInsets.only(top: 12.0),
+                                                                          padding: const EdgeInsets
+                                                                              .only(
+                                                                              top: 12.0),
                                                                           child:
                                                                               Column(
                                                                             mainAxisAlignment:
@@ -494,7 +509,8 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                                           ),
                                                                         ),
                                                                         Padding(
-                                                                          padding: const EdgeInsets.only(
+                                                                          padding: const EdgeInsets
+                                                                              .only(
                                                                               right: 2.0,
                                                                               top: 20),
                                                                           child:
@@ -604,7 +620,7 @@ class _CgategorywiseState extends State<Cgategorywise> {
                     child: Container(
                         color: Color(0xfff3f5f5),
                         child: FutureBuilder(
-                            future: catby_productData(id2!, "0"),
+                            future: catby_productData(id2, "0"),
                             builder: (context, snapshot) {
                               // print(id + "pcatid");
                               var datanew = snapshot.data;
@@ -683,7 +699,7 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                                         .fill,
                                                                     imageUrl: GroceryAppConstant
                                                                             .Product_Imageurl +
-                                                                        data.img!!,
+                                                                        data.img!,
                                                                     placeholder: (context,
                                                                             url) =>
                                                                         Center(
@@ -726,16 +742,15 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                                   crossAxisAlignment:
                                                                       CrossAxisAlignment
                                                                           .start,
-                                                                  children: <
-                                                                      Widget>[
+                                                                  children: <Widget>[
                                                                     Padding(
                                                                       padding: const EdgeInsets
-                                                                              .only(
+                                                                          .only(
                                                                           top:
                                                                               8.0),
                                                                       child:
                                                                           Text(
-                                                                        data.productName!!,
+                                                                        data.productName!,
                                                                         overflow:
                                                                             TextOverflow.ellipsis,
                                                                         maxLines:
@@ -775,8 +790,9 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                                               .start,
                                                                       children: [
                                                                         Padding(
-                                                                          padding:
-                                                                              const EdgeInsets.only(top: 12.0),
+                                                                          padding: const EdgeInsets
+                                                                              .only(
+                                                                              top: 12.0),
                                                                           child:
                                                                               Column(
                                                                             mainAxisAlignment:
@@ -798,7 +814,8 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                                           ),
                                                                         ),
                                                                         Padding(
-                                                                          padding: const EdgeInsets.only(
+                                                                          padding: const EdgeInsets
+                                                                              .only(
                                                                               right: 2.0,
                                                                               top: 20),
                                                                           child:
@@ -1096,16 +1113,11 @@ class _CgategorywiseState extends State<Cgategorywise> {
                                                     child: new SizedBox(
                                                       width: 60.0,
                                                       height: 60.0,
-                                                      child: item.img!.length >
-                                                              0
-                                                          ? Image.network(
-                                                              GroceryAppConstant
-                                                                      .base_url +
-                                                                  "manage/uploads/p_category/" +
-                                                                  item.img!,
-                                                              fit: BoxFit.fill)
-                                                          : Image.asset(
-                                                              "assets/images/logo.png"),
+                                                      child:
+                                                          getGroceryCategoryImageWidget(
+                                                        item.img,
+                                                        fit: BoxFit.fill,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
@@ -1198,13 +1210,14 @@ class _CgategorywiseState extends State<Cgategorywise> {
       String varient,
       String mv) {
     ProductsCart st = new ProductsCart(
+        id: 0,
         pid: pID,
         pname: p_name,
         pimage: image,
         pprice: (price * quantity).toString(),
         pQuantity: quantity,
-        pcolor: c_val ?? "",
-        psize: p_size ?? "",
+        pcolor: c_val,
+        psize: p_size,
         pdiscription: p_disc,
         sgst: sgst,
         cgst: cgst,
@@ -1216,7 +1229,10 @@ class _CgategorywiseState extends State<Cgategorywise> {
         shipping: shippingcharge,
         totalQuantity: totalQun,
         varient: varient,
-        mv: int.parse(mv));
+        mv: int.parse(mv),
+        moq: "",
+        time1: "",
+        date1: "");
     dbmanager2.getProductList1(pID).then((usersFromServe) async {
       // SharedPreferences prefer = await SharedPreferences.getInstance();
       SharedPreferences prefers = await SharedPreferences.getInstance();

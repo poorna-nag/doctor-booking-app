@@ -1,17 +1,14 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pagewise/flutter_pagewise.dart';
-import 'package:intl/intl.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-import 'package:aladdinmart/StyleDecoration/styleDecoration.dart';
-import 'package:aladdinmart/dbhelper/database_helper.dart';
-import 'package:aladdinmart/model/CustmerModel.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+import 'package:ecoshine24/dbhelper/database_helper.dart';
+import 'package:ecoshine24/model/CustmerModel.dart';
 import 'package:http/http.dart' as http;
-import 'package:aladdinmart/model/OrderShow.dart';
-import 'package:aladdinmart/model/banktransation.dart';
+import 'package:ecoshine24/model/OrderShow.dart';
+import 'package:ecoshine24/model/banktransation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_money.dart';
@@ -42,8 +39,8 @@ class _WalltReportState extends State<WalltReport> {
     print("user--------->${user_id}");
 
     setState(() {
-      wallet = wal??"";
-      FoodAppConstant.user_id = user_id??"";
+      wallet = wal ?? "";
+      FoodAppConstant.user_id = user_id ?? "";
     });
   }
 
@@ -59,7 +56,7 @@ class _WalltReportState extends State<WalltReport> {
       if (this.mounted) {
         setState(() {
           walletlist = usersFromServe!;
-          wallet = walletlist[0].wallet??"";
+          wallet = walletlist[0].wallet ?? "";
           // isLoading = false;
         });
       }
@@ -208,7 +205,7 @@ class _WalltReportState extends State<WalltReport> {
                               itemBuilder: this._itemBuilder,
                               pageFuture: (pageIndex) => get_walletrecord(
                                   FoodAppConstant.user_id,
-                                  pageIndex !* PAGE_SIZE)),
+                                  pageIndex! * PAGE_SIZE)),
                         ),
                       ],
                     ),
@@ -261,7 +258,7 @@ class _WalltReportState extends State<WalltReport> {
                           left: 10,
                         ),
                         child: Text(
-                          entry.wInvoiceId??"",
+                          entry.wInvoiceId ?? "",
                           style: TextStyle(fontWeight: FontWeight.w500),
                         ),
                       ),
@@ -274,9 +271,11 @@ class _WalltReportState extends State<WalltReport> {
                     child: Card(
                       child: Center(
                         child: Text(
-                          double.parse(entry.wIn??"") > 0 ? "Credit" : "Debit",
+                          double.parse(entry.wIn ?? "") > 0
+                              ? "Credit"
+                              : "Debit",
                           style: TextStyle(
-                              color: double.parse(entry.wIn??"") > 0
+                              color: double.parse(entry.wIn ?? "") > 0
                                   ? FoodAppColors.sellp
                                   : Colors.red,
                               fontWeight: FontWeight.bold,
@@ -292,7 +291,7 @@ class _WalltReportState extends State<WalltReport> {
               height: 40,
               child: Padding(
                 padding: const EdgeInsets.only(left: 10, top: 15),
-                child: Text(entry.wNote??""),
+                child: Text(entry.wNote ?? ""),
               ),
             ),
             Divider(),
@@ -319,7 +318,7 @@ class _WalltReportState extends State<WalltReport> {
                       Padding(
                         padding: const EdgeInsets.only(left: 10, top: 5),
                         child: Text(
-                          "\u{20B9}${double.parse(entry.wIn??"") > 0 ? entry.wIn : entry.wOut}",
+                          "\u{20B9}${double.parse(entry.wIn ?? "") > 0 ? entry.wIn : entry.wOut}",
                           style: TextStyle(fontSize: 13),
                         ),
                       ),
@@ -341,7 +340,7 @@ class _WalltReportState extends State<WalltReport> {
                       Padding(
                         padding: const EdgeInsets.only(left: 10, top: 5),
                         child: Text(
-                          entry.wDate??"",
+                          entry.wDate ?? "",
                           style: TextStyle(color: Colors.black, fontSize: 13),
                         ),
                       ),
@@ -382,7 +381,7 @@ class _WalltReportState extends State<WalltReport> {
                       children: <Widget>[
                         Container(
                           child: Text(
-                            entry.wDate == null ? '' : entry.wDate??"",
+                            entry.wDate == null ? '' : entry.wDate ?? "",
                             overflow: TextOverflow.fade,
                             style: TextStyle(
                                     fontSize: 18,
@@ -396,7 +395,7 @@ class _WalltReportState extends State<WalltReport> {
                           child: Text(
                             entry.wTransactionId == "0"
                                 ? ''
-                                : entry.wTransactionId??"",
+                                : entry.wTransactionId ?? "",
                             overflow: TextOverflow.fade,
                             style: TextStyle(fontSize: 15, color: Colors.grey)
                                 .copyWith(fontSize: 15),
@@ -408,7 +407,9 @@ class _WalltReportState extends State<WalltReport> {
                       children: [
                         Container(
                           child: Text(
-                            entry.wIn != "0" ? entry.wIn ??"": entry.wOut??"",
+                            entry.wIn != "0"
+                                ? entry.wIn ?? ""
+                                : entry.wOut ?? "",
                             overflow: TextOverflow.fade,
                             style: TextStyle(
                                     fontSize: 18,

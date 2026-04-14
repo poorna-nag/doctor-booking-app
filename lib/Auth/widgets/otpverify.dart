@@ -3,14 +3,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:aladdinmart/Auth/signup.dart';
-import 'package:aladdinmart/Auth/widgets/custom_shape.dart';
-import 'package:aladdinmart/Auth/widgets/customappbar.dart';
-import 'package:aladdinmart/Auth/widgets/responsive_ui.dart';
-import 'package:aladdinmart/Auth/widgets/textformfield.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/Auth/signup.dart';
+import 'package:ecoshine24/Auth/widgets/custom_shape.dart';
+import 'package:ecoshine24/Auth/widgets/customappbar.dart';
+import 'package:ecoshine24/Auth/widgets/responsive_ui.dart';
+import 'package:ecoshine24/Auth/widgets/textformfield.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 import 'package:http/http.dart' as http;
-import 'package:aladdinmart/model/RegisterModel.dart';
+import 'package:ecoshine24/model/RegisterModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpVerify extends StatelessWidget {
@@ -68,22 +68,27 @@ class _SignInScreenState extends State<SignInScreen> {
     map['shop_id'] = FoodAppConstant.Shop_id;
     map['otp'] = otpController.text;
     map['mobile'] = mobile;
-    final response =
-        await http.post(Uri.parse(FoodAppConstant.base_url + 'api/step2.php'), body: map);
+    final response = await http
+        .post(Uri.parse(FoodAppConstant.base_url + 'api/step2.php'), body: map);
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);
       OtpModal user = OtpModal.fromJson(jsonDecode(response.body));
-      if (user.message.toString() == "OTP Verified Successfully.") {
+
+      // Check if success is true before proceeding
+      if (user.success == "true") {
         showLongToast(user.message.toString());
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => SignUpScreen()),
         );
       } else {
+        // Show error message from API
         showLongToast(user.message.toString());
       }
-    } else
-      throw Exception("Unable to get Employee list");
+    } else {
+      showLongToast("Network error. Please try again.");
+    }
+    return null;
   }
 
   @override
@@ -96,15 +101,18 @@ class _SignInScreenState extends State<SignInScreen> {
 
   void gatinfo() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    name = pref.getString("name");
-    mobile = pref.getString("mobile");
+    name =
+        pref.getString("temp_name"); // Read from temp key for registration flow
+    mobile = pref
+        .getString("temp_mobile"); // Read from temp key for registration flow
   }
 
-//  @override
-//  void dispose() {
-////    _timer.cancel();
-//    super.dispose();
-//  }
+  @override
+  void dispose() {
+    _timer?.cancel();
+    otpController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

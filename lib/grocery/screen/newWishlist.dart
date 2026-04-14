@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/StyleDecoration/styleDecoration.dart';
-import 'package:aladdinmart/grocery/dbhelper/wishlistdart.dart';
-import 'package:aladdinmart/grocery/screen/detailpage1.dart';
+import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/StyleDecoration/styleDecoration.dart';
+import 'package:ecoshine24/grocery/dbhelper/wishlistdart.dart';
+import 'package:ecoshine24/grocery/screen/detailpage1.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NewWishList extends StatefulWidget {
@@ -12,10 +12,9 @@ class NewWishList extends StatefulWidget {
 
 class WishlistState extends State<NewWishList> {
   final DbProductManager1 dbmanager = new DbProductManager1();
-  static List<WishlistsCart> prodctlist1=[];
+  static List<WishlistsCart> prodctlist1 = [];
   double totalamount = 0;
 
-  int? _count = 1;
   bool? islogin = false;
 
   void gatinfo() async {
@@ -48,18 +47,32 @@ class WishlistState extends State<NewWishList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: GroceryAppColors.tela1,
+      backgroundColor: GroceryAppColors.bg,
       appBar: AppBar(
-        backgroundColor: GroceryAppColors.tela,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [GroceryAppColors.boxColor1, GroceryAppColors.boxColor2],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-            color: Colors.white,
-            icon: Icon(Icons.arrow_back),
+            color: GroceryAppColors.white,
+            icon: Icon(Icons.arrow_back_ios),
             onPressed: () {
               Navigator.pop(context);
             }),
         title: Text(
-          "Wish list",
-          style: TextStyle(color: Colors.white, fontSize: 24),
+          "Wishlist",
+          style: TextStyle(
+            color: GroceryAppColors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: Column(
@@ -68,11 +81,11 @@ class WishlistState extends State<NewWishList> {
 //          createSubTitle(),
           Expanded(
               child: ListView.builder(
-            itemCount: prodctlist1 == null ? 0 : prodctlist1.length,
+            itemCount: prodctlist1.length,
             itemBuilder: (BuildContext context, int index) {
               if (prodctlist1.length > 0) {
                 WishlistsCart item = prodctlist1[index];
-                var i = item.pQuantity;
+                // Product quantity available for reference
 
                 return Dismissible(
                   key: Key(UniqueKey().toString()),
@@ -108,27 +121,43 @@ class WishlistState extends State<NewWishList> {
                   },
                   // Show a red background as the item is swiped away.
                   background: Container(
-                    decoration: BoxDecoration(color: Colors.red),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red.shade400, Colors.red.shade600],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     padding: EdgeInsets.all(5.0),
                     child: Row(
                       children: <Widget>[
                         Padding(
                           padding: const EdgeInsets.only(left: 20.0),
-                          child: Icon(Icons.delete, color: Colors.white),
+                          child: Icon(Icons.delete,
+                              color: GroceryAppColors.white, size: 24),
                         ),
                       ],
                     ),
                   ),
                   secondaryBackground: Container(
                     height: 100.0,
-                    decoration: BoxDecoration(color: Colors.red),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red.shade600, Colors.red.shade400],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     padding: EdgeInsets.all(5.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         Padding(
                           padding: const EdgeInsets.only(right: 20.0),
-                          child: Icon(Icons.delete, color: Colors.white),
+                          child: Icon(Icons.delete,
+                              color: GroceryAppColors.white, size: 24),
                         ),
                       ],
                     ),
@@ -148,9 +177,30 @@ class WishlistState extends State<NewWishList> {
                             margin:
                                 EdgeInsets.only(left: 16, right: 16, top: 16),
                             decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(16))),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(16)),
+                              gradient: LinearGradient(
+                                colors: [
+                                  GroceryAppColors.white,
+                                  GroceryAppColors.bg
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              border: Border.all(
+                                color:
+                                    GroceryAppColors.boxColor1.withOpacity(0.2),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: GroceryAppColors.boxColor1
+                                      .withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
                             child: Row(
                               children: <Widget>[
                                 Container(
@@ -161,7 +211,21 @@ class WishlistState extends State<NewWishList> {
                                   decoration: BoxDecoration(
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(14)),
-                                      color: Colors.blue.shade200,
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          GroceryAppColors.boxColor1
+                                              .withOpacity(0.1),
+                                          GroceryAppColors.boxColor2
+                                              .withOpacity(0.1),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      border: Border.all(
+                                        color: GroceryAppColors.boxColor1
+                                            .withOpacity(0.3),
+                                        width: 1,
+                                      ),
                                       image: DecorationImage(
                                           fit: BoxFit.cover,
                                           image: NetworkImage(
@@ -182,15 +246,17 @@ class WishlistState extends State<NewWishList> {
                                           padding:
                                               EdgeInsets.only(right: 8, top: 4),
                                           child: Text(
-                                            item.pname! == null
+                                            item.pname != null &&
+                                                    item.pname!.isNotEmpty
                                                 ? 'name'
                                                 : item.pname!,
                                             maxLines: 2,
                                             softWrap: true,
                                             style: TextStyle(
                                                     fontSize: 18,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Colors.black)
+                                                    fontWeight: FontWeight.w600,
+                                                    color: GroceryAppColors
+                                                        .boxColor1)
                                                 .copyWith(fontSize: 14),
                                           ),
                                         ),
@@ -198,21 +264,19 @@ class WishlistState extends State<NewWishList> {
                                         Text(
                                           'COLOR ${item.pcolor}',
                                           style: TextStyle(
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Colors.black)
-                                              .copyWith(
-                                                  color: Colors.grey,
-                                                  fontSize: 14),
+                                                  fontWeight: FontWeight.w500,
+                                                  color: GroceryAppColors
+                                                      .boxColor2)
+                                              .copyWith(fontSize: 12),
                                         ),
                                         SizedBox(height: 6),
                                         Text(
                                           'Size ${item.psize}',
                                           style: TextStyle(
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Colors.black)
-                                              .copyWith(
-                                                  color: Colors.grey,
-                                                  fontSize: 14),
+                                                  fontWeight: FontWeight.w500,
+                                                  color: GroceryAppColors
+                                                      .boxColor2)
+                                              .copyWith(fontSize: 12),
                                         ),
                                         Container(
                                           child: Row(
@@ -224,10 +288,11 @@ class WishlistState extends State<NewWishList> {
                                                     ? '100'
                                                     : '\u{20B9} ${double.parse(item.pprice!).toStringAsFixed(2)}',
                                                 style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme.secondary,
+                                                  color: GroceryAppColors
+                                                      .boxColor1,
                                                   fontWeight: FontWeight.w700,
-                                                ).copyWith(color: Colors.green),
+                                                  fontSize: 16,
+                                                ),
                                               ),
 //                                                Padding(
 //                                                  padding: const EdgeInsets.all(8.0),
@@ -298,9 +363,10 @@ class WishlistState extends State<NewWishList> {
                               child: InkWell(
                                 onTap: () {
                                   dbmanager.deleteProducts(item.id!);
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                      content: Text(" Serviceis remove"),
-                                      duration: Duration(seconds: 1)));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(" Serviceis remove"),
+                                          duration: Duration(seconds: 1)));
                                   setState(() {
                                     prodctlist1.removeAt(index);
 //                                      Constant.itemcount--;
@@ -404,7 +470,7 @@ class WishlistState extends State<NewWishList> {
       child: Text(
         "SHOPPING CART",
         style: CustomTextStyle.textFormFieldBold
-            .copyWith(fontSize: 16, color: Colors.black),
+            .copyWith(fontSize: 16, color: GroceryAppColors.boxColor1),
       ),
       margin: EdgeInsets.only(left: 12, top: 12),
     );
@@ -416,7 +482,7 @@ class WishlistState extends State<NewWishList> {
       child: Text(
         'Total (${GroceryAppConstant.itemcount}) Items',
         style: CustomTextStyle.textFormFieldBold
-            .copyWith(fontSize: 12, color: Colors.grey),
+            .copyWith(fontSize: 12, color: GroceryAppColors.boxColor2),
       ),
       margin: EdgeInsets.only(left: 12, top: 4),
     );

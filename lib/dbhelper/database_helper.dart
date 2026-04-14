@@ -3,34 +3,31 @@ import 'dart:developer';
 
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
-// import 'package:aladdinmart/grocery/General/AppConstant.dart';
-import 'package:aladdinmart/grocery/model/RegisterModel.dart';
-import 'package:aladdinmart/model/AddressModel.dart';
-import 'package:aladdinmart/model/CategaryModal.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
+// import 'package:ecoshine24/grocery/General/AppConstant.dart';
+import 'package:ecoshine24/grocery/model/RegisterModel.dart';
+import 'package:ecoshine24/model/AddressModel.dart';
+import 'package:ecoshine24/model/CategaryModal.dart';
 
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:aladdinmart/model/CityName.dart';
-import 'package:aladdinmart/model/CoupanModel.dart';
-import 'package:aladdinmart/model/Cuponcode.dart';
-import 'package:aladdinmart/model/CustmerModel.dart';
-import 'package:aladdinmart/model/Gallerymodel.dart';
-import 'package:aladdinmart/model/GroupProducts.dart';
-import 'package:aladdinmart/model/InvoiceTrackmodel.dart';
-import 'package:aladdinmart/model/ListModel.dart';
-import 'package:aladdinmart/model/MyReviewModel.dart';
-import 'package:aladdinmart/model/ShopDModel.dart';
-import 'package:aladdinmart/model/TrackInvoiceModel.dart';
-import 'package:aladdinmart/model/Varient.dart';
-import 'package:aladdinmart/model/banktransation.dart';
-import 'package:aladdinmart/model/productmodel.dart';
-import 'package:aladdinmart/model/promotion_banner_model.dart';
-import 'package:aladdinmart/model/slidermodal.dart';
+import 'package:ecoshine24/model/CityName.dart';
+import 'package:ecoshine24/model/CoupanModel.dart';
+import 'package:ecoshine24/model/Cuponcode.dart';
+import 'package:ecoshine24/model/CustmerModel.dart';
+import 'package:ecoshine24/model/Gallerymodel.dart';
+import 'package:ecoshine24/model/GroupProducts.dart';
+import 'package:ecoshine24/model/InvoiceTrackmodel.dart';
+import 'package:ecoshine24/model/ListModel.dart';
+import 'package:ecoshine24/model/MyReviewModel.dart';
+import 'package:ecoshine24/model/ShopDModel.dart';
+import 'package:ecoshine24/model/TrackInvoiceModel.dart';
+import 'package:ecoshine24/model/Varient.dart';
+import 'package:ecoshine24/model/banktransation.dart';
+import 'package:ecoshine24/model/productmodel.dart';
+import 'package:ecoshine24/model/promotion_banner_model.dart';
+import 'package:ecoshine24/model/slidermodal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../grocery/General/AppConstant.dart' as g;
-import '../widgets/calculate_distance.dart';
 
 abstract class ArticleRepository {
   Future<List<Categary>?> getArticles();
@@ -80,6 +77,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -105,6 +103,7 @@ class DatabaseHelper {
     } catch (e, s) {
       print('getSlider error --> e:-$e s:-$s');
     }
+    return null;
   }
 
   static Future<List<Slider1>?> getSlider() async {
@@ -124,6 +123,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -150,6 +150,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -177,6 +178,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -225,6 +227,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -247,6 +250,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -271,6 +275,7 @@ class DatabaseHelper {
 
       return list;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -290,6 +295,7 @@ class DatabaseHelper {
 
       return glist;
     }
+    return null;
 //    print("List Size: ${list.length}");
   }
 
@@ -315,6 +321,7 @@ Future<List<Categary>?> getData(String id) async {
     return Categary.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<Products>?> catby_productData(
@@ -342,6 +349,7 @@ Future<List<Products>?> catby_productData(
     return Products.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<TrackInvoice>?> trackInvoice(String mobile) async {
@@ -360,6 +368,7 @@ Future<List<TrackInvoice>?> trackInvoice(String mobile) async {
     return TrackInvoice.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<InvoiceInvoice>?> trackInvoiceOrder(String invoice) async {
@@ -377,6 +386,7 @@ Future<List<InvoiceInvoice>?> trackInvoiceOrder(String invoice) async {
     return InvoiceInvoice.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<Products>?> productdetail(String id) async {
@@ -397,6 +407,7 @@ Future<List<Products>?> productdetail(String id) async {
     return Products.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<Products>?> search(String query, String mvid) async {
@@ -419,13 +430,16 @@ Future<List<Products>?> search(String query, String mvid) async {
     return Products.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<Review>?> myReview(String userid) async {
   print(userid);
 //  String link = "http://www.sanjarcreation.com/manage/api/reviews/all?X-Api-Key=9C03CAEC0A143D345578448E263AF8A6&user_id=2345&field=shop_id&filter=49" ;
   String link = FoodAppConstant.base_url +
-      "manage/api/reviews/all?X-Api-Key=9C03CAEC0A143D345578448E263AF8A6&user_id=" +
+      "manage/api/reviews/all?X-Api-Key=" +
+      FoodAppConstant.API_KEY +
+      "&user_id=" +
       userid +
       "&field=shop_id&filter=" +
       FoodAppConstant.Shop_id;
@@ -438,26 +452,48 @@ Future<List<Review>?> myReview(String userid) async {
     return Review.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<GroupProducts>?> GroupPro(String userid) async {
-  String link = "https://www.bigwelt.com/api/pg.php?id=" +
-      userid +
-      "&shop_id=" +
-      FoodAppConstant.Shop_id;
-  print(link);
-  final response = await http.get(Uri.parse(link));
-  if (response.statusCode == 200) {
-    var responseData = json.decode(response.body);
-    List<GroupProducts> galleryArray = responseData;
-//    GroupProducts  groupProducts= GroupProducts.fromMap(json.decode(response.body));
-////    List<dynamic> galleryArray = responseData["data"]["reviews"];
-//    print(galleryArray.toString()+"Gallery");
-    if (galleryArray == null) {
-      return galleryArray;
-    } else {
-      return GroupProducts.getListFromJson(galleryArray);
+  try {
+    // Check if userid is valid
+    if (userid.isEmpty) {
+      print("Error: User ID is empty for GroupPro");
+      return [];
     }
+
+    String link = "https://www.bigwelt.com/api/pg.php?id=" +
+        userid +
+        "&shop_id=" +
+        FoodAppConstant.Shop_id;
+    print(link);
+
+    final response = await http.get(Uri.parse(link));
+    if (response.statusCode == 200) {
+      var responseData = json.decode(response.body);
+
+      // Check if responseData is valid and is a list
+      if (responseData != null) {
+        if (responseData is List) {
+          return GroupProducts.getListFromJson(responseData);
+        } else {
+          print(
+              "Error: GroupPro response is not a list: ${responseData.runtimeType}");
+          return [];
+        }
+      } else {
+        print("Error: GroupPro response data is null");
+        return [];
+      }
+    } else {
+      print(
+          "Error: GroupPro HTTP ${response.statusCode} - ${response.reasonPhrase}");
+      return [];
+    }
+  } catch (e) {
+    print("Error in GroupPro: $e");
+    return [];
   }
 }
 
@@ -488,6 +524,7 @@ Future<List<Products>?> searchval(String query, String mvid) async {
 
     return Products.getListFromJson(galleryArray);
   }
+  return null;
 }
 
 searchdatasave(String query, String md5) async {
@@ -529,6 +566,7 @@ Future<List<Slider1>?> getBanner() async {
 
     return list;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -553,6 +591,7 @@ Future<List<UserAddress>?> getAddress() async {
 
     return UserAddress.getListFromJson(galleryArray);
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -574,6 +613,7 @@ Future<Coupan?> getCoupan(String code) async {
     Coupan coupan = Coupan.fromMap(json.decode(response.body));
     return coupan;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -591,6 +631,7 @@ Future<List<PVariant>?> getPvarient(String id) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<CityName>?> getPcity() async {
@@ -608,6 +649,7 @@ Future<List<CityName>?> getPcity() async {
 
     return list;
   }
+  return null;
 }
 
 // Behlf of lat long get mv list
@@ -633,6 +675,7 @@ Future<List<ListModel>?> getShopList(String rad) async {
 
     return list;
   }
+  return null;
 }
 
 List<ListModel> newList = [];
@@ -686,7 +729,7 @@ Future<List<ListModel>> getShopListByCat(
     //   }
     // }
     return list;
-  }else{
+  } else {
     return [];
   }
 }
@@ -714,6 +757,7 @@ Future<List<ListModel>?> getAllMv(int lim) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<ListModel>?> getShopList1(int slim, String city) async {
@@ -734,6 +778,7 @@ Future<List<ListModel>?> getShopList1(int slim, String city) async {
     List<ListModel> list = ListModel.getListFromJson(galleryArray);
     return list;
   }
+  return null;
 }
 
 Future<List<ListModel>?> getShopList1ByMV(String mv) async {
@@ -754,6 +799,7 @@ Future<List<ListModel>?> getShopList1ByMV(String mv) async {
     List<ListModel> list = ListModel.getListFromJson(galleryArray);
     return list;
   }
+  return null;
 }
 
 Future<List<Products>?> getAllProducts(String lim) async {
@@ -776,6 +822,7 @@ Future<List<Products>?> getAllProducts(String lim) async {
     return Products.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<ShopDModel?> getShopD() async {
@@ -790,6 +837,7 @@ Future<ShopDModel?> getShopD() async {
 
     return user;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -837,6 +885,7 @@ Future<List<CustmerModel>?> mywallet(String userid) async {
     return CustmerModel.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<Categary>?> get_Category(String val) async {
@@ -860,6 +909,7 @@ Future<List<Categary>?> get_Category(String val) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<Slider1>?> getSliderforMedicalShop(String mvid) async {
@@ -880,6 +930,7 @@ Future<List<Slider1>?> getSliderforMedicalShop(String mvid) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<Categary>?> get_CategoryBYMv(String val) async {
@@ -899,6 +950,7 @@ Future<List<Categary>?> get_CategoryBYMv(String val) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<Products>?> getTServicebymv_id(
@@ -926,6 +978,7 @@ Future<List<Products>?> getTServicebymv_id(
 
     return list;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -950,6 +1003,7 @@ Future<List<ListModel>?> searchvender(String query, String rad) async {
     return ListModel.getListFromJson(galleryArray);
     ;
   }
+  return null;
 }
 
 Future<List<TrackInvoice>?> trackInvoice1(String mobile) async {
@@ -969,6 +1023,7 @@ Future<List<TrackInvoice>?> trackInvoice1(String mobile) async {
 
     return list;
   }
+  return null;
 }
 
 Future<List<CuponCode>?> getCoupanlist() async {
@@ -989,6 +1044,7 @@ Future<List<CuponCode>?> getCoupanlist() async {
     List<CuponCode> list = CuponCode.getListFromJson(galleryArray);
     return list;
   }
+  return null;
 //    print("List Size: ${list.length}");
 }
 
@@ -1011,8 +1067,8 @@ Future<List<ListModel>?> IndiVisualvenderDetails() async {
     List<dynamic> galleryArray = responseData["data"]["mv_list"];
 
     return ListModel.getListFromJson(galleryArray);
-    ;
   }
+  return null;
 }
 
 Future<List<ListModel>?> getShopListby(String mvid) async {
@@ -1035,4 +1091,5 @@ Future<List<ListModel>?> getShopListby(String mvid) async {
 
     return list;
   }
+  return null;
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:aladdinmart/Auth/widgets/responsive_ui.dart';
-import 'package:aladdinmart/General/AppConstant.dart';
+import 'package:ecoshine24/Auth/widgets/responsive_ui.dart';
+import 'package:ecoshine24/General/AppConstant.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? hint;
@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool? obscureText;
   final IconData? icon;
+  final bool? enabled;
   double? _width;
   double? _pixelRatio;
   bool large = false;
@@ -19,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.icon,
     this.obscureText,
+    this.enabled,
   });
 
   @override
@@ -34,6 +36,7 @@ class CustomTextField extends StatelessWidget {
         controller: textEditingController,
         obscureText: obscureText ?? false,
         keyboardType: keyboardType,
+        enabled: enabled ?? true,
         cursorColor: FoodAppColors.boxColor1,
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: FoodAppColors.tela, size: 20),

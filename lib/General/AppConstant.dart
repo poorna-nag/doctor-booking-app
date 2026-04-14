@@ -4,7 +4,7 @@ import 'package:ecoshine24/model/CategaryModal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FoodAppConstant {
-  static String appname = "Doctor Booking App";
+  static String appname = "acuityDr";
   static const String packageName = "com.doctorbookingbigweltdemoapp";
   static const String iosAppLink = "com.doctorbookingbigweltdemoapp";
   // ignore: constant_identifier_names

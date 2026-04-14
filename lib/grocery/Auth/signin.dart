@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:ecoshine24/grocery/Auth/forgetPassword.dart';
@@ -308,6 +309,7 @@ class _SignInScreenState extends State<SignInScreen>
     pref.setString("user_id", userData['user_id']?.toString() ?? "");
     pref.setString("pp", userData['pp']?.toString() ?? "");
     pref.setBool("isLogin", true);
+    pref.setBool("skipLogin", false);
 
     // Set global constants
     GroceryAppConstant.isLogin = true;
@@ -319,9 +321,47 @@ class _SignInScreenState extends State<SignInScreen>
 
     _showLongToast("Login successful");
 
-    Navigator.push(
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => GroceryApp()),
+      (route) => false,
+    );
+  }
+
+  Future<void> _continueAsGuest() async {
+    setState(() {
+      flag = false;
+    });
+
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool("skipLogin", true);
+    await pref.setBool("isLogin", false);
+    await pref.setString("email", "");
+    await pref.setString("name", "");
+    await pref.setString("city", "");
+    await pref.setString("address", "");
+    await pref.setString("sex", "");
+    await pref.setString("mobile", "");
+    await pref.setString("pin", "");
+    await pref.setString("user_id", "");
+    await pref.setString("pp", "");
+
+    GroceryAppConstant.isLogin = false;
+    GroceryAppConstant.email = "";
+    GroceryAppConstant.name = "";
+    GroceryAppConstant.user_id = "";
+    GroceryAppConstant.image = "";
+    GroceryAppConstant.User_ID = "";
+    GroceryAppConstant.check = false;
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => GroceryApp()),
+      (route) => false,
     );
   }
 
@@ -363,6 +403,7 @@ class _SignInScreenState extends State<SignInScreen>
         pref.setString("user_id", user.user_id.toString());
         pref.setString("pp", user.pp.toString());
         pref.setBool("isLogin", true);
+        pref.setBool("skipLogin", false);
         print(user.user_id);
         GroceryAppConstant.isLogin = true;
         GroceryAppConstant.email = user.email.toString();
@@ -373,9 +414,12 @@ class _SignInScreenState extends State<SignInScreen>
 
 //        pref.setString("mobile",phoneController.text);
 
-        Navigator.push(
+        if (!mounted) return;
+
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => GroceryApp()),
+          (route) => false,
         );
       } else {
         _showLongToast(user.message.toString());
@@ -394,28 +438,309 @@ class _SignInScreenState extends State<SignInScreen>
     _pixelRatio = MediaQuery.of(context).devicePixelRatio;
     _large = ResponsiveWidget.isScreenLarge(_width!, _pixelRatio!);
     _medium = ResponsiveWidget.isScreenMedium(_width!, _pixelRatio!);
-    return Material(
-      child: Container(
-        height: _height,
-        width: _width,
-        padding: EdgeInsets.only(bottom: 5),
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Opacity(opacity: 0.88, child: CustomAppBar()),
-              clipShape(),
-              welcomeTextRow(),
-              signInTextRow(),
-              form(),
-              forgetPassTextRow(),
-              SizedBox(height: 10),
-              button(),
-              SizedBox(height: 30),
-              signUpTextRow(),
-            ],
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: const Color(0xFFF5F8FC),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFEAF4FF), Color(0xFFF7FBFF)],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight:
+                    _height! - MediaQuery.of(context).padding.vertical - 48,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildBrandHeader(),
+                  const SizedBox(height: 24),
+                  _buildLoginCard(),
+                  const SizedBox(height: 20),
+                  _buildFooterLinks(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBrandHeader() {
+    return Column(
+      children: [
+        Container(
+          width: 112,
+          height: 112,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.12),
+                blurRadius: 30,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: Image.asset(
+            'assets/icon/doctor booking logo 1.png',
+            fit: BoxFit.contain,
+          ),
+        ),
+        const SizedBox(height: 18),
+        Text(
+          GroceryAppConstant.appname,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF15324B),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Simple booking, fast access',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Color(0xFF67809A),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _key,
+        child: isLoadingDesign
+            ? const Padding(
+                padding: EdgeInsets.symmetric(vertical: 36),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xff1E88E5),
+                  ),
+                ),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    isOtpLogin ? 'Verify your number' : 'Sign in to continue',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF15324B),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Use your mobile number, or skip for guest access.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF67809A),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  emailTextFormField(),
+                  const SizedBox(height: 14),
+                  if (isOtpLogin) ...[
+                    if (!isOtpSent) ...[
+                      _buildPrimaryButton(
+                        label: 'Send OTP',
+                        onPressed: _sendLoginOtp,
+                      ),
+                    ] else ...[
+                      _buildOtpField(),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              isOtpSent = false;
+                            });
+                          },
+                          child: const Text('Resend OTP'),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildPrimaryButton(
+                        label: 'Verify & Login',
+                        onPressed: _loginWithOtp,
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    _buildGuestButton(),
+                  ] else ...[
+                    passwordTextFormField(),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ForgetPass(),
+                            ),
+                          );
+                        },
+                        child: const Text('Forgot password?'),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildPrimaryButton(
+                      label: 'Sign in',
+                      onPressed: () {
+                        if (nameController.text.trim().length != 10) {
+                          _showLongToast(
+                              'Please enter a valid 10-digit mobile number');
+                        } else if (passwordController.text.trim().length < 5) {
+                          _showLongToast(
+                              'Password should contain at least 5 characters');
+                        } else {
+                          setState(() {
+                            flag = true;
+                          });
+                          _getEmployee();
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _buildGuestButton(),
+                  ],
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildGuestButton() {
+    return SizedBox(
+      height: 48,
+      width: double.infinity,
+      child: TextButton(
+        onPressed: flag ? null : _continueAsGuest,
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xff1E88E5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0xFFB7D7F5)),
+          ),
+        ),
+        child: const Text(
+          'Continue as guest',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton({
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      height: 52,
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: flag ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: const LinearGradient(
+              colors: [Color(0xff1E88E5), Color(0xff42A5F5)],
+            ),
+          ),
+          child: Center(
+            child: flag
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterLinks() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          "Don't have an account? ",
+          style: TextStyle(
+            color: Color(0xFF67809A),
+            fontSize: 14,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Register()),
+            );
+          },
+          child: const Text(
+            'Sign up',
+            style: TextStyle(
+              color: Color(0xff1E88E5),
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -619,13 +944,18 @@ class _SignInScreenState extends State<SignInScreen>
       keyboardType: TextInputType.number,
       textEditingController: nameController,
       icon: Icons.phone_android,
-      hint: "Mobile No",
+      hint: "10 Digit Mobile Number",
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10),
+      ],
+      maxLength: 10,
     );
   }
 
   Widget passwordTextFormField() {
     return CustomTextField(
-      keyboardType: TextInputType.emailAddress,
+      keyboardType: TextInputType.visiblePassword,
       textEditingController: passwordController,
       icon: Icons.lock,
       obscureText: true,
@@ -852,6 +1182,11 @@ class _SignInScreenState extends State<SignInScreen>
       textEditingController: otpController,
       icon: Icons.security,
       hint: "Enter OTP",
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(6),
+      ],
+      maxLength: 6,
     );
   }
 

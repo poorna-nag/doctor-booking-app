@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ecoshine24/Auth/widgets/responsive_ui.dart';
 import 'package:ecoshine24/General/AppConstant.dart';
 
@@ -9,6 +10,8 @@ class CustomTextField extends StatelessWidget {
   final bool? obscureText;
   final IconData? icon;
   final bool? enabled;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
   double? _width;
   double? _pixelRatio;
   bool large = false;
@@ -21,6 +24,8 @@ class CustomTextField extends StatelessWidget {
     this.icon,
     this.obscureText,
     this.enabled,
+    this.inputFormatters,
+    this.maxLength,
   });
 
   @override
@@ -36,11 +41,14 @@ class CustomTextField extends StatelessWidget {
         controller: textEditingController,
         obscureText: obscureText ?? false,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
+        maxLength: maxLength,
         enabled: enabled ?? true,
         cursorColor: FoodAppColors.boxColor1,
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: FoodAppColors.tela, size: 20),
           hintText: hint,
+          counterText: '',
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30.0),
               borderSide: BorderSide.none),

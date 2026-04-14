@@ -7,7 +7,7 @@ import 'package:html/parser.dart';
 
 class GroceryAppConstant {
   // static const String base_url = "http://www.comelyindia.w4u.in/";
-  static String appname = "Doctor Booking App";
+  static String appname = "acuityDr";
   static const String packageName = "com.doctorbookingbigweltdemoapp";
   static const String iosAppLink = "";
   static const String base_url = "https://bookyourdoctor.w4u.in/";

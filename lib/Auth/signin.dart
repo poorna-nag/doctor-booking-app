@@ -354,6 +354,7 @@ class _SignInScreenState extends State<SignInScreen>
               "");
       pref.setString("pp", userData['pp']?.toString() ?? "");
       pref.setBool("isLogin", true);
+      pref.setBool("skipLogin", false);
 
       // Set global constants with fallbacks
       GroceryAppConstant.isLogin = true;
@@ -371,6 +372,8 @@ class _SignInScreenState extends State<SignInScreen>
 
       _showLongToast("Login successful");
 
+      if (!mounted) return;
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => GroceryApp()),
@@ -381,6 +384,8 @@ class _SignInScreenState extends State<SignInScreen>
       _showLongToast("Login successful but error saving data: $e");
 
       // Still navigate to app even if there's an error saving preferences
+      if (!mounted) return;
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => GroceryApp()),
@@ -393,6 +398,40 @@ class _SignInScreenState extends State<SignInScreen>
     Fluttertoast.showToast(
       msg: s,
       toastLength: Toast.LENGTH_LONG,
+    );
+  }
+
+  Future<void> _continueAsGuest() async {
+    setState(() {
+      flag = false;
+    });
+
+    final pref = await SharedPreferences.getInstance();
+    await pref.setBool("skipLogin", true);
+    await pref.setBool("isLogin", false);
+    await pref.setString("email", "");
+    await pref.setString("name", "");
+    await pref.setString("city", "");
+    await pref.setString("address", "");
+    await pref.setString("sex", "");
+    await pref.setString("mobile", "");
+    await pref.setString("pin", "");
+    await pref.setString("user_id", "");
+    await pref.setString("pp", "");
+
+    GroceryAppConstant.isLogin = false;
+    GroceryAppConstant.email = "";
+    GroceryAppConstant.name = "";
+    GroceryAppConstant.user_id = "";
+    GroceryAppConstant.image = "";
+    GroceryAppConstant.User_ID = "";
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => GroceryApp()),
+      (route) => false,
     );
   }
 
@@ -476,471 +515,357 @@ class _SignInScreenState extends State<SignInScreen>
     _pixelRatio = MediaQuery.of(context).devicePixelRatio;
     _large = ResponsiveWidget.isScreenLarge(_width!, _pixelRatio!);
     _medium = ResponsiveWidget.isScreenMedium(_width!, _pixelRatio!);
-
     return Scaffold(
-      resizeToAvoidBottomInset:
-          true, // Changed to true to handle keyboard properly
-      backgroundColor: Color(0xffF8FBFF), // Light medical blue background
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top section with medical blue gradient background
-            Expanded(
-              flex: 4,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xff1E88E5), // Medical blue from logo
-                      Color(0xff42A5F5), // Lighter medical blue
-                      Color(0xff64B5F6), // Even lighter medical blue
-                    ],
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    // Medical decorative elements
-                    Positioned(
-                      top: 30,
-                      right: -40,
-                      child: AnimatedBuilder(
-                        animation: _fadeAnimation,
-                        builder: (context, child) {
-                          return Opacity(
-                            opacity: _fadeAnimation.value * 0.1,
-                            child: Container(
-                              width: 140,
-                              height: 140,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
-                                    width: 2),
-                              ),
-                              child: Icon(
-                                Icons.health_and_safety,
-                                color: Colors.white.withOpacity(0.2),
-                                size: 60,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 40,
-                      left: -30,
-                      child: AnimatedBuilder(
-                        animation: _fadeAnimation,
-                        builder: (context, child) {
-                          return Opacity(
-                            opacity: _fadeAnimation.value * 0.08,
-                            child: Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: Colors.white.withOpacity(0.25),
-                                    width: 2),
-                              ),
-                              child: Icon(
-                                Icons.medical_services,
-                                color: Colors.white.withOpacity(0.2),
-                                size: 40,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    // Content
-                    SlideTransition(
-                      position: _slideAnimation,
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: Padding(
-                          padding: EdgeInsets.all(20),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Medical logo section
-                                Container(
-                                  padding: EdgeInsets.all(18),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 25,
-                                        offset: Offset(0, 10),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipOval(
-                                    child: Image.asset(
-                                      'assets/images/medical_logo.png',
-                                      height: 65,
-                                      width: 65,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Icon(
-                                          Icons.local_hospital,
-                                          size: 65,
-                                          color: Color(0xff1E88E5),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 15),
-                                Text(
-                                  "HealthCare Plus",
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 1.2,
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  "Your Trusted Medical Partner",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white.withOpacity(0.9),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(height: 20),
-                                // Medical service highlights
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    // Consultation icon
-                                    SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: Offset(-2, 0),
-                                        end: Offset.zero,
-                                      ).animate(CurvedAnimation(
-                                        parent: _slideController,
-                                        curve: Interval(0.6, 1.0,
-                                            curve: Curves.elasticOut),
-                                      )),
-                                      child: _buildMedicalServiceIcon(
-                                        Icons.video_call,
-                                        "Consultation",
-                                        iconSize: 20,
-                                        fontSize: 10,
-                                      ),
-                                    ),
-                                    // Appointment icon
-                                    SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: Offset(0, 2),
-                                        end: Offset.zero,
-                                      ).animate(CurvedAnimation(
-                                        parent: _slideController,
-                                        curve: Interval(0.7, 1.0,
-                                            curve: Curves.bounceOut),
-                                      )),
-                                      child: _buildMedicalServiceIcon(
-                                        Icons.schedule,
-                                        "Appointments",
-                                        iconSize: 20,
-                                        fontSize: 10,
-                                      ),
-                                    ),
-                                    // Health Records icon
-                                    SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: Offset(2, 0),
-                                        end: Offset.zero,
-                                      ).animate(CurvedAnimation(
-                                        parent: _slideController,
-                                        curve: Interval(0.8, 1.0,
-                                            curve: Curves.elasticOut),
-                                      )),
-                                      child: _buildMedicalServiceIcon(
-                                        Icons.folder_shared,
-                                        "Records",
-                                        iconSize: 20,
-                                        fontSize: 10,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+      resizeToAvoidBottomInset: true,
+      backgroundColor: const Color(0xFFF5F8FC),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFEAF4FF), Color(0xFFF7FBFF)],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight:
+                    _height! - MediaQuery.of(context).padding.vertical - 48,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildBrandHeader(),
+                  const SizedBox(height: 24),
+                  _buildLoginCard(),
+                  const SizedBox(height: 20),
+                  _buildFooterLinks(),
+                ],
               ),
             ),
-            // Bottom section with white background and login form
-            Expanded(
-              flex: 6,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Color(0xffF8FBFF), // Light medical blue background
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBrandHeader() {
+    return Column(
+      children: [
+        Container(
+          width: 112,
+          height: 112,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.12),
+                blurRadius: 30,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: Image.asset(
+            'assets/icon/doctor booking logo 1.png',
+            fit: BoxFit.contain,
+          ),
+        ),
+        const SizedBox(height: 18),
+        Text(
+          GroceryAppConstant.appname,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF15324B),
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Simple booking, fast access',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Color(0xFF67809A),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _key,
+        child: isLoadingDesign
+            ? const Padding(
+                padding: EdgeInsets.symmetric(vertical: 36),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xff1E88E5),
                   ),
                 ),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                    left: 20,
-                    right: 20,
-                    top: 20, // Reduced from 25
-                    bottom: 10 +
-                        MediaQuery.of(context)
-                            .viewInsets
-                            .bottom, // Reduced from 15
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    isOtpLogin ? 'Verify your number' : 'Sign in to continue',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF15324B),
+                    ),
                   ),
-                  child: Form(
-                    key: _key,
-                    child: isLoadingDesign
-                        ? Container(
-                            height: 150,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xff1E88E5), // Medical blue
-                              ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Use your mobile number, or skip for guest access.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF67809A),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  emailTextFormField(),
+                  const SizedBox(height: 14),
+                  if (isOtpLogin) ...[
+                    if (!isOtpSent) ...[
+                      _buildPrimaryButton(
+                        label: 'Send OTP',
+                        onPressed: _sendLoginOtp,
+                      ),
+                    ] else ...[
+                      _buildOtpField(),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              isOtpSent = false;
+                            });
+                          },
+                          child: const Text('Resend OTP'),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildPrimaryButton(
+                        label: 'Verify & Login',
+                        onPressed: _loginWithOtp,
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    _buildGuestButton(),
+                  ] else ...[
+                    passwordTextFormField(),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ForgetPass(),
                             ),
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Welcome text
-                              Text(
-                                "Welcome Back!",
-                                style: TextStyle(
-                                  fontSize: 26, // Reduced from 30
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xff1E88E5), // Medical blue
-                                ),
-                              ),
-                              SizedBox(height: 6), // Reduced from 8
-                              Text(
-                                "Sign in to access your healthcare account",
-                                style: TextStyle(
-                                  fontSize: 15, // Reduced from 16
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              SizedBox(height: 20), // Reduced from 25
+                          );
+                        },
+                        child: const Text('Forgot password?'),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildPrimaryButton(
+                      label: 'Sign in',
+                      onPressed: () {
+                        if (nameController.text.trim().length != 10) {
+                          _showLongToast(
+                              'Please enter a valid 10-digit mobile number');
+                        } else if (passwordController.text.trim().length < 5) {
+                          _showLongToast(
+                              'Password should contain at least 5 characters');
+                        } else {
+                          setState(() {
+                            flag = true;
+                          });
+                          _getEmployee();
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _buildGuestButton(),
+                  ],
+                ],
+              ),
+      ),
+    );
+  }
 
-                              // Mobile number field
-                              _buildMedicalTextField(
-                                controller: nameController,
-                                hintText: "Mobile Number",
-                                prefixIcon: Icons.phone_android_rounded,
-                                keyboardType: TextInputType.number,
-                              ),
-                              SizedBox(height: 15), // Reduced from 18
-
-                              // Show different fields based on login design
-                              if (isOtpLogin) ...[
-                                // OTP Login Flow
-                                if (!isOtpSent) ...[
-                                  // Send OTP button
-                                  _buildMedicalButton(
-                                    onPressed: _sendLoginOtp,
-                                    text: "SEND OTP",
-                                    isLoading: flag,
-                                  ),
-                                  SizedBox(height: 20),
-                                  _buildMedicalOrDivider(),
-                                ] else ...[
-                                  // OTP input field
-                                  _buildMedicalTextField(
-                                    controller: otpController,
-                                    hintText: "Enter 6-digit OTP",
-                                    prefixIcon: Icons.security_rounded,
-                                    keyboardType: TextInputType.number,
-                                  ),
-                                  SizedBox(height: 15),
-                                  // Resend OTP option
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Didn't receive OTP?",
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            isOtpSent = false;
-                                          });
-                                        },
-                                        child: Text(
-                                          "Resend",
-                                          style: TextStyle(
-                                            color: Color(
-                                                0xff1E88E5), // Medical blue
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            decoration:
-                                                TextDecoration.underline,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 25),
-                                  // Login with OTP button
-                                  _buildMedicalButton(
-                                    onPressed: _loginWithOtp,
-                                    text: "VERIFY & LOGIN",
-                                    isLoading: flag,
-                                  ),
-                                ],
-                              ] else ...[
-                                // Password Login Flow
-                                _buildMedicalTextField(
-                                  controller: passwordController,
-                                  hintText: "Password",
-                                  prefixIcon: Icons.lock_outline_rounded,
-                                  obscureText: _obscurePassword,
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility_off_rounded
-                                          : Icons.visibility_rounded,
-                                      color: Colors.grey[600],
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _obscurePassword = !_obscurePassword;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(height: 15), // Reduced from 18
-                                // Forgot password
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ForgetPass(),
-                                        ),
-                                      );
-                                    },
-                                    child: Text(
-                                      "Forgot Password?",
-                                      style: TextStyle(
-                                        color:
-                                            Color(0xff1E88E5), // Medical blue
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 18), // Reduced from 25
-                                // Sign in button
-                                _buildMedicalButton(
-                                  onPressed: () {
-                                    if (nameController.text.length != 10) {
-                                      _showLongToast(
-                                          "Please enter a valid Mobile Number");
-                                    } else if (passwordController.text.length <
-                                        5) {
-                                      _showLongToast(
-                                          "Password should contain at least 5 letters");
-                                    } else {
-                                      setState(() {
-                                        flag = true;
-                                      });
-                                      _getEmployee();
-                                    }
-                                  },
-                                  text: "SIGN IN",
-                                  isLoading: flag,
-                                ),
-                                SizedBox(height: 20),
-                                _buildMedicalOrDivider(),
-                              ],
-
-                              SizedBox(height: 15),
-                              // Bottom action buttons
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildMedicalSecondaryButton(
-                                      onPressed: () async {
-                                        // Set flag to skip category selection modal
-                                        SharedPreferences pref =
-                                            await SharedPreferences
-                                                .getInstance();
-                                        await pref.setBool(
-                                            "skipCategorySelection", true);
-
-                                        Navigator.pushAndRemoveUntil(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  GroceryApp()),
-                                          (route) => false,
-                                        );
-                                      },
-                                      text: "SKIP",
-                                    ),
-                                  ),
-                                  SizedBox(width: 15),
-                                  Expanded(
-                                    flex: 2,
-                                    child: _buildMedicalOutlineButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => Form6(
-                                              initialMobile:
-                                                  nameController.text.isNotEmpty
-                                                      ? nameController.text
-                                                      : null,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      text: "CREATE ACCOUNT",
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+  Widget _buildPrimaryButton({
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      height: 52,
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: flag ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: const LinearGradient(
+              colors: [Color(0xff1E88E5), Color(0xff42A5F5)],
+            ),
+          ),
+          child: Center(
+            child: flag
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
                   ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuestButton() {
+    return SizedBox(
+      height: 48,
+      width: double.infinity,
+      child: TextButton(
+        onPressed: flag ? null : _continueAsGuest,
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xff1E88E5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0xFFB7D7F5)),
+          ),
+        ),
+        child: const Text(
+          'Continue as guest',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooterLinks() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Don't have an account? ",
+              style: TextStyle(
+                color: Color(0xFF67809A),
+                fontSize: 14,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Form6(
+                      initialMobile: nameController.text.trim().isNotEmpty
+                          ? nameController.text.trim()
+                          : null,
+                    ),
+                  ),
+                );
+              },
+              child: const Text(
+                'Sign up',
+                style: TextStyle(
+                  color: Color(0xff1E88E5),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
           ],
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget emailTextFormField() {
+    return CustomTextField(
+      keyboardType: TextInputType.number,
+      textEditingController: nameController,
+      icon: Icons.phone_android,
+      hint: "10 Digit Mobile Number",
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10),
+      ],
+      maxLength: 10,
+    );
+  }
+
+  Widget passwordTextFormField() {
+    return CustomTextField(
+      keyboardType: TextInputType.visiblePassword,
+      textEditingController: passwordController,
+      icon: Icons.lock,
+      obscureText: true,
+      hint: "Password",
+    );
+  }
+
+  Widget _buildOtpField() {
+    return CustomTextField(
+      keyboardType: TextInputType.number,
+      textEditingController: otpController,
+      icon: Icons.security,
+      hint: "Enter OTP",
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(6),
+      ],
+      maxLength: 6,
     );
   }
 

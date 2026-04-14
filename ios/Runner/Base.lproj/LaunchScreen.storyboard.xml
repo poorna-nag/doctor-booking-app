@@ -16,7 +16,7 @@
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" text="Doctor Booking" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="1" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="center" text="acuityDr" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="1" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="24"/>
                                 <color key="textColor" red="0.08235294118" green="0.19607843137" blue="0.29411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </label>

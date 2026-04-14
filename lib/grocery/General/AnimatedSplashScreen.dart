@@ -124,39 +124,72 @@ class SplashScreenState extends State<AnimatedSplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFFF7FBFF),
       body: Container(
-        color: Colors.black,
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            new Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-//              Padding(padding: EdgeInsets.only(bottom: 30.0),child:new Image.asset('assets/images/powered_by.png',height: 25.0,fit: BoxFit.scaleDown,))
-              ],
-            ),
-            new Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                new Image.asset(
-                  "assets/images/ssplash.gif",
-                  fit: BoxFit.fill,
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  errorBuilder: (context, error, stackTrace) {
-                    // Fallback to logo if GIF fails to load
-                    return Image.asset(
-                      "assets/icon/app_logo.png",
-                      width: 200,
-                      height: 200,
-                    );
-                  },
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFEAF4FF), Color(0xFFF7FBFF)],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 150,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.12),
+                      blurRadius: 30,
+                      offset: const Offset(0, 14),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+                child: Image.asset(
+                  'assets/icon/doctor booking logo 1.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                GroceryAppConstant.appname,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 27,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF15324B),
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  'Find the right doctor and book an appointment in a few taps.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: Color(0xFF67809A),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1E88E5)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

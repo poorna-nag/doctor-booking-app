@@ -209,6 +209,7 @@ class _SignInScreenState extends State<SignInScreen>
       var map = new Map<String, dynamic>();
       map['mobile'] = nameController.text;
       map['xkey'] = GroceryAppConstant.API_KEY;
+      map['X-Api-Key'] = GroceryAppConstant.API_KEY;
 
       final response = await http.post(
         Uri.parse(GroceryAppConstant.base_url + 'api/send_otp.php'),
@@ -259,6 +260,7 @@ class _SignInScreenState extends State<SignInScreen>
       map['mobile'] = nameController.text;
       map['password'] = otpController.text + '_OTP'; // OTP with _OTP suffix
       map['xkey'] = GroceryAppConstant.API_KEY;
+      map['X-Api-Key'] = GroceryAppConstant.API_KEY;
 
       final response = await http.post(
         Uri.parse(GroceryAppConstant.base_url + 'api/login.php'),
@@ -379,6 +381,7 @@ class _SignInScreenState extends State<SignInScreen>
     map['shop_id'] = GroceryAppConstant.Shop_id;
     map['mobile'] = nameController.text;
     map['password'] = passwordController.text;
+    map['X-Api-Key'] = GroceryAppConstant.API_KEY;
 
     final response = await http.post(
         Uri.parse(GroceryAppConstant.base_url + 'api/login.php'),

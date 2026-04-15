@@ -9,7 +9,7 @@ class FoodAppConstant {
   static const String iosAppLink = "com.doctorbookingbigweltdemoapp";
   // ignore: constant_identifier_names
   static const String base_url = "https://bookyourdoctor.w4u.in/";
-  static const String API_KEY = "842K3EYZQ65UN7SMD9XPFRATJHVCBLWG";
+  static const String API_KEY = "RDM9GHUT2CJFSNLE6PX4V7A3Z5QW8BYK";
   static const String Shop_id = "2892";
   static const String registration = "user.php";
   static const String post = "post.php";

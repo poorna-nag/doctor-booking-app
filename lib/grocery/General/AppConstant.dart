@@ -13,7 +13,7 @@ class GroceryAppConstant {
   static const String base_url = "https://bookyourdoctor.w4u.in/";
   static const String mainurl = base_url;
 
-  static const String API_KEY = "842K3EYZQ65UN7SMD9XPFRATJHVCBLWG";
+  static const String API_KEY = "RDM9GHUT2CJFSNLE6PX4V7A3Z5QW8BYK";
   static const String Shop_id = "2892";
   static const Google_Api_Key = "AIzaSyA-HxLg6FiYIysPv-iZtslRlt0CSny5awI";
   static const String registration = "user.php";
